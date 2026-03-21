@@ -1,15 +1,29 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Github, Linkedin, Twitter, Mail } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
 
 export default function Footer() {
+  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const isDark = theme !== 'light';
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const logoSrc = mounted && !isDark ? '/c-square.png' : '/c-square-white.png';
+
   return (
     <footer className="relative z-10 mt-20 border-t border-border bg-gradient-to-b from-transparent to-background/80">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-1 hidden border-r border-border pr-8 md:col-span-1 md:block">
-            <h3 className="font-bold text-2xl font-mono tracking-tight text-foreground/90 mb-4">&lt;C_Square/&gt;</h3>
+            <Image src={logoSrc} alt="C Square Club" width={170} height={40} className="mb-4 h-10 w-auto object-contain" />
+            <h3 className="mb-3 font-mono text-2xl font-bold tracking-tight text-foreground/90">&lt;C_Square/&gt;</h3>
             <p className="text-foreground/50 text-sm leading-relaxed pr-4">
               Empowering student developers to learn, build, and conquer the tech world together.
             </p>
@@ -107,7 +121,8 @@ export default function Footer() {
         <div className="flex flex-col items-center justify-between border-t border-border pt-8 md:flex-row">
           {/* Mobile-only logo */}
           <div className="mb-6 w-full border-b border-border pb-6 text-center md:hidden">
-             <h3 className="font-bold text-xl font-mono tracking-tight text-foreground/90 mb-2">&lt;C_Square/&gt;</h3>
+             <Image src={logoSrc} alt="C Square Club" width={150} height={34} className="mx-auto mb-2 h-8 w-auto object-contain" />
+             <h3 className="mb-2 font-mono text-xl font-bold tracking-tight text-foreground/90">&lt;C_Square/&gt;</h3>
              <p className="text-foreground/50 text-xs">Empowering student developers to learn, build, and conquer.</p>
           </div>
           

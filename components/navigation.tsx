@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -17,6 +18,8 @@ export default function Navigation() {
     setMounted(true);
   }, []);
 
+  const logoSrc = mounted && !isDark ? '/c-square.png' : '/c-square-white.png';
+
   const navItems = [
     { href: '/', label: 'Home' },
     { href: '/events', label: 'Events' },
@@ -28,8 +31,9 @@ export default function Navigation() {
     <nav className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-md">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="font-bold text-xl text-primary hover:text-accent transition-colors font-mono tracking-tight">
-            &lt;C_Square/&gt;
+          <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-90">
+            <Image src={logoSrc} alt="C Square Club" width={160} height={36} className="h-9 w-auto object-contain" priority />
+            <span className="font-mono text-lg font-bold tracking-tight text-foreground/90">&lt;C_Square/&gt;</span>
           </Link>
 
           {/* Desktop Navigation */}
