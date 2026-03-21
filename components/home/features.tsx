@@ -42,12 +42,12 @@ export default function Features() {
             return (
               <div
                 key={index}
-                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border bg-card/65 p-6 transition-all duration-500 hover:border-[#0ea5e9]/40 hover:bg-card hover:shadow-[0_0_30px_rgba(14,165,233,0.15)]"
+                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border bg-card/65 p-6 transition-all duration-500 hover:border-[#dc2626]/40 hover:bg-card hover:shadow-[0_0_30px_rgba(220,38,38,0.15)]"
               >
                 {/* Subtle top highlight on hover */}
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#0ea5e9]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#dc2626]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
-                <Icon className="w-10 h-10 text-[#0ea5e9] mb-5 group-hover:scale-110 transition-transform duration-500" />
+                <Icon className="w-10 h-10 text-[#dc2626] mb-5 group-hover:scale-110 transition-transform duration-500" />
                 <h3 className="text-lg font-semibold mb-2 text-foreground/90">{feature.title}</h3>
                 <p className="text-foreground/50 text-sm leading-relaxed">{feature.description}</p>
               </div>

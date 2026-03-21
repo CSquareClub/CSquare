@@ -88,28 +88,28 @@ export default function Footer() {
             <div className="flex gap-4 mt-8">
               <a
                 href="#"
-                className="text-foreground/40 hover:text-[#0ea5e9] transition-colors"
+                className="text-foreground/40 hover:text-[#dc2626] transition-colors"
                 aria-label="GitHub"
               >
                 <Github size={20} />
               </a>
               <a
                 href="#"
-                className="text-foreground/40 hover:text-[#0ea5e9] transition-colors"
+                className="text-foreground/40 hover:text-[#dc2626] transition-colors"
                 aria-label="LinkedIn"
               >
                 <Linkedin size={20} />
               </a>
               <a
                 href="#"
-                className="text-foreground/40 hover:text-[#0ea5e9] transition-colors"
+                className="text-foreground/40 hover:text-[#dc2626] transition-colors"
                 aria-label="Twitter"
               >
                 <Twitter size={20} />
               </a>
               <a
                 href="#"
-                className="text-foreground/40 hover:text-[#0ea5e9] transition-colors"
+                className="text-foreground/40 hover:text-[#dc2626] transition-colors"
                 aria-label="Email"
               >
                 <Mail size={20} />

@@ -12,12 +12,12 @@ export default function GridBackground() {
     setMounted(true);
   }, []);
 
-  const baseBg = isDarkTheme ? '#000000' : '#f2f6ff';
-  const gridLine = isDarkTheme ? 'rgba(79,179,246,0.28)' : 'rgba(37,99,235,0.18)';
-  const overlayMid = isDarkTheme ? 'rgba(0,0,0,0.34)' : 'rgba(226,236,255,0.4)';
-  const overlayEnd = isDarkTheme ? 'rgba(0,0,0,0.92)' : 'rgba(236,242,255,0.9)';
-  const particleColor = isDarkTheme ? 'rgba(56,189,248,0.85)' : 'rgba(37,99,235,0.5)';
-  const ringColor = isDarkTheme ? 'rgba(148,163,184,0.22)' : 'rgba(37,99,235,0.18)';
+  const baseBg = isDarkTheme ? '#000000' : '#fff5f5';
+  const gridLine = isDarkTheme ? 'rgba(248,113,113,0.28)' : 'rgba(220,38,38,0.14)';
+  const overlayMid = isDarkTheme ? 'rgba(0,0,0,0.34)' : 'rgba(254,226,226,0.36)';
+  const overlayEnd = isDarkTheme ? 'rgba(0,0,0,0.92)' : 'rgba(255,241,242,0.9)';
+  const particleColor = isDarkTheme ? 'rgba(248,113,113,0.85)' : 'rgba(220,38,38,0.42)';
+  const ringColor = isDarkTheme ? 'rgba(248,113,113,0.18)' : 'rgba(220,38,38,0.14)';
   const particles = [
     { top: '12%', left: '10%', size: 4, delay: '0s', duration: '7s' },
     { top: '24%', left: '78%', size: 3, delay: '1s', duration: '8s' },
@@ -60,7 +60,7 @@ export default function GridBackground() {
       />
       
       {/* Top radial gradient for the hero glow */}
-      <div className={`absolute top-0 left-1/2 h-[600px] w-[80%] max-w-4xl -translate-x-1/2 rounded-[100%] blur-[120px] pointer-events-none ${isDarkTheme ? 'bg-blue-500/10' : 'bg-blue-400/20'}`} />
+      <div className={`absolute top-0 left-1/2 h-[600px] w-[80%] max-w-4xl -translate-x-1/2 rounded-[100%] blur-[120px] pointer-events-none ${isDarkTheme ? 'bg-red-500/10' : 'bg-red-400/20'}`} />
 
       {/* Floating rings */}
       {rings.map((ring, index) => (
@@ -112,7 +112,7 @@ export default function GridBackground() {
               left: particle.left,
               width: `${particle.size}px`,
               height: `${particle.size}px`,
-              backgroundColor: isDarkTheme ? 'rgba(125,211,252,0.82)' : 'rgba(37,99,235,0.58)',
+              backgroundColor: isDarkTheme ? 'rgba(252,165,165,0.82)' : 'rgba(220,38,38,0.52)',
               animation: `driftWide ${particle.duration} ease-in-out ${particle.delay} infinite`,
             }}
           />

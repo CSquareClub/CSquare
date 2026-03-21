@@ -19,7 +19,7 @@ export default function JoinPage() {
                 </div>
               </div>
               <h1 className="mb-5 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                CUSoC <span className="text-[#4fb3f6]">Registration</span>
+                CUSoC <span className="text-[#ef4444]">Registration</span>
               </h1>
               <p className="mx-auto max-w-2xl text-lg leading-relaxed text-foreground/70">
                 Register students targeting next-year GSoC with their normal details, preparation focus, and what support they need from CUSoC.

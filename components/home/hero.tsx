@@ -18,7 +18,7 @@ export default function Hero() {
 
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 tracking-tight animate-fade-in-up md:leading-[1.1]" style={{ animationDelay: '0.1s' }}>
-              Code. <span className="text-[#4fb3f6]">Create.</span><br />
+              Code. <span className="text-[#ef4444]">Create.</span><br />
               Conquer.
             </h1>
 
@@ -31,7 +31,7 @@ export default function Hero() {
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               <Link
                 href="/cusoc"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0ea5e9] px-6 py-3 font-medium text-white transition-all duration-300 shadow-[0_0_20px_rgba(14,165,233,0.3)] hover:bg-[#0284c7] hover:shadow-[0_0_30px_rgba(14,165,233,0.5)]"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#dc2626] px-6 py-3 font-medium text-white transition-all duration-300 shadow-[0_0_20px_rgba(220,38,38,0.3)] hover:bg-[#b91c1c] hover:shadow-[0_0_30px_rgba(220,38,38,0.5)]"
               >
                 Join the Club <ArrowRight size={18} />
               </Link>
@@ -79,7 +79,7 @@ export default function Hero() {
             </div>
             
             {/* Decorative glow behind code window */}
-            <div className="absolute -inset-1 bg-gradient-to-tr from-[#3b82f6] to-[#0ea5e9] opacity-20 blur-2xl -z-10 rounded-[2rem]"></div>
+            <div className="absolute -inset-1 bg-gradient-to-tr from-[#ef4444] to-[#b91c1c] opacity-20 blur-2xl -z-10 rounded-[2rem]"></div>
           </div>
 
         </div>
