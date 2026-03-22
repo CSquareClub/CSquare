@@ -1,9 +1,9 @@
 import Navigation from '@/components/navigation';
 import Footer from '@/components/footer';
 import GridBackground from '@/components/grid-background';
-import JoinForm from '@/components/join/join-form';
+import CusocForm from '@/components/join/cusoc-form';
 
-export default function JoinPage() {
+export default function CusocPage() {
   return (
     <div className="relative isolate min-h-screen bg-background">
       <GridBackground />
@@ -22,12 +22,12 @@ export default function JoinPage() {
                 CUSoC <span className="text-[#ef4444]">Registration</span>
               </h1>
               <p className="mx-auto max-w-2xl text-lg leading-relaxed text-foreground/70">
-                Register students targeting next-year GSoC with their normal details, preparation focus, and what support they need from CUSoC.
+                Chandigarh University Summer of Code — Choose your track and start your open-source journey.
               </p>
             </div>
 
             <div className="mx-auto max-w-4xl">
-              <JoinForm />
+              <CusocForm />
             </div>
           </div>
         </section>
