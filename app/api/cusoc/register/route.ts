@@ -1,6 +1,181 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { z } from "zod";
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+
+const ses = new SESClient({
+  region: process.env.AWS_REGION || "us-east-1",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
+  },
+});
+
+async function sendWelcomeEmail(emails: string[], fullName: string, track: string, uid:string) {
+  const whatsappLink = "https://chat.whatsapp.com/KVcAI2nE6ZR0AyXurBor6O";
+  const sourceEmail = process.env.AWS_SES_FROM_EMAIL || "csquareclub@cumail.in";
+
+  // Filter out empty emails
+  const validEmails = emails.filter(e => e && e.includes('@'));
+  if (validEmails.length === 0) return;
+
+  const command = new SendEmailCommand({
+    Source: sourceEmail,
+    Destination: { ToAddresses: validEmails },
+    Message: {
+      Subject: { Data: `Welcome to CUSoC ${track} - Registration Successful!` },
+      Body: {
+        Text: {
+          Data: `Hi ${fullName} ,\n\nYour registration for CUSoC ${track} is successfully received!\n\nPlease join our WhatsApp group for further updates:\n${whatsappLink}\n\nBest,\nCUSoC Team`,
+        },
+        Html: {
+          Data: `
+            <!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+@media only screen and (max-width: 480px) {
+  .container {
+    width: 100% !important;
+  }
+  .padding {
+    padding: 20px !important;
+  }
+
+  /* Keep logos left-right but smaller */
+  .logo-left {
+    height: 40px !important;
+  }
+  .logo-right {
+    width: 110px !important;
+    height: auto !important;
+  }
+
+  .text {
+    font-size: 15px !important;
+  }
+}
+</style>
+</head>
+
+<body style="margin:0; padding:0; background-color:#f9f9f9; font-family: Helvetica, Arial, sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9f9f9; padding:20px;">
+<tr>
+<td align="center">
+
+<!-- Main Container -->
+<table class="container" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #eaeaea;">
+
+  <!-- Header -->
+  <tr>
+    <td class="padding" style="padding:25px 20px; border-bottom:1px solid #f0f0f0;">
+      <table width="100%">
+        <tr>
+          
+          <!-- CUSoC -->
+          <td align="left">
+            <img src="https://www.csquareclub.co.in/cusoc.png"
+                 class="logo-left"
+                 style="height:60px; display:block;" />
+          </td>
+
+          <!-- C-Square -->
+          <td align="right">
+            <a href="https://www.csquareclub.co.in">
+              <img src="https://www.csquareclub.co.in/c-square-text.png"
+                   class="logo-right"
+                   style="width:80%; height:90px; display:block;" />
+            </a>
+          </td>
+
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- Body -->
+  <tr>
+    <td class="padding text" style="padding:40px 30px; color:#333; line-height:1.6; font-size:16px;">
+
+      <p style="font-size:18px; margin-top:0;">Hi <b>${fullName} (${uid})</b>,</p>
+
+      <p>Your registration for <strong>CUSoC ${track}</strong> is successfully received!</p>
+
+      <!-- Highlight Box -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; margin:25px 0;">
+        <tr>
+          <td style="padding:20px; text-align:center;">
+
+            <p style="font-size:15px; color:#7f1d1d;">
+              Please join our official WhatsApp group for updates:
+            </p>
+
+            <!-- Button (bulletproof) -->
+            <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin-top:10px;">
+              <tr>
+                <td align="center" bgcolor="#ef4444" style="border-radius:6px;">
+                  <a href="${whatsappLink}"
+                     style="
+                       display:block;
+                       padding:12px 20px;
+                       color:#ffffff;
+                       text-decoration:none;
+                       font-weight:bold;
+                       font-size:16px;
+                     ">
+                    Join WhatsApp Group
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <p style="font-size:13px; margin-top:15px; color:#991b1b; word-break:break-all;">
+              Or copy: <a href="${whatsappLink}" style="color:#ef4444;">${whatsappLink}</a>
+            </p>
+
+          </td>
+        </tr>
+      </table>
+
+      <p>Best regards,<br><strong style="color:#ef4444;">C Square Club</strong></p>
+
+    </td>
+  </tr>
+
+  <!-- Footer -->
+  <tr>
+    <td style="background:#fafafa; padding:20px; text-align:center; font-size:13px; color:#888;">
+      <p style="margin:0;">Chandigarh University Summer of Code</p>
+      <p style="margin:5px 0;">
+        <a href="https://www.csquareclub.co.in" style="color:#888;">www.csquareclub.co.in</a>
+      </p>
+    </td>
+  </tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+          `,
+        },
+      },
+    },
+  });
+
+  try {
+    await ses.send(command);
+  } catch (err) {
+    console.error("Failed to send welcome email via SES", err);
+  }
+}
 
 // ── 2026 schema ─────────────────────────────────────────────
 const schema2026 = z.object({
@@ -55,7 +230,7 @@ const schema2027 = z.object({
   skillLevel: z.enum(["beginner", "basic", "intermediate"]),
   languages: z.string().min(1),
 
-  interestArea: z.enum(["web", "app", "backend", "opensource", "dsa"]),
+  interestArea: z.string().min(1),
 
   goalLearnCoding: z.boolean(),
   goalBuildProjects: z.boolean(),
@@ -93,6 +268,9 @@ export async function POST(req: NextRequest) {
       }
 
       await prisma.cusocRegistration2026.create({ data: fields });
+      // Send Welcome Email
+      await sendWelcomeEmail([fields.cuEmail, fields.personalEmail], fields.fullName, "2026", fields.rollNumber);
+
       return NextResponse.json({ success: true });
     }
 
@@ -111,6 +289,9 @@ export async function POST(req: NextRequest) {
       }
 
       await prisma.cusocRegistration2027.create({ data: fields });
+      // Send Welcome Email
+      await sendWelcomeEmail([fields.cuEmail, fields.personalEmail], fields.fullName, "2027-28", fields.rollNumber);
+
       return NextResponse.json({ success: true });
     }
 

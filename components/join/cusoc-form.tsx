@@ -175,6 +175,7 @@ export default function CusocForm() {
   const [f, setF] = useState<Record<string, any>>({
     languages: [] as string[],
     domainOrder: [] as string[],
+    interestArea: [] as string[],
     goals: [] as string[],
     goalLearnCoding: false,
     goalBuildProjects: false,
@@ -189,7 +190,13 @@ export default function CusocForm() {
       const saved = localStorage.getItem('cusoc_form_2026');
       if (saved) {
         const data = JSON.parse(saved);
-        if (data.f) setF(data.f);
+        if (data.f) {
+           // Prevent map crashes if a legacy string was saved before we migrated these to string[]
+           if (data.f.domainOrder && !Array.isArray(data.f.domainOrder)) data.f.domainOrder = [];
+           if (data.f.interestArea && !Array.isArray(data.f.interestArea)) data.f.interestArea = [];
+           if (data.f.goals && !Array.isArray(data.f.goals)) data.f.goals = [];
+           setF(data.f);
+        }
         if (data.step !== undefined) setStep(data.step);
         if (data.track) setTrack(data.track);
       }
@@ -290,7 +297,7 @@ export default function CusocForm() {
           if (f.languages.includes('Other') && !f.languagesOther?.trim()) return 'Please specify other languages';
           break;
         case 2:
-          if (!f.interestArea) return 'Select an interest area';
+          if (!f.interestArea?.length || f.interestArea.length !== 5) return 'Please select all interest areas in order of your preference (1 to 5)';
           break;
         case 3:
           if (!f.whyJoin?.trim() || f.whyJoin.length < 10) return 'Why do you want to join? (min 10 chars)';
@@ -339,6 +346,7 @@ export default function CusocForm() {
       }
       if (Array.isArray(body.domainOrder)) body.domainOrder = body.domainOrder.join(', ');
       if (Array.isArray(body.goals)) body.goals = body.goals.join(', ');
+      if (Array.isArray(body.interestArea)) body.interestArea = body.interestArea.join(', ');
 
       const res = await fetch('/api/cusoc/register', {
         method: 'POST',
@@ -752,18 +760,45 @@ export default function CusocForm() {
         case 2:
           return (
             <div>
-              <p className={labelCls}>Select your primary interest area</p>
+              <p className={labelCls}>Rank your interest areas (Click in order 1 to 5)</p>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mt-2">
-                {domainOptions.filter((d) => d.value !== 'dsa_cp').concat([{ value: 'dsa', label: 'DSA', emoji: '🧠' }]).map((d) => (
-                  <button key={d.value} type="button" onClick={() => set('interestArea', d.value)}
-                    className={`rounded-2xl border p-4 text-left transition-all duration-200 ${f.interestArea === d.value
-                      ? (dk ? 'border-red-400/40 bg-red-500/10 ring-1 ring-red-400/20' : 'border-red-400 bg-red-50 ring-1 ring-red-200')
-                      : (dk ? 'border-white/10 bg-black/25 hover:border-red-400/25' : 'border-[#fecaca] bg-white hover:border-red-300')
-                    }`}>
-                    <span className="text-2xl">{d.emoji}</span>
-                    <p className="mt-2 text-sm font-semibold text-foreground">{d.label}</p>
-                  </button>
-                ))}
+                {domainOptions.filter((d) => d.value !== 'dsa_cp').concat([{ value: 'dsa', label: 'DSA', emoji: '🧠' }]).map((d) => {
+                  const arr = (f.interestArea || []) as string[];
+                  const idx = arr.indexOf(d.value);
+                  const selected = idx !== -1;
+                  return (
+                    <button key={d.value} type="button" onClick={() => {
+                      if (selected) {
+                        set('interestArea', arr.filter(v => v !== d.value));
+                      } else {
+                        if (arr.length < 5) set('interestArea', [...arr, d.value]);
+                      }
+                    }}
+                      className={`relative rounded-2xl border p-4 text-left transition-all duration-200 ${selected
+                        ? (dk ? 'border-red-400/40 bg-red-500/10 ring-1 ring-red-400/20' : 'border-red-400 bg-red-50 ring-1 ring-red-200')
+                        : (dk ? 'border-white/10 bg-black/25 hover:border-red-400/25' : 'border-[#fecaca] bg-white hover:border-red-300')
+                      }`}>
+                      {selected && (
+                        <div className="absolute top-3 right-3 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow-md">
+                          {idx + 1}
+                        </div>
+                      )}
+                      <span className="text-2xl">{d.emoji}</span>
+                      <p className="mt-2 text-sm font-semibold text-foreground">{d.label}</p>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2 text-sm font-medium items-center">
+                <span className="text-foreground/50 shrink-0">Order:</span>
+                {(Array.isArray(f.interestArea) ? f.interestArea : []).map((val: string, i: number) => {
+                  const option = domainOptions.filter(d => d.value !== 'dsa_cp').concat([{ value: 'dsa', label: 'DSA', emoji: '🧠' }]).find(o => o.value === val);
+                  return (
+                    <span key={val} className={`shrink-0 rounded px-2 py-0.5 ${dk ? 'bg-white/10' : 'bg-black/10'}`}>
+                      {i+1}. {option?.label}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           );

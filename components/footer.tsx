@@ -80,8 +80,8 @@ export default function Footer() {
             <h4 className="font-semibold text-foreground/90 mb-6">Contact</h4>
             <ul className="space-y-3 text-sm">
               <li>
-                <a href="mailto:hello@csquare.club" className="text-foreground/50 hover:text-foreground transition-colors">
-                  hello@csquare.club
+                <a href="mailto:csquareclub@cumail.in" className="text-foreground/50 hover:text-foreground transition-colors">
+                  csquareclub@cumail.in
                 </a>
               </li>
             </ul>

@@ -30,7 +30,8 @@ export default function Hero() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               <Link
-                href="/cusoc"
+                href="https://cuintranet.in/join-now"
+                target='_blank'
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#dc2626] px-6 py-3 font-medium text-white transition-all duration-300 shadow-[0_0_20px_rgba(220,38,38,0.3)] hover:bg-[#b91c1c] hover:shadow-[0_0_30px_rgba(220,38,38,0.5)]"
               >
                 Join the Club <ArrowRight size={18} />
