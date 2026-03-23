@@ -27,7 +27,9 @@ model CusocRegistration2026 {
   // Section 1 – Basic CU Details
   fullName   String
   rollNumber String
-  cuEmail    String   @unique
+  cuEmail       String   @unique
+  personalEmail String   @default("")
+
   phone      String
   department String
   year       String
@@ -38,7 +40,7 @@ model CusocRegistration2026 {
   devExperience     String   // none | basic | intermediate | advanced
 
   // Section 3 – Domain Selection
-  primaryTrack      String   // web | app | backend | opensource | dsa_cp
+  domainOrder       String   @default("") // comma-separated order of domains
 
   // Section 4 – Experience
   githubProfile     String
@@ -53,7 +55,7 @@ model CusocRegistration2026 {
   orgRepoLink       String?
 
   // Section 6 – Goals
-  primaryGoal       String
+  goals             String  @default("") // comma-separated
   whyCusoc          String
 
   // Section 7 – Commitment
@@ -62,12 +64,7 @@ model CusocRegistration2026 {
   readyDeadlines    String   // yes | no
 
   // Section 8 – Mini Proposal
-  proposalOrgName         String
-  proposalProjectTitle    String
-  proposalProblemStatement String
-  proposalSolution        String
-  proposalTechStack       String
-  proposalTimeline        String
+  proposalFileUrl   String   @default("")
 
   // Section 9 – Screening
   screeningAnswer   String
@@ -79,9 +76,11 @@ model CusocRegistration2027 {
   createdAt DateTime @default(now())
 
   // Section 1 – Basic CU Details
-  fullName   String
-  rollNumber String
-  cuEmail    String   @unique
+  fullName      String
+  rollNumber    String
+  cuEmail       String   @unique
+  personalEmail String   @default("")
+
   phone      String
   department String
   year       String

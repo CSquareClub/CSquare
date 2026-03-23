@@ -8,15 +8,16 @@ const schema2026 = z.object({
   fullName: z.string().min(2),
   rollNumber: z.string().min(2),
   cuEmail: z.string().email().regex(/@cuchd\.in$/i, "Must be a @cuchd.in email"),
+  personalEmail: z.string().email(),
   phone: z.string().regex(/^[0-9]{10,15}$/),
   department: z.string().min(2),
   year: z.enum(["1st", "2nd", "3rd", "4th"]),
 
   languages: z.string().min(1),
   dsaLevel: z.enum(["beginner", "intermediate", "advanced"]),
-  devExperience: z.enum(["none", "basic", "intermediate", "advanced"]),
+  devExperience: z.enum(["none", "basic", "intermediate", "advanced", "Other"]).or(z.string()),
 
-  primaryTrack: z.enum(["web", "app", "backend", "opensource", "dsa_cp"]),
+  domainOrder: z.string().min(1),
 
   githubProfile: z.string().url(),
   projectCount: z.enum(["0", "1-2", "3+"]),
@@ -28,19 +29,14 @@ const schema2026 = z.object({
   exploredRepo: z.enum(["yes", "no"]),
   orgRepoLink: z.string().url().optional().or(z.literal("")),
 
-  primaryGoal: z.string().min(2),
+  goals: z.string().min(1),
   whyCusoc: z.string().min(10),
 
   hoursPerWeek: z.enum(["<5", "5-10", "10+"]),
   readyWeeklyTasks: z.enum(["yes", "no"]),
   readyDeadlines: z.enum(["yes", "no"]),
 
-  proposalOrgName: z.string().min(2),
-  proposalProjectTitle: z.string().min(2),
-  proposalProblemStatement: z.string().min(10),
-  proposalSolution: z.string().min(10),
-  proposalTechStack: z.string().min(2),
-  proposalTimeline: z.string().min(2),
+  proposalFileUrl: z.string().url("Valid URL required for proposal file"),
 
   screeningAnswer: z.string().min(10),
 });
@@ -50,7 +46,8 @@ const schema2027 = z.object({
   track: z.literal("2027"),
   fullName: z.string().min(2),
   rollNumber: z.string().min(2),
-  cuEmail: z.string().email().regex(/@cumail\.in$/i, "Must be a @cumail.in email"),
+  cuEmail: z.string().email().regex(/@cuchd\.in$/i, "Must be a @cuchd.in email"),
+  personalEmail: z.string().email(),
   phone: z.string().regex(/^[0-9]{10,15}$/),
   department: z.string().min(2),
   year: z.enum(["1st", "2nd", "3rd", "4th"]),

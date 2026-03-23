@@ -2,6 +2,7 @@ import Navigation from '@/components/navigation';
 import Footer from '@/components/footer';
 import GridBackground from '@/components/grid-background';
 import CusocForm from '@/components/join/cusoc-form';
+import Image from 'next/image';
 
 export default function CusocPage() {
   return (
@@ -18,6 +19,11 @@ export default function CusocPage() {
                   <span className="text-sm font-mono text-foreground/80">~/cusoc/register</span>
                 </div>
               </div>
+              
+              <div className="flex justify-center mb-6">
+                <Image src="/cusoc.png" alt="CUSoC Logo" width={200} height={80} className="object-contain" priority />
+              </div>
+
               <h1 className="mb-5 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
                 CUSoC <span className="text-[#ef4444]">Registration</span>
               </h1>

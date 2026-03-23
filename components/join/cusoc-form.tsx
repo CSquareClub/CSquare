@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import {
   CheckCircle2,
@@ -159,7 +160,10 @@ function Toggle({ id, label }: { id: string; label: string }) {
 
 export default function CusocForm() {
   const { theme } = useTheme();
-  const dk = theme !== 'light';
+  const [mounted, setMounted] = useState(false);
+  const dk = mounted ? theme !== 'light' : true; // default to dark visually before hydrate, or compute actual
+
+  useEffect(() => setMounted(true), []);
 
   const [track, setTrack] = useState<Track>(null);
   const [step, setStep] = useState(0);
@@ -170,12 +174,33 @@ export default function CusocForm() {
   // Form state (flat object – keeps it simple)
   const [f, setF] = useState<Record<string, any>>({
     languages: [] as string[],
+    domainOrder: [] as string[],
+    goals: [] as string[],
     goalLearnCoding: false,
     goalBuildProjects: false,
     goalTargetGsoc: false,
     knowsOpenSource: false,
     knowsGsoc: false,
   });
+
+  // LocalStorage generic auto-save
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('cusoc_form_2026');
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.f) setF(data.f);
+        if (data.step !== undefined) setStep(data.step);
+        if (data.track) setTrack(data.track);
+      }
+    } catch(e) {}
+  }, []);
+
+  useEffect(() => {
+    if (track) {
+      localStorage.setItem('cusoc_form_2026', JSON.stringify({ f, step, track }));
+    }
+  }, [f, step, track]);
 
   const set = (key: string, value: any) => setF((prev) => ({ ...prev, [key]: value }));
   const toggleArr = (key: string, val: string) => {
@@ -202,17 +227,21 @@ export default function CusocForm() {
           if (!f.fullName?.trim()) return 'Full Name is required';
           if (!f.rollNumber?.trim()) return 'CU Roll Number is required';
           if (!f.cuEmail?.trim() || !/@cuchd\.in$/i.test(f.cuEmail)) return 'Valid @cuchd.in email is required';
+          if (!f.personalEmail?.trim() || !f.personalEmail.includes('@')) return 'Valid personal email is required';
           if (!f.phone?.trim() || !/^[0-9]{10,15}$/.test(f.phone)) return 'Valid phone number is required';
           if (!f.department) return 'Please select department';
+          if (f.department === 'Other' && !f.departmentOther?.trim()) return 'Please specify your department';
           if (!f.year) return 'Please select year';
           break;
         case 1:
           if (!f.languages?.length) return 'Select at least one language';
+          if (f.languages.includes('Other') && !f.languagesOther?.trim()) return 'Please specify other languages';
           if (!f.dsaLevel) return 'Select DSA level';
           if (!f.devExperience) return 'Select development experience';
+          if (f.devExperience === 'Other' && !f.devExperienceOther?.trim()) return 'Please specify dev experience';
           break;
         case 2:
-          if (!f.primaryTrack) return 'Select a primary track';
+          if (!f.domainOrder?.length || f.domainOrder.length !== 5) return 'Please select all domains in order of your preference (1 to 5)';
           break;
         case 3:
           if (!f.githubProfile?.trim() || !isValidUrl(f.githubProfile)) return 'Valid GitHub profile link is required';
@@ -223,11 +252,12 @@ export default function CusocForm() {
           break;
         case 4:
           if (!f.targetOrgs?.trim()) return 'Target organization is required';
+          if (f.targetOrgs === 'Other' && !f.targetOrgsOther?.trim()) return 'Please specify target org';
           if (!f.exploredRepo) return 'Explored repo question is required';
           if (f.exploredRepo === 'yes' && (!f.orgRepoLink?.trim() || !isValidUrl(f.orgRepoLink))) return 'Valid repo link is required';
           break;
         case 5:
-          if (!f.primaryGoal) return 'Select a primary goal';
+          if (!f.goals?.length) return 'Select at least one goal';
           if (!f.whyCusoc?.trim() || f.whyCusoc.length < 10) return 'Why CUSoC is required (min 10 chars)';
           break;
         case 6:
@@ -236,12 +266,7 @@ export default function CusocForm() {
           if (!f.readyDeadlines) return 'Deadlines readiness is required';
           break;
         case 7:
-          if (!f.proposalOrgName?.trim()) return 'Organization name is required';
-          if (!f.proposalProjectTitle?.trim()) return 'Project title is required';
-          if (!f.proposalProblemStatement?.trim()) return 'Problem statement is required (min 10 chars)';
-          if (!f.proposalSolution?.trim() || f.proposalSolution.length < 10) return 'Proposed solution is required (min 10 chars)';
-          if (!f.proposalTechStack?.trim()) return 'Tech stack is required';
-          if (!f.proposalTimeline?.trim()) return 'Timeline is required';
+          if (!f.proposalFileUrl?.trim() || !isValidUrl(f.proposalFileUrl)) return 'Valid Google Drive link to PDF proposal is required';
           break;
         case 8:
           if (!f.screeningAnswer?.trim() || f.screeningAnswer.length < 10) return 'Please answer "Why should we select you?" (min 10 chars)';
@@ -252,14 +277,17 @@ export default function CusocForm() {
         case 0:
           if (!f.fullName?.trim()) return 'Full Name is required';
           if (!f.rollNumber?.trim()) return 'CU Roll Number is required';
-          if (!f.cuEmail?.trim() || !/@cumail\.in$/i.test(f.cuEmail)) return 'Valid @cumail.in email is required';
+          if (!f.cuEmail?.trim() || !/@cuchd\.in$/i.test(f.cuEmail)) return 'Valid @cuchd.in email is required';
+          if (!f.personalEmail?.trim() || !f.personalEmail.includes('@')) return 'Valid personal email is required';
           if (!f.phone?.trim() || !/^[0-9]{10,15}$/.test(f.phone)) return 'Valid phone number is required';
           if (!f.department) return 'Please select department';
+          if (f.department === 'Other' && !f.departmentOther?.trim()) return 'Please specify your department';
           if (!f.year) return 'Please select year';
           break;
         case 1:
           if (!f.skillLevel) return 'Select skill level';
           if (!f.languages?.length) return 'Select at least one language';
+          if (f.languages.includes('Other') && !f.languagesOther?.trim()) return 'Please specify other languages';
           break;
         case 2:
           if (!f.interestArea) return 'Select an interest area';
@@ -297,8 +325,20 @@ export default function CusocForm() {
     setIsLoading(true);
     try {
       const body: Record<string, any> = { track, ...f };
-      // Convert languages array to comma-separated string
-      if (Array.isArray(body.languages)) body.languages = body.languages.join(', ');
+      // Override "Other" selections with user's custom input
+      if (body.department === 'Other' && body.departmentOther) body.department = body.departmentOther;
+      if (body.targetOrgs === 'Other' && body.targetOrgsOther) body.targetOrgs = body.targetOrgsOther;
+      if (body.devExperience === 'Other' && body.devExperienceOther) body.devExperience = body.devExperienceOther;
+
+      // Handle arrays
+      if (Array.isArray(body.languages)) {
+        // If 'Other' is checked, add the custom language
+        let langs = body.languages.filter((l: string) => l !== 'Other');
+        if (body.languages.includes('Other') && body.languagesOther) langs.push(body.languagesOther);
+        body.languages = langs.join(', ');
+      }
+      if (Array.isArray(body.domainOrder)) body.domainOrder = body.domainOrder.join(', ');
+      if (Array.isArray(body.goals)) body.goals = body.goals.join(', ');
 
       const res = await fetch('/api/cusoc/register', {
         method: 'POST',
@@ -350,7 +390,8 @@ export default function CusocForm() {
         <div className="pointer-events-none absolute -left-10 top-0 h-44 w-44 rounded-full bg-red-400/15 blur-3xl" />
         <div className="pointer-events-none absolute -right-10 bottom-0 h-44 w-44 rounded-full bg-rose-400/10 blur-3xl" />
 
-        <div className="relative mb-8 text-center">
+        <div className="relative mb-8 text-center flex flex-col items-center">
+          <Image src="/cusoc.png" alt="CUSoC Logo" width={180} height={60} className="mb-4 object-contain" priority />
           <p className={`mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] ${dk ? 'border-red-400/30 bg-red-400/10 text-red-200' : 'border-red-300 bg-red-50 text-red-700'}`}>
             <Sparkles className="h-3.5 w-3.5" />
             Choose Your Track
@@ -428,8 +469,16 @@ export default function CusocForm() {
               <Input id="fullName" label="Full Name" placeholder="Your full name" />
               <Input id="rollNumber" label="CU Roll Number" placeholder="22BCS12345" />
               <Input id="cuEmail" label="CU Email ID" placeholder="name@cuchd.in" type="email" />
+              <Input id="personalEmail" label="Personal Email ID (for GSoC)" placeholder="name@gmail.com" type="email" />
               <Input id="phone" label="Phone Number" placeholder="9876543210" type="tel" />
-              <Select id="department" label="Department" options={departments.map((d) => ({ value: d, label: d }))} />
+              <div>
+                <Select id="department" label="Department" options={departments.map((d) => ({ value: d, label: d }))} />
+                {f.department === 'Other' && (
+                  <div className="mt-3">
+                    <input className={getCardCls(dk)} placeholder="Please specify your department" value={f.departmentOther || ''} onChange={(e) => set('departmentOther', e.target.value)} />
+                  </div>
+                )}
+              </div>
               <Select id="year" label="Year" options={years.map((y) => ({ value: y, label: `${y} Year` }))} />
             </div>
           );
@@ -451,6 +500,11 @@ export default function CusocForm() {
                     </button>
                   ))}
                 </div>
+                {(f.languages as string[])?.includes('Other') && (
+                  <div className="mt-3">
+                    <input className={getCardCls(dk)} placeholder="Mention other languages" value={f.languagesOther || ''} onChange={(e) => set('languagesOther', e.target.value)} />
+                  </div>
+                )}
               </div>
               <Radio id="dsaLevel" label="DSA Level" options={[
                 { value: 'beginner', label: 'Beginner' },
@@ -462,7 +516,13 @@ export default function CusocForm() {
                 { value: 'basic', label: 'Basic' },
                 { value: 'intermediate', label: 'Intermediate' },
                 { value: 'advanced', label: 'Advanced' },
+                { value: 'Other', label: 'Other' },
               ]} />
+              {f.devExperience === 'Other' && (
+                <div className="-mt-2">
+                  <input className={getCardCls(dk)} placeholder="Describe your experience" value={f.devExperienceOther || ''} onChange={(e) => set('devExperienceOther', e.target.value)} />
+                </div>
+              )}
             </div>
           );
 
@@ -470,17 +530,41 @@ export default function CusocForm() {
         case 2:
           return (
             <div>
-              <p className={labelCls}>Select ONE primary track</p>
+              <p className={labelCls}>Rank your interest areas (Click in order 1 to 5)</p>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mt-2">
-                {domainOptions.map((d) => (
-                  <button key={d.value} type="button" onClick={() => set('primaryTrack', d.value)}
-                    className={`rounded-2xl border p-4 text-left transition-all duration-200 ${f.primaryTrack === d.value
-                      ? (dk ? 'border-red-400/40 bg-red-500/10 ring-1 ring-red-400/20' : 'border-red-400 bg-red-50 ring-1 ring-red-200')
-                      : (dk ? 'border-white/10 bg-black/25 hover:border-red-400/25' : 'border-[#fecaca] bg-white hover:border-red-300')
-                    }`}>
-                    <span className="text-2xl">{d.emoji}</span>
-                    <p className="mt-2 text-sm font-semibold text-foreground">{d.label}</p>
-                  </button>
+                {domainOptions.map((d) => {
+                  const arr = (f.domainOrder || []) as string[];
+                  const idx = arr.indexOf(d.value);
+                  const selected = idx !== -1;
+                  return (
+                    <button key={d.value} type="button" onClick={() => {
+                      if (selected) {
+                        set('domainOrder', arr.filter(v => v !== d.value));
+                      } else {
+                        if (arr.length < 5) set('domainOrder', [...arr, d.value]);
+                      }
+                    }}
+                      className={`relative rounded-2xl border p-4 text-left transition-all duration-200 ${selected
+                        ? (dk ? 'border-red-400/40 bg-red-500/10 ring-1 ring-red-400/20' : 'border-red-400 bg-red-50 ring-1 ring-red-200')
+                        : (dk ? 'border-white/10 bg-black/25 hover:border-red-400/25' : 'border-[#fecaca] bg-white hover:border-red-300')
+                      }`}>
+                      {selected && (
+                        <div className="absolute top-3 right-3 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow-md">
+                          {idx + 1}
+                        </div>
+                      )}
+                      <span className="text-2xl">{d.emoji}</span>
+                      <p className="mt-2 text-sm font-semibold text-foreground">{d.label}</p>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2 text-sm font-medium items-center">
+                <span className="text-foreground/50 shrink-0">Order:</span>
+                {(f.domainOrder || []).map((val: string, i: number) => (
+                  <span key={val} className={`shrink-0 rounded px-2 py-0.5 ${dk ? 'bg-white/10' : 'bg-black/10'}`}>
+                    {i+1}. {domainOptions.find(o => o.value === val)?.label}
+                  </span>
                 ))}
               </div>
             </div>
@@ -509,8 +593,13 @@ export default function CusocForm() {
           return (
             <div className="space-y-4">
               <div>
-                <p className={labelCls}>Which organization(s) are you targeting?</p>
-                <div className="flex flex-wrap gap-2 mt-1">
+                <p className={labelCls}>
+                  Which organization(s) are you targeting? <br/>
+                  <a href="https://summerofcode.withgoogle.com/programs/2026/organizations" target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex text-xs text-blue-500 hover:underline">
+                    View GSoC 2026 Organizations Directory
+                  </a>
+                </p>
+                <div className="flex flex-wrap gap-2 mt-2">
                   {orgOptions.map((org) => (
                     <button key={org} type="button" onClick={() => set('targetOrgs', org)}
                       className={`rounded-xl border px-4 py-2 text-sm font-medium transition-all ${f.targetOrgs === org
@@ -522,7 +611,7 @@ export default function CusocForm() {
                   ))}
                 </div>
                 {f.targetOrgs === 'Other' && (
-                  <input className={`${getCardCls(dk)} mt-3`} placeholder="Mention org name" value={f.targetOrgsOther || ''} onChange={(e) => set('targetOrgsOther', e.target.value)} />
+                  <input className={`${getCardCls(dk)} mt-3`} placeholder="Enter organization name" value={f.targetOrgsOther || ''} onChange={(e) => set('targetOrgsOther', e.target.value)} />
                 )}
               </div>
               <Radio id="exploredRepo" label="Have you explored their repository?" options={[
@@ -537,17 +626,21 @@ export default function CusocForm() {
           return (
             <div className="space-y-5">
               <div>
-                <p className={labelCls}>What is your primary goal?</p>
+                <p className={labelCls}>What are your goals? (Select all that apply)</p>
                 <div className="grid gap-2 sm:grid-cols-2 mt-1">
-                  {goalOptions.map((g) => (
-                    <button key={g} type="button" onClick={() => set('primaryGoal', g)}
-                      className={`rounded-xl border px-4 py-3 text-sm font-medium text-left transition-all ${f.primaryGoal === g
-                        ? (dk ? 'border-red-400/40 bg-red-500/15 text-red-300' : 'border-red-400 bg-red-50 text-red-700')
-                        : (dk ? 'border-white/10 bg-black/25 text-foreground/60 hover:border-red-400/25' : 'border-[#fecaca] bg-white text-foreground/70 hover:border-red-300')
-                      }`}>
-                      {g}
-                    </button>
-                  ))}
+                  {goalOptions.map((g) => {
+                    const selected = (f.goals || []).includes(g);
+                    return (
+                      <button key={g} type="button" onClick={() => toggleArr('goals', g)}
+                        className={`rounded-xl border px-4 py-3 text-sm font-medium text-left transition-all flex items-center justify-between ${selected
+                          ? (dk ? 'border-red-400/40 bg-red-500/15 text-red-300' : 'border-red-400 bg-red-50 text-red-700')
+                          : (dk ? 'border-white/10 bg-black/25 text-foreground/60 hover:border-red-400/25' : 'border-[#fecaca] bg-white text-foreground/70 hover:border-red-300')
+                        }`}>
+                        {g}
+                        {selected && <CheckCircle2 className="h-4 w-4" />}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
               <Textarea id="whyCusoc" label="Why do you want to join CUSoC?" placeholder="Describe your motivation, how CUSoC will help you, and what you hope to achieve..." />
@@ -574,18 +667,17 @@ export default function CusocForm() {
         case 7:
           return (
             <div className="space-y-4">
-              {/* <div className={`rounded-xl p-3 mb-2 ${dk ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-amber-50 border border-amber-200'}`}>
-                <p className={`text-xs flex items-center gap-2 ${dk ? 'text-amber-300' : 'text-amber-700'}`}>
-                  <Lightbulb className="h-3.5 w-3.5" />
-                  This is the main selection filter. Take it seriously.
+              <div className={`rounded-xl p-4 mb-2 ${dk ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-amber-50 border border-amber-200'}`}>
+                <p className={`text-sm mb-3 ${dk ? 'text-amber-300' : 'text-amber-800'}`}>
+                  Draft your proposal using the official template, save it as a PDF, upload it to Google Drive, and make sure to turn on <b>"Anyone with the link can view"</b>. Then paste the link below.
                 </p>
-              </div> */}
-              <Input id="proposalOrgName" label="Organization Name" placeholder="e.g. Apache Software Foundation" />
-              <Input id="proposalProjectTitle" label="Project Title" placeholder="Your proposed project title" />
-              <Textarea id="proposalProblemStatement" label="Problem Statement" placeholder="Describe the problem you aim to solve..." rows={3} />
-              <Textarea id="proposalSolution" label="Proposed Solution (3-5 lines)" placeholder="Explain your approach and how you plan to solve it..." rows={4} />
-              <Input id="proposalTechStack" label="Tech Stack" placeholder="React, Node.js, PostgreSQL, etc." />
-              <Input id="proposalTimeline" label="Rough Timeline (weeks)" placeholder="e.g. Week 1-2: Research, Week 3-4: Implementation..." />
+                <div className="flex items-center gap-2">
+                  <a href="https://docs.google.com/document/d/1RtyVv2A8kqxBlkIV0u5WPada2JBOy7VX/edit?usp=sharing&ouid=114220336905495226052&rtpof=true&sd=true" target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${dk ? 'bg-amber-400/20 text-amber-200 hover:bg-amber-400/30' : 'bg-amber-200 text-amber-800 hover:bg-amber-300'}`}>
+                    <FileText className="h-3.5 w-3.5" /> View Proposal Template
+                  </a>
+                </div>
+              </div>
+              <Input id="proposalFileUrl" label="Google Drive Link for PDF Proposal" placeholder="https://drive.google.com/file/d/..." type="url" />
             </div>
           );
 
@@ -612,9 +704,17 @@ export default function CusocForm() {
             <div className="grid gap-4 md:grid-cols-2">
               <Input id="fullName" label="Full Name" placeholder="Your full name" />
               <Input id="rollNumber" label="CU Roll Number" placeholder="22BCS12345" />
-              <Input id="cuEmail" label="CU Email ID" placeholder="name@cumail.in" type="email" />
+              <Input id="cuEmail" label="CU Email ID" placeholder="name@cuchd.in" type="email" />
+              <Input id="personalEmail" label="Personal Email ID (for GSoC)" placeholder="name@gmail.com" type="email" />
               <Input id="phone" label="Phone Number" placeholder="9876543210" type="tel" />
-              <Select id="department" label="Department" options={departments.map((d) => ({ value: d, label: d }))} />
+              <div>
+                <Select id="department" label="Department" options={departments.map((d) => ({ value: d, label: d }))} />
+                {f.department === 'Other' && (
+                  <div className="mt-3">
+                    <input className={getCardCls(dk)} placeholder="Please specify your department" value={f.departmentOther || ''} onChange={(e) => set('departmentOther', e.target.value)} />
+                  </div>
+                )}
+              </div>
               <Select id="year" label="Year" options={years.map((y) => ({ value: y, label: `${y} Year` }))} />
             </div>
           );
@@ -640,6 +740,11 @@ export default function CusocForm() {
                     </button>
                   ))}
                 </div>
+                {(f.languages as string[])?.includes('Other') && (
+                  <div className="mt-3">
+                    <input className={getCardCls(dk)} placeholder="Mention other languages" value={f.languagesOther || ''} onChange={(e) => set('languagesOther', e.target.value)} />
+                  </div>
+                )}
               </div>
             </div>
           );
