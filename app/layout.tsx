@@ -8,8 +8,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'C Square Club - Developer Community',
-  description: 'Join C Square Club, a vibrant community of developers learning, building, and collaborating together.',
+  title: 'C Square Club',
+  // description: 'Join C Square Club, a vibrant community of developers learning, building, and collaborating together.',
   icons: {
     icon: [
       {

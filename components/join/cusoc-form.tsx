@@ -259,7 +259,6 @@ export default function CusocForm() {
           break;
         case 4:
           if (!f.targetOrgs?.trim()) return 'Target organization is required';
-          if (f.targetOrgs === 'Other' && !f.targetOrgsOther?.trim()) return 'Please specify target org';
           if (!f.exploredRepo) return 'Explored repo question is required';
           if (f.exploredRepo === 'yes' && (!f.orgRepoLink?.trim() || !isValidUrl(f.orgRepoLink))) return 'Valid repo link is required';
           break;
@@ -334,7 +333,7 @@ export default function CusocForm() {
       const body: Record<string, any> = { track, ...f };
       // Override "Other" selections with user's custom input
       if (body.department === 'Other' && body.departmentOther) body.department = body.departmentOther;
-      if (body.targetOrgs === 'Other' && body.targetOrgsOther) body.targetOrgs = body.targetOrgsOther;
+
       if (body.devExperience === 'Other' && body.devExperienceOther) body.devExperience = body.devExperienceOther;
 
       // Handle arrays
@@ -362,6 +361,7 @@ export default function CusocForm() {
         }
         throw new Error(json.error || 'Registration failed');
       }
+      localStorage.removeItem('cusoc_form_2026');
       setSubmitted(true);
     } catch (e: any) {
       setError(e.message || 'Something went wrong');
@@ -601,26 +601,13 @@ export default function CusocForm() {
           return (
             <div className="space-y-4">
               <div>
-                <p className={labelCls}>
+                <label className={labelCls} htmlFor="targetOrgs">
                   Which organization(s) are you targeting? <br/>
-                  <a href="https://summerofcode.withgoogle.com/programs/2026/organizations" target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex text-xs text-blue-500 hover:underline">
-                    View GSoC 2026 Organizations Directory
+                  <a href="https://summerofcode.withgoogle.com/programs/2026/organizations" target="_blank" rel="noopener noreferrer" className="inline-flex text-[11px] uppercase tracking-wider text-red-500 hover:text-red-600 transition-colors mt-1 font-bold">
+                    View GSoC 2026 Directory »
                   </a>
-                </p>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {orgOptions.map((org) => (
-                    <button key={org} type="button" onClick={() => set('targetOrgs', org)}
-                      className={`rounded-xl border px-4 py-2 text-sm font-medium transition-all ${f.targetOrgs === org
-                        ? (dk ? 'border-red-400/40 bg-red-500/15 text-red-300' : 'border-red-400 bg-red-50 text-red-700')
-                        : (dk ? 'border-white/10 bg-black/25 text-foreground/60 hover:border-red-400/25' : 'border-[#fecaca] bg-white text-foreground/70 hover:border-red-300')
-                      }`}>
-                      {org}
-                    </button>
-                  ))}
-                </div>
-                {f.targetOrgs === 'Other' && (
-                  <input className={`${getCardCls(dk)} mt-3`} placeholder="Enter organization name" value={f.targetOrgsOther || ''} onChange={(e) => set('targetOrgsOther', e.target.value)} />
-                )}
+                </label>
+                <input id="targetOrgs" type="text" className={getCardCls(dk)} placeholder="e.g. PostgreSQL, Python Software Foundation" value={f.targetOrgs || ''} onChange={(e) => set('targetOrgs', e.target.value)} />
               </div>
               <Radio id="exploredRepo" label="Have you explored their repository?" options={[
                 { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },

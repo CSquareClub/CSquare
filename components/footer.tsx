@@ -55,7 +55,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
+          {/* <div>
             <h4 className="font-semibold text-foreground/90 mb-6">Community</h4>
             <ul className="space-y-3 text-sm">
               <li>
@@ -74,7 +74,7 @@ export default function Footer() {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
 
           <div>
             <h4 className="font-semibold text-foreground/90 mb-6">Contact</h4>
@@ -86,29 +86,30 @@ export default function Footer() {
               </li>
             </ul>
             <div className="flex gap-4 mt-8">
-              <a
+              {/* <a
                 href="#"
                 className="text-foreground/40 hover:text-[#dc2626] transition-colors"
                 aria-label="GitHub"
               >
                 <Github size={20} />
-              </a>
+              </a> */}
               <a
-                href="#"
+                href="https://www.linkedin.com/company/csquare-club/"
+                target='_blank'
                 className="text-foreground/40 hover:text-[#dc2626] transition-colors"
                 aria-label="LinkedIn"
               >
                 <Linkedin size={20} />
               </a>
-              <a
+              {/* <a
                 href="#"
                 className="text-foreground/40 hover:text-[#dc2626] transition-colors"
                 aria-label="Twitter"
               >
                 <Twitter size={20} />
-              </a>
+              </a> */}
               <a
-                href="#"
+                href="mailto:csquareclub@cumail.in"
                 className="text-foreground/40 hover:text-[#dc2626] transition-colors"
                 aria-label="Email"
               >
