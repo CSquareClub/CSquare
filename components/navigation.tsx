@@ -29,7 +29,7 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-border/50 bg-background/95">
+    <nav className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur-md">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-90">
@@ -53,14 +53,14 @@ export default function Navigation() {
               </Link>
             ))}
 
-            <JoinNowModal className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90">
+            <JoinNowModal className="inline-flex items-center justify-center rounded-lg border-2 border-primary bg-primary/10 px-4 py-2 font-mono text-sm font-semibold uppercase tracking-wider text-primary transition-all hover:bg-primary/20 hover:shadow-[0_0_20px_color-mix(in_oklab,var(--primary)_35%,transparent)]">
               Join Now
             </JoinNowModal>
             
             <button
               type="button"
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className="inline-flex items-center justify-center rounded-full border border-border bg-card/40 p-2 text-foreground/70 hover:text-foreground hover:bg-card transition-colors"
+              className="inline-flex items-center justify-center rounded-full border border-border bg-card/60 p-2 text-foreground/70 transition-colors hover:bg-card hover:text-primary"
               aria-label="Toggle theme"
             >
               {mounted && isDark ? <Sun size={16} /> : <Moon size={16} />}
@@ -87,7 +87,7 @@ export default function Navigation() {
             ))}
             <div onClick={() => setIsOpen(false)}>
               <JoinNowModal
-                className="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+                className="mt-2 inline-flex w-full items-center justify-center rounded-xl border-2 border-primary bg-primary/10 px-4 py-3 font-mono text-sm font-semibold uppercase tracking-wider text-primary transition-all hover:bg-primary/20"
               >
                 Join Now
               </JoinNowModal>

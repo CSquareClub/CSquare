@@ -12,10 +12,10 @@ export default function GridBackground() {
     setMounted(true);
   }, []);
 
-  const baseBg = isDarkTheme ? '#020617' : '#f3f8ff';
-  const gridLine = isDarkTheme ? 'rgba(14,165,233,0.12)' : 'rgba(14,165,233,0.08)';
-  const overlayMid = isDarkTheme ? 'rgba(2,6,23,0.28)' : 'rgba(219,234,254,0.35)';
-  const overlayEnd = isDarkTheme ? 'rgba(2,6,23,0.9)' : 'rgba(243,248,255,0.9)';
+  const baseBg = isDarkTheme ? '#0a0f18' : '#f8fafc';
+  const gridLine = isDarkTheme ? 'rgba(34,211,238,0.1)' : 'rgba(8,145,178,0.08)';
+  const overlayMid = isDarkTheme ? 'rgba(15,23,42,0.32)' : 'rgba(226,232,240,0.35)';
+  const overlayEnd = isDarkTheme ? 'rgba(10,15,24,0.92)' : 'rgba(248,250,252,0.92)';
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" style={{ backgroundColor: mounted ? baseBg : '#000000' }}>
@@ -34,11 +34,11 @@ export default function GridBackground() {
       {/* Soft static color washes */}
       <div
         className="absolute -top-24 left-1/2 h-[440px] w-[80%] -translate-x-1/2 rounded-full blur-3xl"
-        style={{ background: isDarkTheme ? 'rgba(14,165,233,0.18)' : 'rgba(56,189,248,0.18)' }}
+        style={{ background: isDarkTheme ? 'rgba(34,211,238,0.15)' : 'rgba(6,182,212,0.14)' }}
       />
       <div
         className="absolute bottom-0 right-0 h-[320px] w-[320px] rounded-full blur-3xl"
-        style={{ background: isDarkTheme ? 'rgba(99,102,241,0.14)' : 'rgba(99,102,241,0.12)' }}
+        style={{ background: isDarkTheme ? 'rgba(14,116,144,0.18)' : 'rgba(8,145,178,0.12)' }}
       />
       
       <div
