@@ -9,6 +9,7 @@ import {
   Loader2,
   Search,
   RefreshCw,
+  Trash2,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import AdminSidebar from "@/components/admin/admin-sidebar";
@@ -27,27 +28,75 @@ export default function CusocRegistrationsPage() {
   const [exportError, setExportError] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<any | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [counts, setCounts] = useState({ count2026: 0, count2027: 0 });
+
+  async function loadCounts() {
+    try {
+      const response = await fetch("/api/cusoc/registrations", { cache: "no-store" });
+      const payload = await response.json();
+      setCounts(payload);
+    } catch {
+      // Ignore transient count fetch errors.
+    }
+  }
+
+  async function loadTrackData(nextTrack: Track) {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/cusoc/registrations?track=${nextTrack}`, {
+        cache: "no-store",
+      });
+      const payload = await response.json();
+      setData(Array.isArray(payload) ? payload : []);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   // Fetch counts on mount
   useEffect(() => {
-    fetch("/api/cusoc/registrations")
-      .then((r) => r.json())
-      .then((d) => setCounts(d))
-      .catch(() => {});
+    loadCounts();
   }, []);
 
   // Fetch data on track change
   useEffect(() => {
-    setLoading(true);
-    fetch(`/api/cusoc/registrations?track=${track}`)
-      .then((r) => r.json())
-      .then((d) => {
-        setData(Array.isArray(d) ? d : []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    loadTrackData(track);
   }, [track]);
+
+  async function handleDelete(id: number) {
+    const confirmed = window.confirm(
+      `Warning: This will permanently delete this CUSoC ${track} registration from the database.\n\nDo you want to continue?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(id);
+      const response = await fetch(`/api/cusoc/registrations?track=${track}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload?.error || "Failed to delete registration");
+      }
+
+      if (selected?.id === id) {
+        setSelected(null);
+      }
+
+      await Promise.all([loadTrackData(track), loadCounts()]);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to delete registration");
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   const filtered = data.filter((r) => {
     if (!search.trim()) return true;
@@ -390,13 +439,27 @@ export default function CusocRegistrationsPage() {
                       </td>
                     ))}
                     <td className="px-4 py-3">
-                      <button
-                        onClick={() => setSelected(row)}
-                        className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-black/50 border border-black/10 hover:border-red-200 hover:text-red-500 hover:bg-red-50 dark:text-white/40 dark:hover:text-red-400 dark:hover:bg-red-500/5 dark:border-white/[0.06] dark:hover:border-red-500/20 transition-all"
-                      >
-                        <Eye className="w-3 h-3" />
-                        View
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setSelected(row)}
+                          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-black/50 border border-black/10 hover:border-red-200 hover:text-red-500 hover:bg-red-50 dark:text-white/40 dark:hover:text-red-400 dark:hover:bg-red-500/5 dark:border-white/[0.06] dark:hover:border-red-500/20 transition-all"
+                        >
+                          <Eye className="w-3 h-3" />
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleDelete(row.id)}
+                          disabled={deletingId === row.id}
+                          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed dark:text-red-400 dark:border-red-500/30 dark:hover:bg-red-500/10 transition-all"
+                        >
+                          {deletingId === row.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-3 h-3" />
+                          )}
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

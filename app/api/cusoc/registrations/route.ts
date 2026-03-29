@@ -268,3 +268,44 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user) {
+    return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(req.url);
+  const track = searchParams.get("track") as Track | null;
+
+  if (track !== "2026" && track !== "2027") {
+    return NextResponse.json({ error: "Invalid track" }, { status: 400 });
+  }
+
+  try {
+    const body = await req.json();
+    const id = Number(body?.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return NextResponse.json({ error: "Invalid registration id" }, { status: 400 });
+    }
+
+    if (track === "2026") {
+      await prisma.cusocRegistration2026.delete({ where: { id } });
+    } else {
+      await prisma.cusocRegistration2027.delete({ where: { id } });
+    }
+
+    return NextResponse.json({ success: true, id });
+  } catch (err) {
+    const message = getErrorMessage(err);
+
+    if (message.toLowerCase().includes("record to delete does not exist")) {
+      return NextResponse.json({ error: "Registration not found" }, { status: 404 });
+    }
+
+    console.error("Error deleting CUSoC registration:", err);
+    return NextResponse.json({ error: "Failed to delete registration" }, { status: 500 });
+  }
+}
