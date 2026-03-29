@@ -1,9 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { Calendar, MapPin, Users, ArrowRight } from 'lucide-react';
 
 interface EventCardProps {
-  id: string;
+  id: string | number;
   title: string;
   description: string;
   date: string;
@@ -12,6 +13,7 @@ interface EventCardProps {
   attendees: number;
   category: string;
   image: string;
+  registrationUrl?: string | null;
 }
 
 export default function EventCard({
@@ -23,6 +25,7 @@ export default function EventCard({
   attendees,
   category,
   image,
+  registrationUrl,
 }: EventCardProps) {
   return (
     <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card/70 transition-all duration-500 hover:border-[#dc2626]/35 hover:bg-card hover:shadow-[0_0_30px_rgba(220,38,38,0.15)]">
@@ -68,9 +71,23 @@ export default function EventCard({
         </div>
 
         <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
-          <button className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition-all duration-300 hover:border-[#dc2626] hover:bg-[#dc2626] hover:text-white group-hover:shadow-[0_0_15px_rgba(220,38,38,0.3)]">
-            Register Now
-          </button>
+          {registrationUrl ? (
+            <Link
+              href={registrationUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition-all duration-300 hover:border-[#dc2626] hover:bg-[#dc2626] hover:text-white group-hover:shadow-[0_0_15px_rgba(220,38,38,0.3)]"
+            >
+              Register Now
+            </Link>
+          ) : (
+            <button
+              disabled
+              className="cursor-not-allowed rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground/50"
+            >
+              Details Soon
+            </button>
+          )}
           <ArrowRight size={16} className="text-[#dc2626] group-hover:translate-x-1 transition-transform" />
         </div>
       </div>
