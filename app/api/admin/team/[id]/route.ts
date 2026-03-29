@@ -1,5 +1,5 @@
 import { authOptions } from "@/lib/authOptions";
-import { getLinkedInProfileImage } from "@/lib/linkedin-image";
+import { getGeneratedAvatar, getLinkedInProfileImage } from "@/lib/linkedin-image";
 import { deleteTeamMember, updateTeamMember } from "@/lib/team-store";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -29,6 +29,9 @@ export async function PATCH(req: Request, context: RouteContext) {
     let resolvedImage = image;
     if ((image === null || image === "") && typeof linkedin === "string" && linkedin) {
       resolvedImage = await getLinkedInProfileImage(linkedin);
+    }
+    if ((resolvedImage === null || resolvedImage === "") && typeof body.name === "string") {
+      resolvedImage = getGeneratedAvatar(body.name);
     }
 
     const updated = await updateTeamMember(memberId, {

@@ -1,5 +1,5 @@
 import { authOptions } from "@/lib/authOptions";
-import { getLinkedInProfileImage } from "@/lib/linkedin-image";
+import { getGeneratedAvatar, getLinkedInProfileImage } from "@/lib/linkedin-image";
 import { createTeamMember, listAdminTeam } from "@/lib/team-store";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -29,7 +29,10 @@ export async function POST(req: Request) {
     const body = await req.json();
     const linkedin = body.linkedin || null;
     const providedImage = body.image || null;
-    const resolvedImage = providedImage || (linkedin ? await getLinkedInProfileImage(linkedin) : null);
+    const resolvedImage =
+      providedImage ||
+      (linkedin ? await getLinkedInProfileImage(linkedin) : null) ||
+      getGeneratedAvatar(body.name);
 
     const member = await createTeamMember({
       name: body.name,
