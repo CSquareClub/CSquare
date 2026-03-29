@@ -19,6 +19,14 @@ import { redirect } from "next/navigation";
 
 type Track = "2026" | "2027";
 
+const CHIP_FIELDS = new Set([
+  "languages",
+  "domainOrder",
+  "goals",
+  "targetOrgs",
+  "interestArea",
+]);
+
 export default function CusocRegistrationsPage() {
   const [track, setTrack] = useState<Track>("2026");
   const [data, setData] = useState<any[]>([]);
@@ -283,6 +291,12 @@ export default function CusocRegistrationsPage() {
     return String(v);
   };
 
+  const splitToChips = (value: string) =>
+    value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
   return (
     <div className="min-h-screen p-6 lg:p-8">
       {/* Header */}
@@ -499,18 +513,35 @@ export default function CusocRegistrationsPage() {
                       const val = selected[key as string];
                       if (val === null || val === undefined || val === "")
                         return null;
+
+                      const isChipField = CHIP_FIELDS.has(key as string) && typeof val === "string";
+                      const chips = isChipField ? splitToChips(val) : [];
+
                       return (
                         <div key={key as string}>
                           <p className="text-[10px] uppercase tracking-wider text-black/40 dark:text-white/25 mb-0.5">
                             {label}
                           </p>
-                          <p className="text-sm text-black/80 dark:text-white/80 break-words">
-                            {typeof val === "boolean"
-                              ? val
-                                ? "Yes"
-                                : "No"
-                              : String(val)}
-                          </p>
+                          {chips.length > 0 ? (
+                            <div className="flex flex-wrap gap-1.5">
+                              {chips.map((chip) => (
+                                <span
+                                  key={chip}
+                                  className="rounded-md border border-black/10 bg-black/[0.04] px-2 py-0.5 text-xs text-black/80 dark:border-white/[0.12] dark:bg-white/[0.06] dark:text-white/80"
+                                >
+                                  {chip}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-black/80 dark:text-white/80 break-words">
+                              {typeof val === "boolean"
+                                ? val
+                                  ? "Yes"
+                                  : "No"
+                                : String(val)}
+                            </p>
+                          )}
                         </div>
                       );
                     })}
