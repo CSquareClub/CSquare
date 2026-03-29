@@ -24,7 +24,7 @@ export default function Navigation() {
     { href: '/', label: 'Home' },
     { href: '/events', label: 'Events' },
     { href: '/team', label: 'Team' },
-    { href: '/cusoc', label: 'Join Now' },
+    { href: '/cusoc', label: 'Register for CUSoC' },
   ];
 
   return (
@@ -51,6 +51,13 @@ export default function Navigation() {
                 {item.label}
               </Link>
             ))}
+
+            <Link
+              href="/cusoc"
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+            >
+              Join Now
+            </Link>
             
             <button
               type="button"
@@ -80,6 +87,13 @@ export default function Navigation() {
                 {item.label}
               </Link>
             ))}
+            <Link
+              href="/cusoc"
+              onClick={() => setIsOpen(false)}
+              className="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+            >
+              Join Now
+            </Link>
             <button
               type="button"
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
