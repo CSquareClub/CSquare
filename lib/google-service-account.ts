@@ -28,6 +28,19 @@ function normalizePrivateKey(value: string): string {
     .replace(/\r\n/g, "\n")
     .replace(/\r/g, "\n");
 
+  // Some dashboards strip PEM newlines entirely; rebuild a valid PEM block.
+  const beginMarker = "-----BEGIN PRIVATE KEY-----";
+  const endMarker = "-----END PRIVATE KEY-----";
+  if (key.includes(beginMarker) && key.includes(endMarker) && !key.includes("\n")) {
+    const body = key
+      .replace(beginMarker, "")
+      .replace(endMarker, "")
+      .replace(/\s+/g, "");
+
+    const wrappedBody = body.match(/.{1,64}/g)?.join("\n") || body;
+    key = `${beginMarker}\n${wrappedBody}\n${endMarker}\n`;
+  }
+
   return key;
 }
 
