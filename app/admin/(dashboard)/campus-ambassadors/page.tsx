@@ -31,6 +31,8 @@ export default function CampusAmbassadorsPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>("");
   const [error, setError] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [deleting, setDeleting] = useState(false);
 
   async function loadData(mode: ViewMode) {
     setLoading(true);
@@ -46,10 +48,12 @@ export default function CampusAmbassadorsPage() {
 
       setRows(Array.isArray(payload.data) ? payload.data : []);
       setCounts(payload.counts || { total: 0, ambassadors: 0 });
+      setSelectedIds([]);
     } catch (err) {
       setRows([]);
       setStatus(err instanceof Error ? err.message : "Failed to fetch records");
       setError(true);
+      setSelectedIds([]);
     } finally {
       setLoading(false);
     }
@@ -117,6 +121,59 @@ export default function CampusAmbassadorsPage() {
     }
   }
 
+  function toggleSelectAll(checked: boolean) {
+    if (checked) {
+      setSelectedIds(filteredRows.map((row) => row.id));
+      return;
+    }
+    setSelectedIds([]);
+  }
+
+  function toggleSelectOne(id: number, checked: boolean) {
+    setSelectedIds((prev) => {
+      if (checked) {
+        if (prev.includes(id)) return prev;
+        return [...prev, id];
+      }
+      return prev.filter((item) => item !== id);
+    });
+  }
+
+  async function deleteSelected() {
+    if (!selectedIds.length) return;
+
+    const confirmed = window.confirm(`Delete ${selectedIds.length} selected entries from database?`);
+    if (!confirmed) return;
+
+    setDeleting(true);
+    setStatus("");
+    setError(false);
+
+    try {
+      const res = await fetch("/api/admin/campus-ambassadors", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selectedIds }),
+      });
+
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(payload?.error || "Failed to delete selected entries");
+      }
+
+      setStatus(`Deleted ${payload.deletedCount ?? selectedIds.length} entries successfully.`);
+      setSelectedIds([]);
+      await loadData(view);
+    } catch (err) {
+      setError(true);
+      setStatus(err instanceof Error ? err.message : "Failed to delete selected entries");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  const allVisibleSelected = filteredRows.length > 0 && filteredRows.every((row) => selectedIds.includes(row.id));
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -146,6 +203,15 @@ export default function CampusAmbassadorsPage() {
           >
             <Download className="h-4 w-4" />
             Export Excel
+          </button>
+
+          <button
+            type="button"
+            onClick={deleteSelected}
+            disabled={!selectedIds.length || deleting}
+            className="inline-flex items-center gap-2 rounded-xl border border-red-300 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 transition-all hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300"
+          >
+            {deleting ? "Deleting..." : `Delete Selected (${selectedIds.length})`}
           </button>
         </div>
       </div>
@@ -204,6 +270,14 @@ export default function CampusAmbassadorsPage() {
             <table className="min-w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-border bg-background/80">
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-foreground/50">
+                    <input
+                      type="checkbox"
+                      checked={allVisibleSelected}
+                      onChange={(e) => toggleSelectAll(e.target.checked)}
+                      aria-label="Select all rows"
+                    />
+                  </th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-foreground/50">Name</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-foreground/50">Institute</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-foreground/50">Roll No.</th>
@@ -216,6 +290,14 @@ export default function CampusAmbassadorsPage() {
               <tbody>
                 {filteredRows.map((item) => (
                   <tr key={item.id} className="border-b border-border/70 last:border-0">
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(item.id)}
+                        onChange={(e) => toggleSelectOne(item.id, e.target.checked)}
+                        aria-label={`Select ${item.fullName}`}
+                      />
+                    </td>
                     <td className="px-4 py-3 text-foreground/90">{item.fullName}</td>
                     <td className="px-4 py-3 text-foreground/80">{item.instituteName}</td>
                     <td className="px-4 py-3 text-foreground/80">{item.rollNumber}</td>

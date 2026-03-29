@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 
 const CU_JOIN_URL = "https://cuintranet.in/join-now";
-const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/K24oTi4LFLh4XOI3oY495G";
 
 type JoinFormState = {
   fullName: string;
@@ -96,11 +95,6 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
 
     setStep("success");
     setSubmitting(false);
-
-    setTimeout(() => {
-      window.open(WHATSAPP_GROUP_URL, "_blank", "noopener,noreferrer");
-      closeModal();
-    }, 1400);
   }
 
   return (
@@ -244,7 +238,14 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
             {step === "success" && (
               <div className="rounded-xl border border-emerald-300/40 bg-emerald-500/10 p-4 text-center">
                 <p className="text-sm font-semibold text-emerald-400">Submitted Successfully</p>
-                <p className="mt-1 text-xs text-foreground/70">Redirecting you to WhatsApp group...</p>
+                <p className="mt-1 text-xs text-foreground/70">You will receive an email shortly.</p>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="mt-3 rounded-md border border-border px-3 py-1.5 text-xs text-foreground/80 hover:bg-card"
+                >
+                  Close
+                </button>
               </div>
             )}
           </div>

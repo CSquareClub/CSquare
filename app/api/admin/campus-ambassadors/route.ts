@@ -1,6 +1,7 @@
 import { authOptions } from "@/lib/authOptions";
 import { getGoogleServiceAccountConfig } from "@/lib/google-service-account";
 import {
+  deleteOutsideRegistrations,
   getOutsideRegistrationCounts,
   listCampusAmbassadors,
   listOutsideRegistrations,
@@ -182,5 +183,29 @@ export async function POST() {
       { error: `Failed to sync data to Google Sheets: ${message}` },
       { status: 500 }
     );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user) {
+    return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+  }
+
+  try {
+    const body = await req.json();
+    const ids = Array.isArray(body?.ids)
+      ? body.ids.map((id: unknown) => Number(id)).filter((id: number) => Number.isInteger(id) && id > 0)
+      : [];
+
+    if (!ids.length) {
+      return NextResponse.json({ error: "No valid ids provided" }, { status: 400 });
+    }
+
+    const deletedCount = await deleteOutsideRegistrations(ids);
+    return NextResponse.json({ success: true, deletedCount });
+  } catch (error) {
+    console.error("Failed to delete outside registrations", error);
+    return NextResponse.json({ error: "Failed to delete records" }, { status: 500 });
   }
 }

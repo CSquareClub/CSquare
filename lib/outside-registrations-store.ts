@@ -128,3 +128,17 @@ export async function getOutsideRegistrationCounts(): Promise<{ total: number; a
     ambassadors: Number(ambassadorRows[0]?.count ?? 0),
   };
 }
+
+export async function deleteOutsideRegistrations(ids: number[]): Promise<number> {
+  await ensureOutsideRegistrationsTable();
+
+  const validIds = ids.filter((id) => Number.isInteger(id) && id > 0);
+  if (!validIds.length) return 0;
+
+  const result = await prisma.$executeRawUnsafe(
+    `DELETE FROM outside_registrations WHERE id = ANY($1::int[]);`,
+    validIds
+  );
+
+  return Number(result);
+}
