@@ -1,26 +1,30 @@
 'use client';
 
-import { Github, Linkedin, Twitter } from 'lucide-react';
+import { Linkedin } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 interface TeamCardProps {
   name: string;
   role: string;
-  bio: string;
-  github?: string;
+  about: string;
   linkedin?: string;
-  twitter?: string;
-  image: string;
+  image?: string | null;
 }
 
 export default function TeamCard({
   name,
   role,
-  bio,
-  github,
+  about,
   linkedin,
-  twitter,
   image,
 }: TeamCardProps) {
+  const fallbackImage = useMemo(
+    () =>
+      'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=1200&q=80',
+    []
+  );
+  const [currentImage, setCurrentImage] = useState(image || fallbackImage);
+
   return (
     <div className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-border bg-card/70 transition-all duration-500 hover:border-[#dc2626]/30 hover:bg-card hover:shadow-[0_0_30px_rgba(220,38,38,0.15)]">
       {/* Subtle top highlight on hover */}
@@ -28,7 +32,12 @@ export default function TeamCard({
 
       {/* Image Banner */}
       <div className="relative h-48 w-full flex-shrink-0 overflow-hidden bg-card">
-        <img src={image} className="w-full h-full object-cover object-[center_30%] transition-transform duration-700 group-hover:scale-105" alt={name} />
+        <img
+          src={currentImage}
+          className="w-full h-full object-cover object-[center_30%] transition-transform duration-700 group-hover:scale-105"
+          alt={name}
+          onError={() => setCurrentImage(fallbackImage)}
+        />
         {/* Gradient Overlay for Text Polish */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent opacity-90" />
       </div>
@@ -41,20 +50,9 @@ export default function TeamCard({
           <p className="text-sm text-[#dc2626]/80 font-semibold">{role}</p>
         </div>
 
-        <p className="text-foreground/60 text-sm mb-6 leading-relaxed flex-grow">{bio}</p>
+        <p className="text-foreground/60 text-sm mb-6 leading-relaxed flex-grow">{about}</p>
 
         <div className="mt-auto flex gap-4 border-t border-border pt-4">
-          {github && (
-            <a
-              href={github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground/40 hover:text-[#dc2626] transition-colors"
-              aria-label="GitHub"
-            >
-              <Github size={18} />
-            </a>
-          )}
           {linkedin && (
             <a
               href={linkedin}
@@ -64,17 +62,6 @@ export default function TeamCard({
               aria-label="LinkedIn"
             >
               <Linkedin size={18} />
-            </a>
-          )}
-          {twitter && (
-            <a
-              href={twitter}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground/40 hover:text-[#dc2626] transition-colors"
-              aria-label="Twitter"
-            >
-              <Twitter size={18} />
             </a>
           )}
         </div>

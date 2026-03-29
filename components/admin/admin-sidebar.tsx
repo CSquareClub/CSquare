@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Users,
   CalendarDays,
+  User,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -18,6 +19,7 @@ const navItems = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "Registrations", href: "/admin/registrations", icon: Users },
   { label: "Events", href: "/admin/events", icon: CalendarDays },
+  { label: "Team", href: "/admin/team", icon: User },
   // { label: "Stalls", href: "/admin/stalls", icon: Store },
   // { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
