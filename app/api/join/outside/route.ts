@@ -1,4 +1,4 @@
-import { createOutsideRegistration } from "@/lib/outside-registrations-store";
+import { createOutsideRegistration, checkDuplicateRegistration } from "@/lib/outside-registrations-store";
 import { NextResponse } from "next/server";
 
 function isValidEmail(value: string) {
@@ -22,6 +22,19 @@ export async function POST(req: Request) {
 
     if (!isValidEmail(personalEmail) || !isValidEmail(collegeEmail)) {
       return NextResponse.json({ error: "Please provide valid email addresses" }, { status: 400 });
+    }
+
+    const isDuplicate = await checkDuplicateRegistration(
+      rollNumber,
+      personalEmail,
+      collegeEmail
+    );
+
+    if (isDuplicate) {
+      return NextResponse.json(
+        { error: "You have already submitted the form. Check your registered email for updates." },
+        { status: 409 }
+      );
     }
 
     const record = await createOutsideRegistration({

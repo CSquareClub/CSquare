@@ -129,6 +129,28 @@ export async function getOutsideRegistrationCounts(): Promise<{ total: number; a
   };
 }
 
+export async function checkDuplicateRegistration(
+  rollNumber: string,
+  personalEmail: string,
+  collegeEmail: string
+): Promise<boolean> {
+  await ensureOutsideRegistrationsTable();
+
+  const rows = await prisma.$queryRawUnsafe<Array<{ exists: boolean }>>([
+    `SELECT EXISTS(
+      SELECT 1 FROM outside_registrations
+      WHERE LOWER(roll_number) = LOWER($1::text)
+        OR LOWER(personal_email) = LOWER($2::text)
+        OR LOWER(college_email) = LOWER($3::text)
+    ) AS exists;`,
+    rollNumber,
+    personalEmail,
+    collegeEmail,
+  ] as any);
+
+  return rows[0]?.exists ?? false;
+}
+
 export async function deleteOutsideRegistrations(ids: number[]): Promise<number> {
   await ensureOutsideRegistrationsTable();
 
