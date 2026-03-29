@@ -94,7 +94,7 @@ export async function listOutsideRegistrations(): Promise<OutsideRegistration[]>
   const rows = await prisma.$queryRawUnsafe<OutsideRegistrationRow[]>(
     `SELECT id, created_at, full_name, institute_name, roll_number, personal_email, college_email, campus_ambassador
      FROM outside_registrations
-     ORDER BY created_at DESC;`
+      ORDER BY created_at ASC;`
   );
 
   return rows.map(rowToRegistration);
@@ -107,7 +107,7 @@ export async function listCampusAmbassadors(): Promise<OutsideRegistration[]> {
     `SELECT id, created_at, full_name, institute_name, roll_number, personal_email, college_email, campus_ambassador
      FROM outside_registrations
      WHERE campus_ambassador = TRUE
-     ORDER BY created_at DESC;`
+      ORDER BY created_at ASC;`
   );
 
   return rows.map(rowToRegistration);

@@ -160,14 +160,14 @@ export async function GET(req: Request) {
   try {
     if (track === "2026") {
       const data = await prisma.cusocRegistration2026.findMany({
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: "asc" },
       });
       return NextResponse.json(data);
     }
 
     if (track === "2027") {
       const data = await prisma.cusocRegistration2027.findMany({
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: "asc" },
       });
       return NextResponse.json(data);
     }
@@ -217,8 +217,8 @@ export async function POST(req: NextRequest) {
     const spreadsheetId = resolveSpreadsheetId(spreadsheetInput);
     const registrations =
       track === "2026"
-        ? await prisma.cusocRegistration2026.findMany({ orderBy: { createdAt: "desc" } })
-        : await prisma.cusocRegistration2027.findMany({ orderBy: { createdAt: "desc" } });
+        ? await prisma.cusocRegistration2026.findMany({ orderBy: { createdAt: "asc" } })
+        : await prisma.cusocRegistration2027.findMany({ orderBy: { createdAt: "asc" } });
 
     const sheetTitle = track === "2026" ? "CUSoC 2026" : "CUSoC 2027-28";
     const columns = exportColumns[track];
