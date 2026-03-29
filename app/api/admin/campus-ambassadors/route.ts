@@ -21,7 +21,7 @@ const exportColumns: Array<{ key: string; header: string }> = [
   { key: "createdAt", header: "Submitted At" },
 ];
 
-const defaultSpreadsheetId = "";
+const defaultSpreadsheetId = "1S6OQd0lXUxpPQc7DQrP6mx2Ic-W3YI14aNhlYw-c15c";
 
 function getErrorMessage(err: unknown): string {
   if (!err) return "Unknown error";
