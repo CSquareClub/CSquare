@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 const CU_JOIN_URL = "https://cuintranet.in/join-now";
 
@@ -38,6 +39,11 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
   const [checkingDuplicate, setCheckingDuplicate] = useState(false);
   const [form, setForm] = useState<JoinFormState>(initialForm);
   const [cuRegistered, setCuRegistered] = useState(false);
+  const [portalReady, setPortalReady] = useState(false);
+
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -53,6 +59,22 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
     
     return () => {
       document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeModal();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, [isOpen]);
 
@@ -183,22 +205,14 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
     setSubmitting(false);
   }
 
-  return (
-    <>
-      <button type="button" onClick={() => setIsOpen(true)} className={className}>
-        {children}
-      </button>
+  const modalContent = isOpen ? (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={closeModal}>
+      <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] transition-opacity duration-200" />
 
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <button
-            type="button"
-            aria-label="Close modal"
-            onClick={closeModal}
-            className="absolute inset-0 bg-black/55 backdrop-blur-[2px] transition-opacity duration-200"
-          />
-
-          <div className="relative z-10 w-full max-w-xl rounded-2xl border border-border bg-background p-6 shadow-2xl transition-all duration-300 animate-fade-in-up sm:p-7">
+      <div
+        className="relative z-10 w-full max-w-xl rounded-2xl border border-border bg-background p-6 shadow-2xl transition-all duration-300 animate-fade-in-up sm:p-7 max-h-[90vh] overflow-y-auto"
+        onClick={(event) => event.stopPropagation()}
+      >
             <div className="mb-4 flex items-start justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Join C Square</p>
@@ -361,9 +375,17 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
                 </div>
               </div>
             )}
-          </div>
         </div>
-      )}
+    </div>
+  ) : null;
+
+  return (
+    <>
+      <button type="button" onClick={() => setIsOpen(true)} className={className}>
+        {children}
+      </button>
+
+      {portalReady && modalContent ? createPortal(modalContent, document.body) : null}
     </>
   );
 }
