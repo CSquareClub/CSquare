@@ -44,6 +44,14 @@ function normalizePrivateKey(value: string): string {
   return key;
 }
 
+function decodeBase64(input: string, sourceName: string): string {
+  try {
+    return Buffer.from(input.trim(), "base64").toString("utf8");
+  } catch {
+    throw new Error(`${sourceName} is not valid base64`);
+  }
+}
+
 function getRequiredEnv(name: string): string {
   const value = process.env[name];
   if (!value) {
@@ -97,7 +105,15 @@ export function getGoogleServiceAccountConfig(): GoogleServiceAccountConfig {
   const projectId =
     process.env.GOOGLE_PROJECT_ID || process.env.GOOGLE_SERVICE_ACCOUNT_PROJECT_ID;
   const clientEmail = getRequiredEnv("GOOGLE_SERVICE_ACCOUNT_EMAIL");
-  const privateKey = normalizePrivateKey(getRequiredEnv("GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY"));
+  const privateKeyBase64 = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64;
+  const privateKey = privateKeyBase64
+    ? normalizePrivateKey(
+        decodeBase64(
+          privateKeyBase64,
+          "GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64"
+        )
+      )
+    : normalizePrivateKey(getRequiredEnv("GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY"));
 
   return {
     projectId,
