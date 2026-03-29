@@ -136,7 +136,7 @@ export async function checkDuplicateRegistration(
 ): Promise<boolean> {
   await ensureOutsideRegistrationsTable();
 
-  const rows = await prisma.$queryRawUnsafe<Array<{ exists: boolean }>>([
+  const rows = await prisma.$queryRawUnsafe<Array<{ exists: boolean }>>(
     `SELECT EXISTS(
       SELECT 1 FROM outside_registrations
       WHERE LOWER(roll_number) = LOWER($1::text)
@@ -145,8 +145,8 @@ export async function checkDuplicateRegistration(
     ) AS exists;`,
     rollNumber,
     personalEmail,
-    collegeEmail,
-  ] as any);
+    collegeEmail
+  );
 
   return rows[0]?.exists ?? false;
 }
