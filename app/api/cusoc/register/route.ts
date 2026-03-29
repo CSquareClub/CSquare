@@ -312,3 +312,46 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const track = String(searchParams.get("track") || "").trim();
+    const cuEmail = String(searchParams.get("cuEmail") || "").trim().toLowerCase();
+
+    if (!track || !cuEmail) {
+      return NextResponse.json({ duplicate: false });
+    }
+
+    if (!/@cuchd\.in$/i.test(cuEmail)) {
+      return NextResponse.json({ duplicate: false });
+    }
+
+    if (track === "2026") {
+      const existing = await prisma.cusocRegistration2026.findUnique({
+        where: { cuEmail },
+      });
+
+      return NextResponse.json({
+        duplicate: Boolean(existing),
+        error: existing ? "This CU email is already registered for CUSoC 2026." : undefined,
+      });
+    }
+
+    if (track === "2027") {
+      const existing = await prisma.cusocRegistration2027.findUnique({
+        where: { cuEmail },
+      });
+
+      return NextResponse.json({
+        duplicate: Boolean(existing),
+        error: existing ? "This CU email is already registered for CUSoC 2027-28." : undefined,
+      });
+    }
+
+    return NextResponse.json({ duplicate: false });
+  } catch (err) {
+    console.error("CUSoC duplicate check error:", err);
+    return NextResponse.json({ error: "Could not validate registration" }, { status: 500 });
+  }
+}

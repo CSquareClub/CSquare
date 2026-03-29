@@ -170,6 +170,9 @@ export default function CusocForm() {
   const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [duplicateError, setDuplicateError] = useState<string | null>(null);
+  const [checkingDuplicate, setCheckingDuplicate] = useState(false);
+  const [alreadyRegisteredOnBrowser, setAlreadyRegisteredOnBrowser] = useState(false);
 
   // Form state (flat object – keeps it simple)
   const [f, setF] = useState<Record<string, any>>({
@@ -208,6 +211,67 @@ export default function CusocForm() {
       localStorage.setItem('cusoc_form_2026', JSON.stringify({ f, step, track }));
     }
   }, [f, step, track]);
+
+  useEffect(() => {
+    if (!track) {
+      setAlreadyRegisteredOnBrowser(false);
+      return;
+    }
+
+    const browserFlag = localStorage.getItem(`cusoc_registered_${track}`);
+    setAlreadyRegisteredOnBrowser(browserFlag === 'true');
+  }, [track]);
+
+  useEffect(() => {
+    if (!track || step !== 0) {
+      setCheckingDuplicate(false);
+      return;
+    }
+
+    const cuEmail = String(f.cuEmail || '').trim().toLowerCase();
+    if (!/@cuchd\.in$/i.test(cuEmail)) {
+      setDuplicateError(null);
+      setCheckingDuplicate(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        setCheckingDuplicate(true);
+        const query = new URLSearchParams({ track, cuEmail });
+        const response = await fetch(`/api/cusoc/register?${query.toString()}`, {
+          method: 'GET',
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          setDuplicateError(null);
+          return;
+        }
+
+        const payload = await response.json();
+        if (payload?.duplicate) {
+          setDuplicateError(payload?.error || 'This CU email is already registered.');
+        } else {
+          setDuplicateError(null);
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setDuplicateError(null);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setCheckingDuplicate(false);
+        }
+      }
+    }, 350);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [track, step, f.cuEmail]);
 
   const set = (key: string, value: any) => setF((prev) => ({ ...prev, [key]: value }));
   const toggleArr = (key: string, val: string) => {
@@ -314,6 +378,11 @@ export default function CusocForm() {
   };
 
   const next = () => {
+    if (step === 0 && duplicateError) {
+      setError(duplicateError);
+      return;
+    }
+
     const err = validate();
     if (err) { setError(err); return; }
     setError(null);
@@ -325,6 +394,11 @@ export default function CusocForm() {
   /* ── Submit ────────────────────────────────────────────── */
 
   const submit = async () => {
+    if (duplicateError) {
+      setError(duplicateError);
+      return;
+    }
+
     const err = validate();
     if (err) { setError(err); return; }
     setError(null);
@@ -362,6 +436,9 @@ export default function CusocForm() {
         throw new Error(json.error || 'Registration failed');
       }
       localStorage.removeItem('cusoc_form_2026');
+      if (track) {
+        localStorage.setItem(`cusoc_registered_${track}`, 'true');
+      }
       setSubmitted(true);
     } catch (e: any) {
       setError(e.message || 'Something went wrong');
@@ -453,6 +530,46 @@ export default function CusocForm() {
             <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-amber-500 group-hover:text-amber-400">
               Start Application <ChevronRight className="h-3.5 w-3.5" />
             </div>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (alreadyRegisteredOnBrowser) {
+    return (
+      <div className={`rounded-[34px] p-10 text-center backdrop-blur-xl ${dk ? 'border border-blue-400/20 bg-white/[0.04] shadow-[0_0_80px_rgba(59,130,246,0.12)]' : 'border border-blue-200 bg-white/95 shadow-[0_18px_50px_rgba(15,23,42,0.08)]'}`}>
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-blue-400/30 bg-blue-500/10">
+          <AlertCircle className="h-8 w-8 text-blue-400" />
+        </div>
+        <h3 className="mb-2 text-3xl font-bold tracking-tight text-foreground">Already Registered</h3>
+        <p className="mx-auto max-w-lg text-foreground/70">
+          This browser has already submitted a CUSoC {track === '2026' ? '2026' : '2027-28'} registration. Check the registered email for updates.
+        </p>
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.removeItem(`cusoc_registered_${track}`);
+              setAlreadyRegisteredOnBrowser(false);
+              setError(null);
+              setDuplicateError(null);
+            }}
+            className="rounded-lg border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
+          >
+            Not You? Reset
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setTrack(null);
+              setStep(0);
+              setError(null);
+              setDuplicateError(null);
+            }}
+            className={`rounded-lg border px-4 py-2 text-sm font-medium ${dk ? 'border-white/10 bg-white/[0.03] text-foreground/70 hover:text-foreground' : 'border-[#fecaca] bg-white text-foreground/70 hover:text-foreground'}`}
+          >
+            Change Track
           </button>
         </div>
       </div>
@@ -899,6 +1016,17 @@ export default function CusocForm() {
         </div>
       )}
 
+      {checkingDuplicate && step === 0 && !duplicateError && (
+        <p className="mb-4 text-xs text-foreground/60">Checking registration status...</p>
+      )}
+
+      {duplicateError && step === 0 && (
+        <div className={`mb-5 flex gap-3 rounded-2xl border p-4 animate-fade-in-up ${dk ? 'border-red-500/30 bg-red-500/10' : 'border-red-300/50 bg-red-50'}`}>
+          <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" />
+          <p className={`text-sm ${dk ? 'text-red-100' : 'text-red-700'}`}>{duplicateError}</p>
+        </div>
+      )}
+
       {/* Content */}
       <section className={sectionCls}>
         <div className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-foreground/65">
@@ -916,12 +1044,12 @@ export default function CusocForm() {
         </button>
 
         {isLast ? (
-          <button type="button" onClick={submit} disabled={isLoading}
+          <button type="button" onClick={submit} disabled={isLoading || Boolean(duplicateError)}
             className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-red-500 to-red-700 px-7 py-3 font-semibold text-white transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_0_35px_rgba(220,38,38,0.35)] disabled:cursor-not-allowed disabled:opacity-60">
             {isLoading ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting…</> : <>Submit Registration <Flame className="h-4 w-4" /></>}
           </button>
         ) : (
-          <button type="button" onClick={next}
+          <button type="button" onClick={next} disabled={step === 0 && Boolean(duplicateError)}
             className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-red-500 to-red-700 px-6 py-2.5 font-semibold text-white transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_0_25px_rgba(220,38,38,0.3)]">
             Next <ChevronRight className="h-4 w-4" />
           </button>
