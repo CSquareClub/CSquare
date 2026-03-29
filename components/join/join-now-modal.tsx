@@ -206,11 +206,11 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
   }
 
   const modalContent = isOpen ? (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={closeModal}>
-      <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] transition-opacity duration-200" />
+    <div className="fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-4" onClick={closeModal}>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px] transition-opacity duration-200 sm:bg-black/55" />
 
       <div
-        className="relative z-10 w-full max-w-xl rounded-2xl border border-border bg-background p-6 shadow-2xl transition-all duration-300 animate-fade-in-up sm:p-7 max-h-[90vh] overflow-y-auto"
+        className="relative z-10 w-full max-w-xl rounded-t-2xl border border-border bg-background p-4 shadow-2xl transition-all duration-300 animate-fade-in-up max-h-[90dvh] overflow-y-auto sm:rounded-2xl sm:p-7 sm:max-h-[90vh]"
         onClick={(event) => event.stopPropagation()}
       >
             <div className="mb-4 flex items-start justify-between">
