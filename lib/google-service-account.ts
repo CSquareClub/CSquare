@@ -11,7 +11,24 @@ export type GoogleServiceAccountConfig = {
 };
 
 function normalizePrivateKey(value: string): string {
-  return value.includes("\\n") ? value.replace(/\\n/g, "\n") : value;
+  let key = value.trim();
+
+  // Some env dashboards keep surrounding quotes when pasting JSON values.
+  if (
+    (key.startsWith('"') && key.endsWith('"')) ||
+    (key.startsWith("'") && key.endsWith("'"))
+  ) {
+    key = key.slice(1, -1);
+  }
+
+  // Handle common escaped newline variants from environment variable UIs.
+  key = key
+    .replace(/\\r\\n/g, "\n")
+    .replace(/\\n/g, "\n")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
+
+  return key;
 }
 
 function getRequiredEnv(name: string): string {
