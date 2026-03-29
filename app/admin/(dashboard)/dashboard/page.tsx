@@ -5,8 +5,6 @@ import AdminHeader from "@/components/admin/admin-header";
 import {
   Users,
   CalendarDays,
-  Store,
-  TrendingUp,
   Activity,
   BarChart3,
 } from "lucide-react";
@@ -30,22 +28,6 @@ const stats = [
     color: "from-orange-500 to-amber-600",
     shadowColor: "shadow-orange-500/15",
   },
-  {
-    label: "Stall Bookings",
-    value: "—",
-    change: "+5",
-    icon: Store,
-    color: "from-violet-500 to-purple-600",
-    shadowColor: "shadow-violet-500/15",
-  },
-  {
-    label: "Revenue",
-    value: "—",
-    change: "+18%",
-    icon: TrendingUp,
-    color: "from-emerald-500 to-green-600",
-    shadowColor: "shadow-emerald-500/15",
-  },
 ];
 
 const quickActions = [
@@ -60,12 +42,6 @@ const quickActions = [
     description: "Edit event details and settings",
     href: "/admin/events",
     icon: CalendarDays,
-  },
-  {
-    label: "Stall Registrations",
-    description: "View stall bookings and payments",
-    href: "/admin/stalls",
-    icon: Store,
   },
   {
     label: "Analytics",
