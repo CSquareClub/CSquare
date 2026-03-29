@@ -7,6 +7,11 @@ import { getGoogleServiceAccountConfig } from "@/lib/google-service-account";
 
 type Track = "2026" | "2027";
 
+const fallbackSpreadsheetIds: Record<Track, string> = {
+  "2026": "1Z-s5HxgSVzfXf4m9mV5WW8B-fTH1Fs7KYg0JvjConp4",
+  "2027": "1zvqnoc2JzUREzbuKtzgPKBiNXMpepqbzTxqjqa82vy0",
+};
+
 const exportColumns: Record<
   Track,
   Array<{ key: string; header: string }>
@@ -92,13 +97,15 @@ function getSpreadsheetInputForTrack(track: Track): string | undefined {
   if (track === "2026") {
     return (
       process.env.GOOGLE_SPREADSHEET_ID_2026 ||
-      process.env.GOOGLE_SPREADSHEET_ID
+      process.env.GOOGLE_SPREADSHEET_ID ||
+      fallbackSpreadsheetIds["2026"]
     );
   }
 
   return (
     process.env.GOOGLE_SPREADSHEET_ID_2027 ||
-    process.env.GOOGLE_SPREADSHEET_ID
+    process.env.GOOGLE_SPREADSHEET_ID ||
+    fallbackSpreadsheetIds["2027"]
   );
 }
 
@@ -200,7 +207,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "Missing spreadsheet env for selected track. Set GOOGLE_SPREADSHEET_ID_2026 / GOOGLE_SPREADSHEET_ID_2027 (or fallback GOOGLE_SPREADSHEET_ID).",
+          "Missing spreadsheet configuration for selected track.",
       },
       { status: 500 }
     );
