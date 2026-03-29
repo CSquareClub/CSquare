@@ -95,6 +95,19 @@ export async function listAdminEvents(): Promise<ClubEvent[]> {
   return rows.map(rowToEvent);
 }
 
+export async function countActiveEvents(): Promise<number> {
+  await ensureEventsTable();
+
+  const rows = await prisma.$queryRawUnsafe<Array<{ count: bigint | number }>>(
+    `SELECT COUNT(*)::bigint AS count
+     FROM events
+     WHERE is_published = TRUE
+       AND event_date >= NOW();`
+  );
+
+  return Number(rows[0]?.count ?? 0);
+}
+
 export type CreateEventInput = Omit<ClubEvent, "id" | "date"> & { date: string };
 
 export async function createEvent(input: CreateEventInput): Promise<ClubEvent> {

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
+import PageImpressionTracker from '@/components/analytics/page-impression-tracker'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -39,6 +40,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          <PageImpressionTracker />
           {children}
         </ThemeProvider>
         <Analytics />
