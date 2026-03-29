@@ -1,4 +1,5 @@
 import { authOptions } from "@/lib/authOptions";
+import { getLinkedInProfileImage } from "@/lib/linkedin-image";
 import { deleteTeamMember, updateTeamMember } from "@/lib/team-store";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -22,13 +23,20 @@ export async function PATCH(req: Request, context: RouteContext) {
     }
 
     const body = await req.json();
+    const linkedin = typeof body.linkedin !== "undefined" ? body.linkedin || null : undefined;
+    const image = typeof body.image !== "undefined" ? body.image || null : undefined;
+
+    let resolvedImage = image;
+    if ((image === null || image === "") && typeof linkedin === "string" && linkedin) {
+      resolvedImage = await getLinkedInProfileImage(linkedin);
+    }
 
     const updated = await updateTeamMember(memberId, {
       name: body.name,
       role: body.role,
       about: body.about,
-      linkedin: typeof body.linkedin !== "undefined" ? body.linkedin || null : undefined,
-      image: typeof body.image !== "undefined" ? body.image || null : undefined,
+      linkedin,
+      image: resolvedImage,
       isPublished: typeof body.isPublished !== "undefined" ? Boolean(body.isPublished) : undefined,
       sortOrder: typeof body.sortOrder !== "undefined" ? Number(body.sortOrder) : undefined,
     });

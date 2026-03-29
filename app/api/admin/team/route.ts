@@ -1,4 +1,5 @@
 import { authOptions } from "@/lib/authOptions";
+import { getLinkedInProfileImage } from "@/lib/linkedin-image";
 import { createTeamMember, listAdminTeam } from "@/lib/team-store";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -26,13 +27,16 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
+    const linkedin = body.linkedin || null;
+    const providedImage = body.image || null;
+    const resolvedImage = providedImage || (linkedin ? await getLinkedInProfileImage(linkedin) : null);
 
     const member = await createTeamMember({
       name: body.name,
       role: body.role,
       about: body.about,
-      linkedin: body.linkedin || null,
-      image: body.image || null,
+      linkedin,
+      image: resolvedImage,
       isPublished: typeof body.isPublished !== "undefined" ? Boolean(body.isPublished) : true,
       sortOrder: Number(body.sortOrder || 0),
     });

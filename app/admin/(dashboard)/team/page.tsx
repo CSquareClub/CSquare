@@ -185,6 +185,9 @@ export default function AdminTeamPage() {
           onChange={(e) => setForm((prev) => ({ ...prev, image: e.target.value }))}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
         />
+        <p className="text-xs text-muted-foreground md:col-span-2">
+          Leave image empty to auto-try profile photo from LinkedIn URL.
+        </p>
 
         <input
           type="number"
