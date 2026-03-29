@@ -156,7 +156,7 @@ export default function CusocRegistrationsPage() {
     { key: "cuEmail", label: "Email" },
     { key: "department", label: "Dept" },
     { key: "year", label: "Year" },
-    { key: "primaryTrack", label: "Domain" },
+    { key: "domainOrder", label: "Domain" },
     { key: "dsaLevel", label: "DSA" },
   ];
   const cols2027 = [
@@ -177,10 +177,12 @@ export default function CusocRegistrationsPage() {
       fields: [
         ["Full Name", "fullName"],
         ["Roll Number", "rollNumber"],
-        ["Email", "cuEmail"],
+        ["CU Email", "cuEmail"],
+        ["Personal Email", "personalEmail"],
         ["Phone", "phone"],
         ["Department", "department"],
         ["Year", "year"],
+        ["Registered At", "createdAt"],
       ],
     },
     {
@@ -194,7 +196,7 @@ export default function CusocRegistrationsPage() {
     {
       title: "Domain & Experience",
       fields: [
-        ["Primary Track", "primaryTrack"],
+        ["Domain Order", "domainOrder"],
         ["GitHub", "githubProfile"],
         ["Projects", "projectCount"],
         ["Best Project", "bestProjectLink"],
@@ -213,7 +215,7 @@ export default function CusocRegistrationsPage() {
     {
       title: "Goals & Commitment",
       fields: [
-        ["Primary Goal", "primaryGoal"],
+        ["Goals", "goals"],
         ["Why CUSoC", "whyCusoc"],
         ["Hours/Week", "hoursPerWeek"],
         ["Weekly Tasks", "readyWeeklyTasks"],
@@ -223,12 +225,7 @@ export default function CusocRegistrationsPage() {
     {
       title: "Mini Proposal",
       fields: [
-        ["Org Name", "proposalOrgName"],
-        ["Project Title", "proposalProjectTitle"],
-        ["Problem", "proposalProblemStatement"],
-        ["Solution", "proposalSolution"],
-        ["Tech Stack", "proposalTechStack"],
-        ["Timeline", "proposalTimeline"],
+        ["Proposal File URL", "proposalFileUrl"],
       ],
     },
     {
