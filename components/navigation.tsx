@@ -12,11 +12,41 @@ export default function Navigation() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [nowLabel, setNowLabel] = useState("");
   const { theme, setTheme } = useTheme();
   const isDark = theme !== 'light';
 
   useEffect(() => {
     setMounted(true);
+
+    const updateScrollProgress = () => {
+      const scrollTop = window.scrollY;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollHeight > 0 ? Math.min(100, (scrollTop / scrollHeight) * 100) : 0;
+      setScrollProgress(progress);
+    };
+
+    const updateNowLabel = () => {
+      const now = new Date();
+      setNowLabel(
+        now.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      );
+    };
+
+    updateScrollProgress();
+    updateNowLabel();
+
+    window.addEventListener('scroll', updateScrollProgress, { passive: true });
+    const timer = window.setInterval(updateNowLabel, 30000);
+
+    return () => {
+      window.removeEventListener('scroll', updateScrollProgress);
+      window.clearInterval(timer);
+    };
   }, []);
 
   const logoSrc = mounted && !isDark ? '/c-square.png' : '/c-square-white.png';
@@ -30,6 +60,12 @@ export default function Navigation() {
 
   return (
     <nav className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur-md">
+      <div className="absolute left-0 top-0 h-[2px] w-full bg-border/40">
+        <div
+          className="h-full bg-primary transition-[width] duration-150"
+          style={{ width: `${scrollProgress}%` }}
+        />
+      </div>
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-90">
@@ -39,6 +75,9 @@ export default function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6 lg:gap-8">
+            <span className="rounded-full border border-border bg-card/60 px-3 py-1 font-mono text-xs text-foreground/70">
+              LIVE {nowLabel || '--:--'}
+            </span>
             {navItems.map((item) => (
               <Link
                 key={item.href}

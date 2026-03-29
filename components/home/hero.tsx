@@ -3,8 +3,29 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import JoinNowModal from '@/components/join/join-now-modal';
+import { useEffect, useState } from 'react';
 
 export default function Hero() {
+  const dynamicWords = ['Compete', 'Create', 'Collaborate', 'Contribute'];
+  const [activeWord, setActiveWord] = useState(dynamicWords[0]);
+  const [wordVisible, setWordVisible] = useState(true);
+
+  useEffect(() => {
+    let index = 0;
+
+    const interval = window.setInterval(() => {
+      setWordVisible(false);
+
+      window.setTimeout(() => {
+        index = (index + 1) % dynamicWords.length;
+        setActiveWord(dynamicWords[index]);
+        setWordVisible(true);
+      }, 160);
+    }, 2600);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
   return (
     <section className="relative py-20 lg:py-32 xl:py-40 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -19,7 +40,13 @@ export default function Hero() {
 
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 tracking-tight animate-fade-in-up md:leading-[1.1]" style={{ animationDelay: '0.1s' }}>
-              Learn. <span className="text-primary">Compete.</span><br />
+              Learn.{' '}
+              <span
+                className={`text-primary inline-block min-w-[6.5ch] transition-all duration-200 ${wordVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1'}`}
+              >
+                {activeWord}.
+              </span>
+              <br />
               Build.
             </h1>
 
