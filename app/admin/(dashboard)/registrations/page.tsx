@@ -23,6 +23,7 @@ export default function CusocRegistrationsPage() {
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState<string>("");
+  const [exportError, setExportError] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<any | null>(null);
   const [counts, setCounts] = useState({ count2026: 0, count2027: 0 });
@@ -63,6 +64,9 @@ export default function CusocRegistrationsPage() {
 
     setExporting(true);
     setExportStatus("");
+    setExportError(false);
+
+    let syncSuccessful = false;
 
     try {
       const res = await fetch(`/api/cusoc/registrations?track=${track}`, {
@@ -76,7 +80,9 @@ export default function CusocRegistrationsPage() {
       }
 
       setExportStatus(`Synced ${payload?.rowCount ?? data.length} rows to Google Sheet.`);
+      syncSuccessful = true;
     } catch (err) {
+      setExportError(true);
       setExportStatus(
         err instanceof Error
           ? err.message
@@ -84,10 +90,12 @@ export default function CusocRegistrationsPage() {
       );
     }
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, `CUSoC_${track}`);
-    XLSX.writeFile(wb, `CUSoC_${track}_Registrations.xlsx`);
+    if (syncSuccessful) {
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, `CUSoC_${track}`);
+      XLSX.writeFile(wb, `CUSoC_${track}_Registrations.xlsx`);
+    }
 
     setExporting(false);
   };
@@ -252,7 +260,15 @@ export default function CusocRegistrationsPage() {
       </div>
 
       {exportStatus && (
-        <p className="mb-4 text-sm text-black/60 dark:text-white/50">{exportStatus}</p>
+        <p
+          className={`mb-4 text-sm ${
+            exportError
+              ? "text-red-600 dark:text-red-400"
+              : "text-emerald-700 dark:text-emerald-400"
+          }`}
+        >
+          {exportStatus}
+        </p>
       )}
 
       {/* Track Tabs */}

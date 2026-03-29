@@ -72,6 +72,34 @@ function asSheetValue(value: unknown): string | number | boolean {
   return String(value);
 }
 
+function resolveSpreadsheetId(input: string): string {
+  const trimmed = input.trim();
+
+  if (!trimmed) {
+    throw new Error("GOOGLE_SPREADSHEET_ID is empty");
+  }
+
+  // Accept full Google Sheets URL and extract ID.
+  const match = trimmed.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  if (match?.[1]) {
+    return match[1];
+  }
+
+  return trimmed;
+}
+
+function getErrorMessage(err: unknown): string {
+  if (!err) return "Unknown error";
+  if (err instanceof Error) return err.message;
+
+  if (typeof err === "object") {
+    const maybeMessage = (err as { message?: unknown }).message;
+    if (typeof maybeMessage === "string") return maybeMessage;
+  }
+
+  return String(err);
+}
+
 async function ensureSheetExists(
   spreadsheetId: string,
   title: string,
@@ -153,8 +181,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid track" }, { status: 400 });
   }
 
-  const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID;
-  if (!spreadsheetId) {
+  const spreadsheetInput = process.env.GOOGLE_SPREADSHEET_ID;
+  if (!spreadsheetInput) {
     return NextResponse.json(
       { error: "Missing GOOGLE_SPREADSHEET_ID in environment" },
       { status: 500 }
@@ -162,6 +190,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const spreadsheetId = resolveSpreadsheetId(spreadsheetInput);
     const registrations =
       track === "2026"
         ? await prisma.cusocRegistration2026.findMany({ orderBy: { createdAt: "desc" } })
@@ -180,6 +209,8 @@ export async function POST(req: NextRequest) {
       key: config.privateKey,
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
+
+    await auth.authorize();
 
     const sheetsClient = google.sheets({ version: "v4", auth });
 
@@ -205,9 +236,10 @@ export async function POST(req: NextRequest) {
       sheetTitle,
     });
   } catch (err) {
+    const message = getErrorMessage(err);
     console.error("Error exporting CUSoC registrations to Google Sheets:", err);
     return NextResponse.json(
-      { error: "Failed to export registrations to Google Sheets" },
+      { error: `Failed to export registrations to Google Sheets: ${message}` },
       { status: 500 }
     );
   }
