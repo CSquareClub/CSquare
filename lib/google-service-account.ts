@@ -91,6 +91,19 @@ function parseServiceAccountJson(raw: string): GoogleServiceAccountFields {
 }
 
 export function getGoogleServiceAccountConfig(): GoogleServiceAccountConfig {
+  const fromJsonBase64 = process.env.GOOGLE_SERVICE_ACCOUNT_JSON_BASE64;
+  if (fromJsonBase64) {
+    const parsed = parseServiceAccountJson(
+      decodeBase64(fromJsonBase64, "GOOGLE_SERVICE_ACCOUNT_JSON_BASE64")
+    );
+
+    return {
+      projectId: parsed.project_id,
+      clientEmail: parsed.client_email,
+      privateKey: normalizePrivateKey(parsed.private_key),
+    };
+  }
+
   const fromJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
 
   if (fromJson) {
