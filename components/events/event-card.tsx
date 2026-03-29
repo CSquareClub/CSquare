@@ -17,6 +17,20 @@ interface EventCardProps {
   registrationUrl?: string | null;
 }
 
+function normalizeEventImageUrl(url: string | undefined | null): string {
+  if (!url) return '';
+
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+
+  const driveMatch = trimmed.match(/drive\.google\.com\/file\/d\/([^/]+)/i);
+  if (driveMatch?.[1]) {
+    return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+  }
+
+  return trimmed;
+}
+
 export default function EventCard({
   title,
   description,
@@ -28,12 +42,13 @@ export default function EventCard({
   image,
   registrationUrl,
 }: EventCardProps) {
+  const normalizedImage = useMemo(() => normalizeEventImageUrl(image), [image]);
   const fallbackImage = useMemo(
     () =>
       `https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80`,
     []
   );
-  const [currentImage, setCurrentImage] = useState(image || fallbackImage);
+  const [currentImage, setCurrentImage] = useState(normalizedImage || fallbackImage);
 
   return (
     <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card/70 transition-all duration-500 hover:border-[#dc2626]/35 hover:bg-card hover:shadow-[0_0_30px_rgba(220,38,38,0.15)]">
