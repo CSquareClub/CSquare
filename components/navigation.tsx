@@ -24,7 +24,7 @@ export default function Navigation() {
     { href: '/', label: 'Home' },
     { href: '/events', label: 'Events' },
     { href: '/team', label: 'Team' },
-    { href: '/cusoc', label: 'Register for CUSoC' },
+    { href: '/cusoc', label: 'Join Now' },
   ];
 
   return (

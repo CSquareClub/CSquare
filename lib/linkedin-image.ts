@@ -64,22 +64,24 @@ function extractLinkedInVectorImage(html: string): string | null {
   return combined;
 }
 
-export function getGeneratedAvatar(name?: string | null): string {
-  const safeName = (name || "C Square Member").trim() || "C Square Member";
-  const encoded = encodeURIComponent(safeName);
-  return `https://ui-avatars.com/api/?name=${encoded}&background=0ea5e9&color=ffffff&size=512&rounded=true&bold=true`;
+function extractMediaLinkedInImage(content: string): string | null {
+  const normalized = content.replace(/\\\//g, "/");
+  const match = normalized.match(/https:\/\/media\.licdn\.com\/dms\/image\/[^\s"')<>]+/i);
+  if (!match?.[0]) {
+    return null;
+  }
+
+  const decoded = decodeHtml(match[0]);
+  if (isLikelyGenericLinkedInImage(decoded)) {
+    return null;
+  }
+
+  return decoded;
 }
 
-export async function getLinkedInProfileImage(linkedinUrl: string): Promise<string | null> {
+async function fetchProfileContent(url: string): Promise<string | null> {
   try {
-    const url = new URL(linkedinUrl);
-    if (!url.hostname.includes("linkedin.com")) {
-      return null;
-    }
-
-    const normalizedUrl = `${url.origin}${url.pathname}`;
-
-    const response = await fetch(normalizedUrl, {
+    const response = await fetch(url, {
       method: "GET",
       redirect: "follow",
       headers: {
@@ -95,12 +97,49 @@ export async function getLinkedInProfileImage(linkedinUrl: string): Promise<stri
       return null;
     }
 
-    const html = await response.text();
-    if (/authwall|checkpoint|login-submit/i.test(html)) {
+    return await response.text();
+  } catch {
+    return null;
+  }
+}
+
+export function getGeneratedAvatar(name?: string | null): string {
+  const safeName = (name || "C Square Member").trim() || "C Square Member";
+  const encoded = encodeURIComponent(safeName);
+  return `https://ui-avatars.com/api/?name=${encoded}&background=0ea5e9&color=ffffff&size=512&rounded=true&bold=true`;
+}
+
+export async function getLinkedInProfileImage(linkedinUrl: string): Promise<string | null> {
+  try {
+    const url = new URL(linkedinUrl);
+    if (!url.hostname.includes("linkedin.com")) {
       return null;
     }
 
-    const imageUrl = extractMetaImage(html) || extractLinkedInVectorImage(html);
+    const normalizedUrl = `${url.origin}${url.pathname}`;
+    const fetchTargets = [
+      normalizedUrl,
+      `https://r.jina.ai/http://${normalizedUrl.replace(/^https?:\/\//, "")}`,
+    ];
+
+    let imageUrl: string | null = null;
+    for (const target of fetchTargets) {
+      const content = await fetchProfileContent(target);
+      if (!content) continue;
+
+      if (/authwall|checkpoint|login-submit/i.test(content)) {
+        continue;
+      }
+
+      imageUrl =
+        extractMetaImage(content) ||
+        extractLinkedInVectorImage(content) ||
+        extractMediaLinkedInImage(content);
+
+      if (imageUrl) {
+        break;
+      }
+    }
 
     if (!imageUrl) {
       return null;

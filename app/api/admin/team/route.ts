@@ -29,8 +29,11 @@ export async function POST(req: Request) {
     const body = await req.json();
     const linkedin = body.linkedin || null;
     const providedImage = body.image || null;
+    const shouldTreatAsEmptyImage =
+      !providedImage ||
+      (typeof providedImage === "string" && providedImage.includes("ui-avatars.com/api"));
     const resolvedImage =
-      providedImage ||
+      (shouldTreatAsEmptyImage ? null : providedImage) ||
       (linkedin ? await getLinkedInProfileImage(linkedin) : null) ||
       getGeneratedAvatar(body.name);
 

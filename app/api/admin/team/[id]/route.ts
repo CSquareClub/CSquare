@@ -25,9 +25,11 @@ export async function PATCH(req: Request, context: RouteContext) {
     const body = await req.json();
     const linkedin = typeof body.linkedin !== "undefined" ? body.linkedin || null : undefined;
     const image = typeof body.image !== "undefined" ? body.image || null : undefined;
+    const normalizedImage =
+      typeof image === "string" && image.includes("ui-avatars.com/api") ? null : image;
 
-    let resolvedImage = image;
-    if ((image === null || image === "") && typeof linkedin === "string" && linkedin) {
+    let resolvedImage = normalizedImage;
+    if ((normalizedImage === null || normalizedImage === "") && typeof linkedin === "string" && linkedin) {
       resolvedImage = await getLinkedInProfileImage(linkedin);
     }
     if ((resolvedImage === null || resolvedImage === "") && typeof body.name === "string") {

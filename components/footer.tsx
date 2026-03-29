@@ -49,7 +49,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/cusoc" className="text-foreground/50 hover:text-foreground transition-colors">
-                  Register
+                  Join Now
                 </Link>
               </li>
             </ul>
