@@ -21,6 +21,8 @@ export default function CusocRegistrationsPage() {
   const [track, setTrack] = useState<Track>("2026");
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const [exportStatus, setExportStatus] = useState<string>("");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<any | null>(null);
   const [counts, setCounts] = useState({ count2026: 0, count2027: 0 });
@@ -32,9 +34,6 @@ export default function CusocRegistrationsPage() {
       .then((d) => setCounts(d))
       .catch(() => {});
   }, []);
-
-  console.log(data);
-  
 
   // Fetch data on track change
   useEffect(() => {
@@ -59,12 +58,38 @@ export default function CusocRegistrationsPage() {
     );
   });
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     if (!data.length) return;
+
+    setExporting(true);
+    setExportStatus("");
+
+    try {
+      const res = await fetch(`/api/cusoc/registrations?track=${track}`, {
+        method: "POST",
+      });
+
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = payload?.error || "Google Sheet sync failed";
+        throw new Error(msg);
+      }
+
+      setExportStatus(`Synced ${payload?.rowCount ?? data.length} rows to Google Sheet.`);
+    } catch (err) {
+      setExportStatus(
+        err instanceof Error
+          ? err.message
+          : "Could not sync to Google Sheet"
+      );
+    }
+
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, `CUSoC_${track}`);
     XLSX.writeFile(wb, `CUSoC_${track}_Registrations.xlsx`);
+
+    setExporting(false);
   };
 
   // Column configs per track
@@ -218,13 +243,17 @@ export default function CusocRegistrationsPage() {
         </div>
         <button
           onClick={exportToExcel}
-          disabled={!data.length}
+          disabled={!data.length || exporting}
           className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:shadow-xl hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Download className="w-4 h-4" />
-          Export to Excel
+          {exporting ? "Syncing..." : "Export to Excel"}
         </button>
       </div>
+
+      {exportStatus && (
+        <p className="mb-4 text-sm text-black/60 dark:text-white/50">{exportStatus}</p>
+      )}
 
       {/* Track Tabs */}
       <div className="mb-6 flex gap-2">
