@@ -141,23 +141,23 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
 
             {step === "choose" && (
               <div className="space-y-3">
-                <p className="text-sm text-foreground/65">What would you like to do?</p>
-                <button
-                  type="button"
-                  onClick={() => setStep("form")}
-                  className="w-full rounded-xl border border-border bg-card px-4 py-4 text-left transition-colors hover:border-primary/40 hover:bg-primary/10"
-                >
-                  <p className="font-semibold text-foreground">Join C Square Club</p>
-                  <p className="mt-1 text-xs text-foreground/60">Fill a quick form and join our community.</p>
-                </button>
-
+                <p className="text-sm text-foreground/65">Select your category to continue.</p>
                 <button
                   type="button"
                   onClick={handleCuStudentClick}
                   className="w-full rounded-xl border border-border bg-card px-4 py-4 text-left transition-colors hover:border-primary/40 hover:bg-primary/10"
                 >
-                  <p className="font-semibold text-foreground">Also Register for CUSoC</p>
-                  <p className="mt-1 text-xs text-foreground/60">CU students - Register for the official society.</p>
+                  <p className="font-semibold text-foreground">Chandigarh University Student</p>
+                  <p className="mt-1 text-xs text-foreground/60">Continue to CU intranet registration.</p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStep("form")}
+                  className="w-full rounded-xl border border-border bg-card px-4 py-4 text-left transition-colors hover:border-primary/40 hover:bg-primary/10"
+                >
+                  <p className="font-semibold text-foreground">Other College / Outside CU</p>
+                  <p className="mt-1 text-xs text-foreground/60">Fill a quick form and join the community group.</p>
                 </button>
               </div>
             )}
