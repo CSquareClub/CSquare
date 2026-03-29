@@ -8,6 +8,7 @@ import {
   X,
   Loader2,
   Search,
+  RefreshCw,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import AdminSidebar from "@/components/admin/admin-sidebar";
@@ -59,14 +60,21 @@ export default function CusocRegistrationsPage() {
     );
   });
 
-  const exportToExcel = async () => {
+  const downloadExcel = () => {
+    if (!data.length) return;
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, `CUSoC_${track}`);
+    XLSX.writeFile(wb, `CUSoC_${track}_Registrations.xlsx`);
+  };
+
+  const syncToGoogleSheet = async () => {
     if (!data.length) return;
 
     setExporting(true);
     setExportStatus("");
     setExportError(false);
-
-    let syncSuccessful = false;
 
     try {
       const res = await fetch(`/api/cusoc/registrations?track=${track}`, {
@@ -80,24 +88,12 @@ export default function CusocRegistrationsPage() {
       }
 
       setExportStatus(`Synced ${payload?.rowCount ?? data.length} rows to Google Sheet.`);
-      syncSuccessful = true;
     } catch (err) {
       setExportError(true);
       setExportStatus(
         err instanceof Error
-          ? `${err.message} Excel file is still downloaded.`
-          : "Could not sync to Google Sheet. Excel file is still downloaded."
-      );
-    }
-
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, `CUSoC_${track}`);
-    XLSX.writeFile(wb, `CUSoC_${track}_Registrations.xlsx`);
-
-    if (syncSuccessful) {
-      setExportStatus(
-        `Synced ${data.length} rows to Google Sheet and downloaded Excel.`
+          ? err.message
+          : "Could not sync to Google Sheet."
       );
     }
 
@@ -253,14 +249,25 @@ export default function CusocRegistrationsPage() {
             View and export all CUSoC registrations
           </p>
         </div>
-        <button
-          onClick={exportToExcel}
-          disabled={!data.length || exporting}
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:shadow-xl hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <Download className="w-4 h-4" />
-          {exporting ? "Syncing..." : "Export to Excel"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={syncToGoogleSheet}
+            disabled={!data.length || exporting}
+            className="flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-all hover:bg-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25"
+          >
+            <RefreshCw className={`w-4 h-4 ${exporting ? "animate-spin" : ""}`} />
+            {exporting ? "Syncing..." : "Sync Google Sheet"}
+          </button>
+
+          <button
+            onClick={downloadExcel}
+            disabled={!data.length}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:shadow-xl hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Download className="w-4 h-4" />
+            Export to Excel
+          </button>
+        </div>
       </div>
 
       {exportStatus && (
