@@ -5,6 +5,34 @@ function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+
+    const rollNumber = String(searchParams.get("rollNumber") || "").trim();
+    const personalEmail = String(searchParams.get("personalEmail") || "").trim().toLowerCase();
+    const collegeEmail = String(searchParams.get("collegeEmail") || "").trim().toLowerCase();
+
+    if (!rollNumber && !personalEmail && !collegeEmail) {
+      return NextResponse.json({ duplicate: false });
+    }
+
+    const isDuplicate = await checkDuplicateRegistration(rollNumber, personalEmail, collegeEmail);
+
+    if (isDuplicate) {
+      return NextResponse.json({
+        duplicate: true,
+        error: "You have already submitted the form. Check your registered email for updates.",
+      });
+    }
+
+    return NextResponse.json({ duplicate: false });
+  } catch (error) {
+    console.error("Failed to check outside registration duplicate", error);
+    return NextResponse.json({ error: "Could not validate registration" }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();

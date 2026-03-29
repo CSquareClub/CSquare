@@ -34,6 +34,8 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
   const [step, setStep] = useState<Step>("choose");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [duplicateError, setDuplicateError] = useState<string | null>(null);
+  const [checkingDuplicate, setCheckingDuplicate] = useState(false);
   const [form, setForm] = useState<JoinFormState>(initialForm);
   const [cuRegistered, setCuRegistered] = useState(false);
 
@@ -54,12 +56,73 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen || step !== "form") return;
+
+    const rollNumber = form.rollNumber.trim();
+    const personalEmail = form.personalEmail.trim().toLowerCase();
+    const collegeEmail = form.collegeEmail.trim().toLowerCase();
+
+    if (!rollNumber && !personalEmail && !collegeEmail) {
+      setDuplicateError(null);
+      setCheckingDuplicate(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        setCheckingDuplicate(true);
+
+        const query = new URLSearchParams({
+          rollNumber,
+          personalEmail,
+          collegeEmail,
+        });
+
+        const response = await fetch(`/api/join/outside?${query.toString()}`, {
+          method: "GET",
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          setDuplicateError(null);
+          return;
+        }
+
+        const payload = await response.json();
+        if (payload?.duplicate) {
+          setDuplicateError(
+            payload?.error || "You have already submitted the form. Check your registered email for updates."
+          );
+        } else {
+          setDuplicateError(null);
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setDuplicateError(null);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setCheckingDuplicate(false);
+        }
+      }
+    }, 350);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [isOpen, step, form.rollNumber, form.personalEmail, form.collegeEmail]);
+
   function closeModal() {
     setIsOpen(false);
     setTimeout(() => {
       setStep("choose");
       setSubmitting(false);
       setError(null);
+      setDuplicateError(null);
+      setCheckingDuplicate(false);
       setForm(initialForm);
       setCuRegistered(false);
     }, 180);
@@ -74,6 +137,11 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
 
   async function submitOutsideCuForm(e: React.FormEvent) {
     e.preventDefault();
+    if (duplicateError) {
+      setError(duplicateError);
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
 
@@ -226,7 +294,11 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
                   </label>
                 </div>
 
-                {error && <p className="text-sm text-red-500">{error}</p>}
+                {checkingDuplicate && !duplicateError && (
+                  <p className="text-xs text-foreground/60">Checking your registration...</p>
+                )}
+                {duplicateError && <p className="text-sm text-red-500">{duplicateError}</p>}
+                {error && !duplicateError && <p className="text-sm text-red-500">{error}</p>}
 
                 <div className="flex flex-col gap-2 pt-1 sm:flex-row">
                   <button
@@ -238,7 +310,7 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
                   </button>
                   <button
                     type="submit"
-                    disabled={submitting}
+                    disabled={submitting || Boolean(duplicateError)}
                     className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
                   >
                     {submitting ? "Submitting..." : "Submit"}
