@@ -17,7 +17,9 @@ function normalizePrivateKey(value: string): string {
 function getRequiredEnv(name: string): string {
   const value = process.env[name];
   if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
+    throw new Error(
+      `Missing required environment variable: ${name}. Add it in your deployment environment (Production scope) and redeploy.`
+    );
   }
   return value;
 }
