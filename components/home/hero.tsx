@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import JoinNowModal from '@/components/join/join-now-modal';
 
 export default function Hero() {
   return (
@@ -30,13 +31,9 @@ export default function Hero() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              <Link
-                href="https://cuintranet.in/join-now"
-                target='_blank'
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-medium text-primary-foreground transition-colors duration-200 hover:opacity-90"
-              >
+              <JoinNowModal className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-medium text-primary-foreground transition-colors duration-200 hover:opacity-90">
                 Join the Club <ArrowRight size={18} />
-              </Link>
+              </JoinNowModal>
               <Link
                 href="/events"
                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card/60 px-6 py-3 font-medium text-foreground transition-all duration-300 hover:bg-card"
