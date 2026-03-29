@@ -8,7 +8,6 @@ import {
   Users,
   CalendarDays,
   User,
-  UserRoundCheck,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -19,7 +18,6 @@ import { useState } from "react";
 const navItems = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "Registrations", href: "/admin/registrations", icon: Users },
-  { label: "Campus Ambassadors", href: "/admin/campus-ambassadors", icon: UserRoundCheck },
   { label: "Events", href: "/admin/events", icon: CalendarDays },
   { label: "Team", href: "/admin/team", icon: User },
   // { label: "Stalls", href: "/admin/stalls", icon: Store },

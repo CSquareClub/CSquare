@@ -17,7 +17,23 @@ import AdminHeader from "@/components/admin/admin-header";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 
-type Track = "2026" | "2027";
+type CusocTrack = "2026" | "2027";
+type RegistrationSource =
+  | "cusoc-2026"
+  | "cusoc-2027"
+  | "outside-all"
+  | "outside-ambassadors";
+
+type OutsideRegistration = {
+  id: number;
+  createdAt: string;
+  fullName: string;
+  instituteName: string;
+  rollNumber: string;
+  personalEmail: string;
+  collegeEmail: string;
+  campusAmbassador: boolean;
+};
 
 const CHIP_FIELDS = new Set([
   "languages",
@@ -28,7 +44,7 @@ const CHIP_FIELDS = new Set([
 ]);
 
 export default function CusocRegistrationsPage() {
-  const [track, setTrack] = useState<Track>("2026");
+  const [source, setSource] = useState<RegistrationSource>("cusoc-2026");
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
@@ -37,26 +53,55 @@ export default function CusocRegistrationsPage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<any | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [counts, setCounts] = useState({ count2026: 0, count2027: 0 });
+  const [counts, setCounts] = useState({ count2026: 0, count2027: 0, outsideTotal: 0, outsideAmbassadors: 0 });
+
+  const isCusocSource = source === "cusoc-2026" || source === "cusoc-2027";
+  const track: CusocTrack = source === "cusoc-2026" ? "2026" : "2027";
 
   async function loadCounts() {
     try {
-      const response = await fetch("/api/cusoc/registrations", { cache: "no-store" });
-      const payload = await response.json();
-      setCounts(payload);
+      const [cusocRes, outsideRes] = await Promise.all([
+        fetch("/api/cusoc/registrations", { cache: "no-store" }),
+        fetch("/api/admin/campus-ambassadors?view=all", { cache: "no-store" }),
+      ]);
+
+      const cusocPayload = await cusocRes.json().catch(() => ({}));
+      const outsidePayload = await outsideRes.json().catch(() => ({}));
+
+      setCounts({
+        count2026: Number(cusocPayload?.count2026 ?? 0),
+        count2027: Number(cusocPayload?.count2027 ?? 0),
+        outsideTotal: Number(outsidePayload?.counts?.total ?? 0),
+        outsideAmbassadors: Number(outsidePayload?.counts?.ambassadors ?? 0),
+      });
     } catch {
       // Ignore transient count fetch errors.
     }
   }
 
-  async function loadTrackData(nextTrack: Track) {
+  async function loadSourceData(nextSource: RegistrationSource) {
     setLoading(true);
     try {
-      const response = await fetch(`/api/cusoc/registrations?track=${nextTrack}`, {
-        cache: "no-store",
-      });
-      const payload = await response.json();
-      setData(Array.isArray(payload) ? payload : []);
+      if (nextSource === "cusoc-2026" || nextSource === "cusoc-2027") {
+        const nextTrack: CusocTrack = nextSource === "cusoc-2026" ? "2026" : "2027";
+        const response = await fetch(`/api/cusoc/registrations?track=${nextTrack}`, {
+          cache: "no-store",
+        });
+        const payload = await response.json();
+        setData(Array.isArray(payload) ? payload : []);
+      } else {
+        const view = nextSource === "outside-all" ? "all" : "ambassadors";
+        const response = await fetch(`/api/admin/campus-ambassadors?view=${view}`, {
+          cache: "no-store",
+        });
+        const payload = await response.json();
+        setData(Array.isArray(payload?.data) ? payload.data : []);
+        setCounts((prev) => ({
+          ...prev,
+          outsideTotal: Number(payload?.counts?.total ?? prev.outsideTotal),
+          outsideAmbassadors: Number(payload?.counts?.ambassadors ?? prev.outsideAmbassadors),
+        }));
+      }
     } finally {
       setLoading(false);
     }
@@ -69,25 +114,32 @@ export default function CusocRegistrationsPage() {
 
   // Fetch data on track change
   useEffect(() => {
-    loadTrackData(track);
-  }, [track]);
+    loadSourceData(source);
+  }, [source]);
 
   async function handleDelete(id: number) {
-    const confirmed = window.confirm(
-      `Warning: This will permanently delete this CUSoC ${track} registration from the database.\n\nDo you want to continue?`
-    );
+    const label = isCusocSource ? `CUSoC ${track}` : source === "outside-ambassadors" ? "Campus Ambassador" : "Outside";
+    const confirmed = window.confirm(`Warning: This will permanently delete this ${label} registration from the database.\n\nDo you want to continue?`);
 
     if (!confirmed) return;
 
     try {
       setDeletingId(id);
-      const response = await fetch(`/api/cusoc/registrations?track=${track}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id }),
-      });
+      const response = isCusocSource
+        ? await fetch(`/api/cusoc/registrations?track=${track}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id }),
+          })
+        : await fetch("/api/admin/campus-ambassadors", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ ids: [id] }),
+          });
 
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
@@ -98,7 +150,7 @@ export default function CusocRegistrationsPage() {
         setSelected(null);
       }
 
-      await Promise.all([loadTrackData(track), loadCounts()]);
+      await Promise.all([loadSourceData(source), loadCounts()]);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to delete registration");
     } finally {
@@ -112,8 +164,11 @@ export default function CusocRegistrationsPage() {
     return (
       r.fullName?.toLowerCase().includes(q) ||
       r.cuEmail?.toLowerCase().includes(q) ||
+      r.personalEmail?.toLowerCase().includes(q) ||
+      r.collegeEmail?.toLowerCase().includes(q) ||
       r.rollNumber?.toLowerCase().includes(q) ||
-      r.department?.toLowerCase().includes(q)
+      r.department?.toLowerCase().includes(q) ||
+      r.instituteName?.toLowerCase().includes(q)
     );
   });
 
@@ -122,8 +177,8 @@ export default function CusocRegistrationsPage() {
 
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, `CUSoC_${track}`);
-    XLSX.writeFile(wb, `CUSoC_${track}_Registrations.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, source);
+    XLSX.writeFile(wb, `${source}_Registrations.xlsx`);
   };
 
   const syncToGoogleSheet = async () => {
@@ -134,9 +189,13 @@ export default function CusocRegistrationsPage() {
     setExportError(false);
 
     try {
-      const res = await fetch(`/api/cusoc/registrations?track=${track}`, {
-        method: "POST",
-      });
+      const res = isCusocSource
+        ? await fetch(`/api/cusoc/registrations?track=${track}`, {
+            method: "POST",
+          })
+        : await fetch(`/api/admin/campus-ambassadors`, {
+            method: "POST",
+          });
 
       const payload = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -144,7 +203,13 @@ export default function CusocRegistrationsPage() {
         throw new Error(msg);
       }
 
-      setExportStatus(`Synced ${payload?.rowCount ?? data.length} rows to Google Sheet.`);
+      if (isCusocSource) {
+        setExportStatus(`Synced ${payload?.rowCount ?? data.length} rows to Google Sheet.`);
+      } else {
+        setExportStatus(
+          `Synced ${payload?.allRows ?? 0} outside registrations and ${payload?.ambassadorRows ?? 0} campus ambassadors.`
+        );
+      }
     } catch (err) {
       setExportError(true);
       setExportStatus(
@@ -176,7 +241,15 @@ export default function CusocRegistrationsPage() {
     { key: "skillLevel", label: "Skill" },
     { key: "interestArea", label: "Interest" },
   ];
-  const cols = track === "2026" ? cols2026 : cols2027;
+  const colsOutside = [
+    { key: "fullName", label: "Name" },
+    { key: "rollNumber", label: "Roll No" },
+    { key: "instituteName", label: "Institute" },
+    { key: "personalEmail", label: "Personal Email" },
+    { key: "collegeEmail", label: "College Email" },
+    { key: "campusAmbassador", label: "Ambassador" },
+  ];
+  const cols = source === "cusoc-2026" ? cols2026 : source === "cusoc-2027" ? cols2027 : colsOutside;
 
   // Detail view field grouping
   const detailSections2026 = [
@@ -282,8 +355,27 @@ export default function CusocRegistrationsPage() {
     },
   ];
 
+  const detailSectionsOutside = [
+    {
+      title: "Basic Details",
+      fields: [
+        ["Full Name", "fullName"],
+        ["Roll Number", "rollNumber"],
+        ["Institute Name", "instituteName"],
+        ["Personal Email", "personalEmail"],
+        ["College Email", "collegeEmail"],
+        ["Campus Ambassador", "campusAmbassador"],
+        ["Registered At", "createdAt"],
+      ],
+    },
+  ];
+
   const detailSections =
-    track === "2026" ? detailSections2026 : detailSections2027;
+    source === "cusoc-2026"
+      ? detailSections2026
+      : source === "cusoc-2027"
+      ? detailSections2027
+      : detailSectionsOutside;
 
   const formatVal = (v: any) => {
     if (v === null || v === undefined || v === "") return "—";
@@ -303,10 +395,10 @@ export default function CusocRegistrationsPage() {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-black dark:text-white tracking-tight">
-            CUSoC Registrations
+            Registrations
           </h1>
           <p className="text-sm text-black/50 dark:text-white/30 mt-1">
-            View and export all CUSoC registrations
+            View, manage, and export CUSoC plus outside registrations in one place
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -342,12 +434,12 @@ export default function CusocRegistrationsPage() {
         </p>
       )}
 
-      {/* Track Tabs */}
-      <div className="mb-6 flex gap-2">
+      {/* Source Tabs */}
+      <div className="mb-6 flex flex-wrap gap-2">
         <button
-          onClick={() => setTrack("2026")}
+          onClick={() => setSource("cusoc-2026")}
           className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all ${
-            track === "2026"
+            source === "cusoc-2026"
               ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-400 border dark:border-emerald-400/30"
               : "bg-black/5 text-black/50 border border-black/5 hover:text-black/80 hover:bg-black/10 dark:bg-white/[0.03] dark:text-white/40 dark:border-white/[0.06] dark:hover:text-white/60 dark:hover:bg-white/[0.05]"
           }`}
@@ -356,7 +448,7 @@ export default function CusocRegistrationsPage() {
           CUSoC 2026
           <span
             className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-              track === "2026"
+              source === "cusoc-2026"
                 ? "bg-emerald-100/50 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
                 : "bg-black/10 text-black/50 dark:bg-white/[0.06] dark:text-white/30"
             }`}
@@ -365,9 +457,9 @@ export default function CusocRegistrationsPage() {
           </span>
         </button>
         <button
-          onClick={() => setTrack("2027")}
+          onClick={() => setSource("cusoc-2027")}
           className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all ${
-            track === "2027"
+            source === "cusoc-2027"
               ? "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/15 dark:text-amber-400 border dark:border-amber-400/30"
               : "bg-black/5 text-black/50 border border-black/5 hover:text-black/80 hover:bg-black/10 dark:bg-white/[0.03] dark:text-white/40 dark:border-white/[0.06] dark:hover:text-white/60 dark:hover:bg-white/[0.05]"
           }`}
@@ -376,12 +468,52 @@ export default function CusocRegistrationsPage() {
           CUSoC 2027-28
           <span
             className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-              track === "2027"
+              source === "cusoc-2027"
                 ? "bg-amber-100/50 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400"
                 : "bg-black/10 text-black/50 dark:bg-white/[0.06] dark:text-white/30"
             }`}
           >
             {counts.count2027}
+          </span>
+        </button>
+        <button
+          onClick={() => setSource("outside-all")}
+          className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all ${
+            source === "outside-all"
+              ? "bg-sky-50 text-sky-600 border-sky-200 dark:bg-sky-500/15 dark:text-sky-300 border dark:border-sky-400/30"
+              : "bg-black/5 text-black/50 border border-black/5 hover:text-black/80 hover:bg-black/10 dark:bg-white/[0.03] dark:text-white/40 dark:border-white/[0.06] dark:hover:text-white/60 dark:hover:bg-white/[0.05]"
+          }`}
+        >
+          <span className="text-base">🔵</span>
+          Outside Registrations
+          <span
+            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+              source === "outside-all"
+                ? "bg-sky-100/60 text-sky-600 dark:bg-sky-500/20 dark:text-sky-300"
+                : "bg-black/10 text-black/50 dark:bg-white/[0.06] dark:text-white/30"
+            }`}
+          >
+            {counts.outsideTotal}
+          </span>
+        </button>
+        <button
+          onClick={() => setSource("outside-ambassadors")}
+          className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all ${
+            source === "outside-ambassadors"
+              ? "bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-300 border dark:border-indigo-400/30"
+              : "bg-black/5 text-black/50 border border-black/5 hover:text-black/80 hover:bg-black/10 dark:bg-white/[0.03] dark:text-white/40 dark:border-white/[0.06] dark:hover:text-white/60 dark:hover:bg-white/[0.05]"
+          }`}
+        >
+          <span className="text-base">🟣</span>
+          Campus Ambassadors
+          <span
+            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+              source === "outside-ambassadors"
+                ? "bg-indigo-100/60 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300"
+                : "bg-black/10 text-black/50 dark:bg-white/[0.06] dark:text-white/30"
+            }`}
+          >
+            {counts.outsideAmbassadors}
           </span>
         </button>
       </div>
@@ -498,7 +630,7 @@ export default function CusocRegistrationsPage() {
               {selected.fullName}
             </h2>
             <p className="text-xs text-black/50 dark:text-white/30 mb-6">
-              {selected.cuEmail} · Registered{" "}
+              {(selected.cuEmail || selected.personalEmail || "No email")} · Registered{" "}
               {new Date(selected.createdAt).toLocaleDateString()}
             </p>
 
