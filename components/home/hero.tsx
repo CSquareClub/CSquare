@@ -12,13 +12,13 @@ export default function Hero() {
           {/* Left Column content */}
           <div className="max-w-2xl">
             {/* Badge */}
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-2 backdrop-blur-sm animate-fade-in-up">
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-2 animate-fade-in-up">
               <span className="text-sm font-mono text-foreground/80">~ ./start_club.sh</span>
             </div>
 
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 tracking-tight animate-fade-in-up md:leading-[1.1]" style={{ animationDelay: '0.1s' }}>
-              Learn. <span className="text-[#ef4444]">Compete.</span><br />
+              Learn. <span className="text-primary">Compete.</span><br />
               Build.
             </h1>
 
@@ -33,7 +33,7 @@ export default function Hero() {
               <Link
                 href="https://cuintranet.in/join-now"
                 target='_blank'
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#dc2626] px-6 py-3 font-medium text-white transition-all duration-300 shadow-[0_0_20px_rgba(220,38,38,0.3)] hover:bg-[#b91c1c] hover:shadow-[0_0_30px_rgba(220,38,38,0.5)]"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-medium text-primary-foreground transition-colors duration-200 hover:opacity-90"
               >
                 Join the Club <ArrowRight size={18} />
               </Link>
@@ -48,7 +48,7 @@ export default function Hero() {
 
           {/* Right Column: Code Window */}
           <div className="relative animate-fade-in-up mx-auto lg:mx-0 lg:ml-auto w-full max-w-[500px] min-w-0" style={{ animationDelay: '0.4s' }}>
-            <div className="relative z-10 w-full overflow-hidden rounded-xl border border-border bg-card/80 backdrop-blur-md shadow-2xl">
+            <div className="relative z-10 w-full overflow-hidden rounded-xl border border-border bg-card/80 shadow-xl">
               {/* Window Header */}
               <div className="flex min-w-0 items-center border-b border-border/70 bg-card px-4 py-3">
                 <div className="flex gap-2.5 flex-shrink-0">
@@ -81,7 +81,7 @@ export default function Hero() {
             </div>
             
             {/* Decorative glow behind code window */}
-            <div className="absolute -inset-1 bg-gradient-to-tr from-[#ef4444] to-[#b91c1c] opacity-20 blur-2xl -z-10 rounded-[2rem]"></div>
+            <div className="absolute -inset-1 bg-gradient-to-tr from-primary/25 to-accent/20 opacity-40 blur-xl -z-10 rounded-[2rem]"></div>
           </div>
 
         </div>
