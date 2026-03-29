@@ -174,8 +174,7 @@ export default function CusocForm() {
   const [checkingDuplicate, setCheckingDuplicate] = useState(false);
   const [alreadyRegisteredOnBrowser, setAlreadyRegisteredOnBrowser] = useState(false);
 
-  // Form state (flat object – keeps it simple)
-  const [f, setF] = useState<Record<string, any>>({
+  const initialFormState: Record<string, any> = {
     languages: [] as string[],
     domainOrder: [] as string[],
     interestArea: [] as string[],
@@ -185,7 +184,10 @@ export default function CusocForm() {
     goalTargetGsoc: false,
     knowsOpenSource: false,
     knowsGsoc: false,
-  });
+  };
+
+  // Form state (flat object – keeps it simple)
+  const [f, setF] = useState<Record<string, any>>(initialFormState);
 
   // LocalStorage generic auto-save
   useEffect(() => {
@@ -445,6 +447,15 @@ export default function CusocForm() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const clearFormAndCache = () => {
+    setF(initialFormState);
+    setStep(0);
+    setError(null);
+    setDuplicateError(null);
+    setCheckingDuplicate(false);
+    localStorage.removeItem('cusoc_form_2026');
   };
 
   /* ═══════════════════════════════════════════════════════ */
@@ -967,6 +978,13 @@ export default function CusocForm() {
             <button type="button" onClick={() => { setTrack(null); setStep(0); setError(null); }}
               className={`rounded-lg border px-2 py-1 text-xs font-medium transition-colors ${dk ? 'border-white/10 bg-white/[0.03] text-foreground/50 hover:text-foreground' : 'border-[#fecaca] bg-white text-foreground/60 hover:text-foreground'}`}>
               ← Change Track
+            </button>
+            <button
+              type="button"
+              onClick={clearFormAndCache}
+              className={`rounded-lg border px-2 py-1 text-xs font-medium transition-colors ${dk ? 'border-white/10 bg-white/[0.03] text-foreground/50 hover:text-foreground' : 'border-[#fecaca] bg-white text-foreground/60 hover:text-foreground'}`}
+            >
+              Clear Form
             </button>
             <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${track === '2026' ? (dk ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-100 text-emerald-700') : (dk ? 'bg-amber-500/15 text-amber-400' : 'bg-amber-100 text-amber-700')}`}>
               {track === '2026' ? '2026 Batch' : '2027-28 Batch'}
