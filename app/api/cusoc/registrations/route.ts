@@ -88,6 +88,20 @@ function resolveSpreadsheetId(input: string): string {
   return trimmed;
 }
 
+function getSpreadsheetInputForTrack(track: Track): string | undefined {
+  if (track === "2026") {
+    return (
+      process.env.GOOGLE_SPREADSHEET_ID_2026 ||
+      process.env.GOOGLE_SPREADSHEET_ID
+    );
+  }
+
+  return (
+    process.env.GOOGLE_SPREADSHEET_ID_2027 ||
+    process.env.GOOGLE_SPREADSHEET_ID
+  );
+}
+
 function getErrorMessage(err: unknown): string {
   if (!err) return "Unknown error";
   if (err instanceof Error) return err.message;
@@ -181,10 +195,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid track" }, { status: 400 });
   }
 
-  const spreadsheetInput = process.env.GOOGLE_SPREADSHEET_ID;
+  const spreadsheetInput = getSpreadsheetInputForTrack(track);
   if (!spreadsheetInput) {
     return NextResponse.json(
-      { error: "Missing GOOGLE_SPREADSHEET_ID in environment" },
+      {
+        error:
+          "Missing spreadsheet env for selected track. Set GOOGLE_SPREADSHEET_ID_2026 / GOOGLE_SPREADSHEET_ID_2027 (or fallback GOOGLE_SPREADSHEET_ID).",
+      },
       { status: 500 }
     );
   }

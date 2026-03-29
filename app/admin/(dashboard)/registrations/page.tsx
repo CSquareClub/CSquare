@@ -85,16 +85,20 @@ export default function CusocRegistrationsPage() {
       setExportError(true);
       setExportStatus(
         err instanceof Error
-          ? err.message
-          : "Could not sync to Google Sheet"
+          ? `${err.message} Excel file is still downloaded.`
+          : "Could not sync to Google Sheet. Excel file is still downloaded."
       );
     }
 
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, `CUSoC_${track}`);
+    XLSX.writeFile(wb, `CUSoC_${track}_Registrations.xlsx`);
+
     if (syncSuccessful) {
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, `CUSoC_${track}`);
-      XLSX.writeFile(wb, `CUSoC_${track}_Registrations.xlsx`);
+      setExportStatus(
+        `Synced ${data.length} rows to Google Sheet and downloaded Excel.`
+      );
     }
 
     setExporting(false);
