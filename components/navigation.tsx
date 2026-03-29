@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Menu, X, Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
+import JoinNowModal from '@/components/join/join-now-modal';
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -52,12 +53,9 @@ export default function Navigation() {
               </Link>
             ))}
 
-            <Link
-              href="/cusoc"
-              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
-            >
+            <JoinNowModal className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90">
               Join Now
-            </Link>
+            </JoinNowModal>
             
             <button
               type="button"
@@ -87,13 +85,14 @@ export default function Navigation() {
                 {item.label}
               </Link>
             ))}
-            <Link
-              href="/cusoc"
+            <button
               onClick={() => setIsOpen(false)}
-              className="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+              className="mt-2 w-full"
             >
-              Join Now
-            </Link>
+              <JoinNowModal className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90">
+                Join Now
+              </JoinNowModal>
+            </button>
             <button
               type="button"
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
