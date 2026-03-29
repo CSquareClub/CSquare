@@ -27,7 +27,7 @@ type JoinNowModalProps = {
   children: React.ReactNode;
 };
 
-type Step = "choose" | "form" | "success";
+type Step = "choose" | "form" | "success" | "already-registered-cu";
 
 export default function JoinNowModal({ className, children }: JoinNowModalProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,11 +35,20 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<JoinFormState>(initialForm);
+  const [cuRegistered, setCuRegistered] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    
+    // Check if user already registered for CUSoC
+    const cuRegFlag = localStorage.getItem("cusoc-registered");
+    if (cuRegFlag === "true") {
+      setCuRegistered(true);
+      setStep("already-registered-cu");
+    }
+    
     return () => {
       document.body.style.overflow = previousOverflow;
     };
@@ -52,10 +61,13 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
       setSubmitting(false);
       setError(null);
       setForm(initialForm);
+      setCuRegistered(false);
     }, 180);
   }
 
   function handleCuStudentClick() {
+    // Mark that user has registered for CUSoC in this browser
+    localStorage.setItem("cusoc-registered", "true");
     window.open(CU_JOIN_URL, "_blank", "noopener,noreferrer");
     closeModal();
   }
@@ -239,6 +251,20 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
               <div className="rounded-xl border border-emerald-300/40 bg-emerald-500/10 p-4 text-center">
                 <p className="text-sm font-semibold text-emerald-400">Submitted Successfully</p>
                 <p className="mt-1 text-xs text-foreground/70">You will receive an email shortly.</p>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="mt-3 rounded-md border border-border px-3 py-1.5 text-xs text-foreground/80 hover:bg-card"
+                >
+                  Close
+                </button>
+              </div>
+            )}
+
+            {step === "already-registered-cu" && (
+              <div className="rounded-xl border border-blue-300/40 bg-blue-500/10 p-4 text-center">
+                <p className="text-sm font-semibold text-blue-400">Already Registered</p>
+                <p className="mt-1 text-xs text-foreground/70">You have already signed up for CUSoC. Check your registered email for updates.</p>
                 <button
                   type="button"
                   onClick={closeModal}
