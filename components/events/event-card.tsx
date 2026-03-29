@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useMemo, useState } from 'react';
 import { Calendar, MapPin, Users, ArrowRight } from 'lucide-react';
 
 interface EventCardProps {
@@ -27,6 +28,13 @@ export default function EventCard({
   image,
   registrationUrl,
 }: EventCardProps) {
+  const fallbackImage = useMemo(
+    () =>
+      `https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80`,
+    []
+  );
+  const [currentImage, setCurrentImage] = useState(image || fallbackImage);
+
   return (
     <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card/70 transition-all duration-500 hover:border-[#dc2626]/35 hover:bg-card hover:shadow-[0_0_30px_rgba(220,38,38,0.15)]">
       {/* Subtle top highlight on hover */}
@@ -34,7 +42,12 @@ export default function EventCard({
       
       {/* Image Banner */}
       <div className="relative h-48 w-full flex-shrink-0 overflow-hidden bg-card">
-        <img src={image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt={title} />
+        <img
+          src={currentImage}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          alt={title}
+          onError={() => setCurrentImage(fallbackImage)}
+        />
         {/* Gradient Overlay for Text Polish */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent opacity-90" />
         
