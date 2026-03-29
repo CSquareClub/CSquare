@@ -135,6 +135,12 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
     closeModal();
   }
 
+  function handleResetCuBrowserState() {
+    localStorage.removeItem("cusoc-registered");
+    setCuRegistered(false);
+    setStep("choose");
+  }
+
   async function submitOutsideCuForm(e: React.FormEvent) {
     e.preventDefault();
     if (duplicateError) {
@@ -337,13 +343,22 @@ export default function JoinNowModal({ className, children }: JoinNowModalProps)
               <div className="rounded-xl border border-blue-300/40 bg-blue-500/10 p-4 text-center">
                 <p className="text-sm font-semibold text-blue-400">Already Registered</p>
                 <p className="mt-1 text-xs text-foreground/70">You have already signed up for CUSoC. Check your registered email for updates.</p>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="mt-3 rounded-md border border-border px-3 py-1.5 text-xs text-foreground/80 hover:bg-card"
-                >
-                  Close
-                </button>
+                <div className="mt-3 flex justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="rounded-md border border-border px-3 py-1.5 text-xs text-foreground/80 hover:bg-card"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResetCuBrowserState}
+                    className="rounded-md border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20"
+                  >
+                    Not You? Reset
+                  </button>
+                </div>
               </div>
             )}
           </div>
