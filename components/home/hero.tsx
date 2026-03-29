@@ -18,13 +18,14 @@ export default function Hero() {
 
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 tracking-tight animate-fade-in-up md:leading-[1.1]" style={{ animationDelay: '0.1s' }}>
-              Code. <span className="text-[#ef4444]">Create.</span><br />
-              Conquer.
+              Learn. <span className="text-[#ef4444]">Compete.</span><br />
+              Build.
             </h1>
 
             {/* Subheading */}
             <p className="text-lg md:text-xl text-foreground/60 mb-10 max-w-xl animate-fade-in-up leading-relaxed" style={{ animationDelay: '0.2s' }}>
-              Bridging the gap between academic learning and real-world application. Join a community of developers, innovators, and problem-solvers.
+              C Square Club is a student-driven technical community focused on building strong coding
+              culture, real problem-solving ability, and industry-ready skills.
             </p>
 
             {/* CTA Buttons */}

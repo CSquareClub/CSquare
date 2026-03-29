@@ -3,6 +3,7 @@ import Footer from '@/components/footer';
 import GridBackground from '@/components/grid-background';
 import Hero from '@/components/home/hero';
 import Features from '@/components/home/features';
+import ClubDescription from '@/components/home/club-description';
 
 export default function Home() {
   return (
@@ -13,6 +14,7 @@ export default function Home() {
       <main className="relative z-10">
         <Hero />
         <Features />
+        <ClubDescription />
       </main>
 
       <Footer />

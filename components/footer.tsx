@@ -25,7 +25,7 @@ export default function Footer() {
             <Image src={logoSrc} alt="C Square Club" width={170} height={40} className="mb-4 h-10 w-auto object-contain" />
             <h3 className="mb-3 font-mono text-2xl font-bold tracking-tight text-foreground/90">&lt;C_Square/&gt;</h3>
             <p className="text-foreground/50 text-sm leading-relaxed pr-4">
-              Empowering student developers to learn, build, and conquer the tech world together.
+              A platform where beginners become coders, coders become competitors, and competitors become builders.
             </p>
           </div>
 
@@ -124,7 +124,7 @@ export default function Footer() {
           <div className="mb-6 w-full border-b border-border pb-6 text-center md:hidden">
              <Image src={logoSrc} alt="C Square Club" width={150} height={34} className="mx-auto mb-2 h-8 w-auto object-contain" />
              <h3 className="mb-2 font-mono text-xl font-bold tracking-tight text-foreground/90">&lt;C_Square/&gt;</h3>
-             <p className="text-foreground/50 text-xs">Empowering student developers to learn, build, and conquer.</p>
+             <p className="text-foreground/50 text-xs">Beginners become coders. Coders become competitors. Competitors become builders.</p>
           </div>
           
           <p className="text-sm text-foreground/40 text-center md:text-left">

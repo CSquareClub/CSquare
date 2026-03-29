@@ -4,24 +4,24 @@ import { Users, Lightbulb, Rocket, Trophy } from 'lucide-react';
 
 const features = [
   {
-    icon: Users,
-    title: 'Community Driven',
-    description: 'Connect with passionate developers and expand your network.',
-  },
-  {
     icon: Lightbulb,
-    title: 'Learn & Grow',
-    description: 'Participate in workshops and skill-sharing sessions.',
-  },
-  {
-    icon: Rocket,
-    title: 'Build Together',
-    description: 'Collaborate on exciting projects and build something great.',
+    title: 'Learning Initiatives',
+    description: 'DSA sessions, language workshops, and peer doubt-solving groups.',
   },
   {
     icon: Trophy,
-    title: 'Compete & Win',
-    description: 'Join hackathons and competitions with amazing prizes.',
+    title: 'Competitive Programming',
+    description: 'Weekly contests and platform practice to improve speed and logic.',
+  },
+  {
+    icon: Rocket,
+    title: 'Project Building',
+    description: 'Hands-on development sessions and collaborative real-world builds.',
+  },
+  {
+    icon: Users,
+    title: 'Community and Impact',
+    description: 'A supportive network preparing students for interviews and placements.',
   },
 ];
 
@@ -30,9 +30,9 @@ export default function Features() {
     <section className="py-20 md:py-32 relative z-10">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">Why Join C Square?</h2>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">Learn. Compete. Build.</h2>
           <p className="text-lg text-foreground/60 max-w-2xl mx-auto">
-            We provide everything you need to accelerate your development journey.
+            Bridging academic learning with industry requirements through structured practice.
           </p>
         </div>
 
