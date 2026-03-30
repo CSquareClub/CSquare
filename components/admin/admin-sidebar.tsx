@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
+  X,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -26,7 +27,12 @@ const navItems = [
   // { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
-export default function AdminSidebar() {
+type AdminSidebarProps = {
+  mobileOpen: boolean;
+  onClose: () => void;
+};
+
+export default function AdminSidebar({ mobileOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
@@ -38,15 +44,23 @@ export default function AdminSidebar() {
   const ambassadorActive = registrationsRootActive && source.includes("outside-ambassadors");
 
   return (
-    <aside
-      className={`relative flex flex-col h-screen border-r border-black/5 bg-gray-50/50 dark:border-white/[0.06] dark:bg-[#060606] transition-all duration-300 ${
-        collapsed ? "w-[72px]" : "w-[260px]"
-      }`}
-    >
+    <>
+      <div
+        className={`fixed inset-0 z-30 bg-black/50 backdrop-blur-sm transition-opacity duration-200 lg:hidden ${
+          mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        onClick={onClose}
+      />
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col border-r border-black/5 bg-gray-50/95 shadow-xl transition-all duration-300 dark:border-white/[0.06] dark:bg-[#060606]/95 lg:static lg:z-auto lg:shadow-none ${
+          collapsed ? "w-[72px]" : "w-[260px]"
+        } ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+      >
       {/* Toggle button */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-7 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-black/10 bg-white text-black/40 hover:text-black/70 hover:border-black/20 dark:border-white/[0.08] dark:bg-[#0a0a0a] dark:text-white/40 dark:hover:text-white/70 dark:hover:border-white/[0.15] transition-colors"
+        className="absolute -right-3 top-7 z-10 hidden h-6 w-6 items-center justify-center rounded-full border border-black/10 bg-white text-black/40 transition-colors hover:border-black/20 hover:text-black/70 dark:border-white/[0.08] dark:bg-[#0a0a0a] dark:text-white/40 dark:hover:border-white/[0.15] dark:hover:text-white/70 lg:flex"
       >
         {collapsed ? (
           <ChevronRight className="w-3 h-3" />
@@ -56,7 +70,7 @@ export default function AdminSidebar() {
       </button>
 
       {/* Brand */}
-      <div className="flex items-center gap-3 px-5 py-6 border-b border-black/5 dark:border-white/[0.04]">
+      <div className="flex items-center justify-between gap-3 border-b border-black/5 px-5 py-6 dark:border-white/[0.04]">
         <div className="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-red-500 to-red-700 shadow-md shadow-red-500/15">
           <Shield className="w-4.5 h-4.5 text-white" />
         </div>
@@ -68,6 +82,13 @@ export default function AdminSidebar() {
             <p className="text-[11px] text-black/50 dark:text-white/30 truncate">Admin Panel</p>
           </div>
         )}
+
+        <button
+          onClick={onClose}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-black/45 transition-colors hover:bg-black/5 hover:text-black/75 dark:text-white/40 dark:hover:bg-white/[0.04] dark:hover:text-white/75 lg:hidden"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
 
       {/* Navigation */}
@@ -75,6 +96,7 @@ export default function AdminSidebar() {
         <div className="mb-2">
           <Link
             href="/admin/registrations?source=cusoc-2026"
+            onClick={onClose}
             className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
               registrationsRootActive
                 ? "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 shadow-sm shadow-red-500/5"
@@ -96,6 +118,7 @@ export default function AdminSidebar() {
             <div className="mt-1 ml-6 space-y-1">
               <Link
                 href="/admin/registrations?source=cusoc-2026"
+                onClick={onClose}
                 className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
                   cusocActive
                     ? "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
@@ -107,6 +130,7 @@ export default function AdminSidebar() {
               </Link>
               <Link
                 href="/admin/registrations?source=outside-ambassadors"
+                onClick={onClose}
                 className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
                   ambassadorActive
                     ? "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
@@ -130,6 +154,7 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                 isActive
                   ? "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 shadow-sm shadow-red-500/5"
@@ -163,7 +188,10 @@ export default function AdminSidebar() {
           </div>
         )}
         <button
-          onClick={() => signOut({ callbackUrl: "/admin/login" })}
+          onClick={() => {
+            onClose();
+            signOut({ callbackUrl: "/admin/login" });
+          }}
           className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-black/50 hover:text-red-600 hover:bg-red-50 dark:text-white/40 dark:hover:text-red-400 dark:hover:bg-red-500/5 transition-all duration-200 w-full ${
             collapsed ? "justify-center" : ""
           }`}
@@ -173,6 +201,7 @@ export default function AdminSidebar() {
           {!collapsed && <span>Sign Out</span>}
         </button>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

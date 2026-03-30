@@ -1,10 +1,8 @@
-import GridBackground from "@/components/grid-background";
 import AdminSessionProvider from "./provider";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
-import AdminSidebar from "@/components/admin/admin-sidebar";
-import AdminHeader from "@/components/admin/admin-header";
+import AdminShell from "@/components/admin/admin-shell";
 
 export const metadata = {
   title: "Admin | C Square Club",
@@ -23,14 +21,7 @@ export default async function AdminLayout({
   }
   return (
     <AdminSessionProvider>
-      {/* <GridBackground /> */}
-      <div className="flex min-h-screen bg-background">
-      <AdminSidebar />
-      <main className="flex-1 min-w-0">
-        <AdminHeader />
-        {children}
-      </main>
-    </div>
+      <AdminShell>{children}</AdminShell>
     </AdminSessionProvider>
   );
 }
