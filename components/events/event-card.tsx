@@ -14,6 +14,7 @@ interface EventCardProps {
   attendees: number;
   category: string;
   image: string;
+  sponsorLogoUrl?: string | null;
   registrationUrl?: string | null;
 }
 
@@ -50,6 +51,7 @@ export default function EventCard({
   attendees,
   category,
   image,
+  sponsorLogoUrl,
   registrationUrl,
 }: EventCardProps) {
   const eventHref = useMemo(
@@ -136,6 +138,18 @@ export default function EventCard({
         </h3>
 
         <p className="text-foreground/60 text-sm mb-6 leading-relaxed flex-grow">{description}</p>
+
+        {sponsorLogoUrl ? (
+          <div className="mb-6 rounded-lg border border-border bg-background/60 p-3">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/60">Sponsored by</p>
+            <img
+              src={normalizeEventImageUrl(sponsorLogoUrl)}
+              alt="Sponsor logo"
+              className="h-16 w-full object-contain"
+              loading="lazy"
+            />
+          </div>
+        ) : null}
 
         <div className="space-y-3 mb-6 text-sm text-foreground/60">
           <div className="flex items-center gap-2">

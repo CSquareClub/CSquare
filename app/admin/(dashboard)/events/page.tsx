@@ -6,12 +6,15 @@ type EventItem = {
   id: number;
   title: string;
   description: string;
+  startDate: string;
+  endDate: string;
   date: string;
   time: string;
   location: string;
   attendees: number;
   category: string;
   image: string;
+  sponsorLogoUrl: string | null;
   isPublished: boolean;
   registrationUrl: string | null;
 };
@@ -19,12 +22,13 @@ type EventItem = {
 type EventFormState = {
   title: string;
   description: string;
-  date: string;
-  time: string;
+  startDate: string;
+  endDate: string;
   location: string;
   attendees: string;
   category: string;
   image: string;
+  sponsorLogoUrl: string;
   isPublished: boolean;
   registrationUrl: string;
 };
@@ -32,12 +36,13 @@ type EventFormState = {
 const defaultForm: EventFormState = {
   title: "",
   description: "",
-  date: "",
-  time: "",
+  startDate: "",
+  endDate: "",
   location: "",
   attendees: "0",
   category: "Workshop",
   image: "",
+  sponsorLogoUrl: "",
   isPublished: true,
   registrationUrl: "",
 };
@@ -79,6 +84,18 @@ export default function AdminEventsPage() {
     loadEvents();
   }, []);
 
+  function handleSponsorLogoFileChange(file: File | null) {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setForm((prev) => ({ ...prev, sponsorLogoUrl: reader.result }));
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
   function resetForm() {
     setForm(defaultForm);
     setEditingId(null);
@@ -93,12 +110,13 @@ export default function AdminEventsPage() {
     const payload = {
       title: form.title,
       description: form.description,
-      date: new Date(form.date).toISOString(),
-      time: form.time,
+      startDate: new Date(form.startDate).toISOString(),
+      endDate: new Date(form.endDate).toISOString(),
       location: form.location,
       attendees: Number(form.attendees || 0),
       category: form.category,
       image: form.image,
+      sponsorLogoUrl: form.sponsorLogoUrl || null,
       isPublished: form.isPublished,
       registrationUrl: form.registrationUrl || null,
     };
@@ -130,12 +148,13 @@ export default function AdminEventsPage() {
     setForm({
       title: event.title,
       description: event.description,
-      date: toInputDateValue(event.date),
-      time: event.time,
+      startDate: toInputDateValue(event.startDate || event.date),
+      endDate: toInputDateValue(event.endDate || event.date),
       location: event.location,
       attendees: String(event.attendees),
       category: event.category,
       image: event.image,
+      sponsorLogoUrl: event.sponsorLogoUrl || "",
       isPublished: event.isPublished,
       registrationUrl: event.registrationUrl || "",
     });
@@ -179,15 +198,15 @@ export default function AdminEventsPage() {
         <input
           required
           type="datetime-local"
-          value={form.date}
-          onChange={(e) => setForm((prev) => ({ ...prev, date: e.target.value }))}
+          value={form.startDate}
+          onChange={(e) => setForm((prev) => ({ ...prev, startDate: e.target.value }))}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm"
         />
         <input
           required
-          placeholder="Time text (e.g. 4:00 PM - 6:00 PM)"
-          value={form.time}
-          onChange={(e) => setForm((prev) => ({ ...prev, time: e.target.value }))}
+          type="datetime-local"
+          value={form.endDate}
+          onChange={(e) => setForm((prev) => ({ ...prev, endDate: e.target.value }))}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm"
         />
         <input
@@ -217,6 +236,18 @@ export default function AdminEventsPage() {
           placeholder="Image URL"
           value={form.image}
           onChange={(e) => setForm((prev) => ({ ...prev, image: e.target.value }))}
+          className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+        />
+        <input
+          placeholder="Sponsor logo URL (optional)"
+          value={form.sponsorLogoUrl}
+          onChange={(e) => setForm((prev) => ({ ...prev, sponsorLogoUrl: e.target.value }))}
+          className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+        />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => handleSponsorLogoFileChange(e.target.files?.[0] || null)}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
         />
         <input
@@ -279,7 +310,9 @@ export default function AdminEventsPage() {
               <div key={event.id} className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-start md:justify-between">
                 <div>
                   <p className="font-semibold">{event.title}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{new Date(event.date).toLocaleString()} • {event.location}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {new Date(event.startDate || event.date).toLocaleString()} - {new Date(event.endDate || event.date).toLocaleString()} • {event.location}
+                  </p>
                   <p className="mt-1 text-xs text-muted-foreground">{event.category} • {event.attendees} attending • {event.isPublished ? "Published" : "Draft"}</p>
                 </div>
                 <div className="flex items-center gap-2">

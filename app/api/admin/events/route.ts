@@ -30,12 +30,15 @@ export async function POST(req: Request) {
     const event = await createEvent({
       title: body.title,
       description: body.description,
+      startDate: body.startDate,
+      endDate: body.endDate,
       date: body.date,
       time: body.time,
       location: body.location,
       attendees: Number(body.attendees || 0),
       category: body.category,
       image: body.image,
+      sponsorLogoUrl: body.sponsorLogoUrl || null,
       isPublished: Boolean(body.isPublished),
       registrationUrl: body.registrationUrl || null,
     });

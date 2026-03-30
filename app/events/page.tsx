@@ -10,8 +10,8 @@ export const dynamic = 'force-dynamic';
 export default async function EventsPage() {
   const allEvents = await listPublicEvents();
   const now = Date.now();
-  const upcomingEvents = allEvents.filter((event) => new Date(event.date).getTime() >= now);
-  const pastHighlights = allEvents.filter((event) => new Date(event.date).getTime() < now);
+  const upcomingEvents = allEvents.filter((event) => new Date(event.endDate || event.date).getTime() >= now);
+  const pastHighlights = allEvents.filter((event) => new Date(event.endDate || event.date).getTime() < now);
 
   return (
     <div className="relative isolate min-h-screen bg-background">

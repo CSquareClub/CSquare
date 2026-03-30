@@ -26,12 +26,15 @@ export async function PATCH(req: Request, context: RouteContext) {
     const updated = await updateEvent(eventId, {
       title: body.title,
       description: body.description,
+      startDate: body.startDate,
+      endDate: body.endDate,
       date: body.date,
       time: body.time,
       location: body.location,
       attendees: typeof body.attendees !== "undefined" ? Number(body.attendees) : undefined,
       category: body.category,
       image: body.image,
+      sponsorLogoUrl: typeof body.sponsorLogoUrl !== "undefined" ? body.sponsorLogoUrl || null : undefined,
       isPublished: typeof body.isPublished !== "undefined" ? Boolean(body.isPublished) : undefined,
       registrationUrl: typeof body.registrationUrl !== "undefined" ? body.registrationUrl || null : undefined,
     });

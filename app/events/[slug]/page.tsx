@@ -101,7 +101,7 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                 <div className="flex items-center gap-2">
                   <Calendar size={16} className="text-[#dc2626]" />
                   <span>
-                    {new Date(event.date).toLocaleDateString()} • {event.time}
+                    {new Date(event.startDate || event.date).toLocaleString()} - {new Date(event.endDate || event.date).toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -113,6 +113,18 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                   <span>{event.attendees} attending</span>
                 </div>
               </div>
+
+              {event.sponsorLogoUrl ? (
+                <div className="rounded-xl border border-border bg-background/50 p-4">
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-foreground/65">Event Sponsor</p>
+                  <img
+                    src={normalizeEventImageUrl(event.sponsorLogoUrl)}
+                    alt="Sponsor logo"
+                    className="h-20 w-full object-contain"
+                    loading="lazy"
+                  />
+                </div>
+              ) : null}
 
               {event.registrationUrl ? (
                 <Link
