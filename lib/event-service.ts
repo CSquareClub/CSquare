@@ -1,4 +1,5 @@
 import prisma from "@/lib/db";
+import { listAdminEvents, listPublicEvents, type ClubEvent } from "@/lib/events-store";
 
 export type EventRecord = {
   id: string;
@@ -35,25 +36,102 @@ function isMissingEventTableError(error: unknown): boolean {
   return maybeError.code === "P2021" && maybeError.meta?.modelName === "Event";
 }
 
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+function toLegacyEventRecord(event: ClubEvent): EventRecord {
+  const title = (event.title || "Untitled Event").trim() || "Untitled Event";
+  const fallbackDate = new Date();
+  const startDateTime = event.startDate ? new Date(event.startDate) : event.date ? new Date(event.date) : fallbackDate;
+  const endDateTime = event.endDate ? new Date(event.endDate) : startDateTime;
+
+  return {
+    id: `legacy-${event.id}`,
+    title,
+    slug: slugify(title),
+    tagline: null,
+    description: event.description || "",
+    category: event.category || "Workshop",
+    eventType: "Offline",
+    tags: [],
+    startDateTime,
+    endDateTime,
+    venueName: event.location || null,
+    city: null,
+    onlineLink: null,
+    organizerName: "C Square",
+    contactEmail: "events@csquare.club",
+    registrationLink: event.registrationLink || event.registrationUrl || "#",
+    registrationDeadline: null,
+    bannerImage: event.image || null,
+    prizes: null,
+    rules: null,
+    schedule: null,
+    sponsors: event.sponsors?.length ? JSON.stringify(event.sponsors) : event.sponsorTitle || null,
+    status: event.isPublished ? "published" : "draft",
+    createdAt: fallbackDate,
+    updatedAt: fallbackDate,
+  };
+}
+
+function mergeEventRecords(primary: EventRecord[], fallback: EventRecord[]): EventRecord[] {
+  const seen = new Set(primary.map((event) => event.slug));
+  const merged = [...primary];
+
+  for (const event of fallback) {
+    if (seen.has(event.slug)) continue;
+    seen.add(event.slug);
+    merged.push(event);
+  }
+
+  return merged;
+}
+
 export async function listAdminEventsFromDb(): Promise<EventRecord[]> {
   try {
-    return await prisma.event.findMany({
+    const dbEvents = await prisma.event.findMany({
       orderBy: { startDateTime: "desc" },
     });
+
+    const legacyEvents = await listAdminEvents();
+    return mergeEventRecords(dbEvents, legacyEvents.map(toLegacyEventRecord)).sort(
+      (a, b) => b.startDateTime.getTime() - a.startDateTime.getTime()
+    );
   } catch (error) {
-    if (isMissingEventTableError(error)) return [];
+    if (isMissingEventTableError(error)) {
+      const legacyEvents = await listAdminEvents();
+      return legacyEvents.map(toLegacyEventRecord).sort(
+        (a, b) => b.startDateTime.getTime() - a.startDateTime.getTime()
+      );
+    }
     throw error;
   }
 }
 
 export async function listPublishedEventsFromDb(): Promise<EventRecord[]> {
   try {
-    return await prisma.event.findMany({
-      where: { status: "published" },
+    const dbEvents = await prisma.event.findMany({
+      where: { status: { equals: "published", mode: "insensitive" } },
       orderBy: { startDateTime: "asc" },
     });
+
+    const legacyEvents = await listPublicEvents();
+    return mergeEventRecords(dbEvents, legacyEvents.map(toLegacyEventRecord)).sort(
+      (a, b) => a.startDateTime.getTime() - b.startDateTime.getTime()
+    );
   } catch (error) {
-    if (isMissingEventTableError(error)) return [];
+    if (isMissingEventTableError(error)) {
+      const legacyEvents = await listPublicEvents();
+      return legacyEvents.map(toLegacyEventRecord).sort(
+        (a, b) => a.startDateTime.getTime() - b.startDateTime.getTime()
+      );
+    }
     throw error;
   }
 }
@@ -69,11 +147,24 @@ export async function getAdminEventById(id: string): Promise<EventRecord | null>
 
 export async function getPublishedEventBySlug(slug: string): Promise<EventRecord | null> {
   try {
-    return await prisma.event.findFirst({
-      where: { slug, status: "published" },
+    const fromDb = await prisma.event.findFirst({
+      where: {
+        slug,
+        status: { equals: "published", mode: "insensitive" },
+      },
     });
+
+    if (fromDb) return fromDb;
+
+    const legacyEvents = await listPublicEvents();
+    const legacyMatch = legacyEvents.find((event) => slugify(event.title || "") === slug);
+    return legacyMatch ? toLegacyEventRecord(legacyMatch) : null;
   } catch (error) {
-    if (isMissingEventTableError(error)) return null;
+    if (isMissingEventTableError(error)) {
+      const legacyEvents = await listPublicEvents();
+      const legacyMatch = legacyEvents.find((event) => slugify(event.title || "") === slug);
+      return legacyMatch ? toLegacyEventRecord(legacyMatch) : null;
+    }
     throw error;
   }
 }
