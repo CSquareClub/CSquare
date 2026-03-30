@@ -109,6 +109,10 @@ function toLegacyEventCreateData(event: ClubEvent) {
   };
 }
 
+function shouldUseLegacyRegistrationLink(link: string | null): boolean {
+  return !link || link.trim() === "#";
+}
+
 let legacySyncPromise: Promise<void> | null = null;
 
 async function syncLegacyEventsToPrisma(): Promise<void> {
@@ -127,18 +131,66 @@ async function syncLegacyEventsToPrisma(): Promise<void> {
     if (!legacyEvents.length) return;
 
     const existing = await prisma.event.findMany({
-      select: { slug: true },
+      select: {
+        id: true,
+        slug: true,
+        bannerImage: true,
+        sponsors: true,
+        registrationLink: true,
+      },
     });
 
-    const existingSlugs = new Set(existing.map((event) => event.slug));
+    const existingBySlug = new Map(existing.map((event) => [event.slug, event]));
 
     for (const legacyEvent of legacyEvents) {
       const data = toLegacyEventCreateData(legacyEvent);
-      if (!data.slug || existingSlugs.has(data.slug)) continue;
+      if (!data.slug) continue;
+
+      const existingEvent = existingBySlug.get(data.slug);
+
+      if (existingEvent) {
+        const patch: {
+          bannerImage?: string | null;
+          sponsors?: string | null;
+          registrationLink?: string;
+        } = {};
+
+        if (!existingEvent.bannerImage && data.bannerImage) {
+          patch.bannerImage = data.bannerImage;
+        }
+
+        if (!existingEvent.sponsors && data.sponsors) {
+          patch.sponsors = data.sponsors;
+        }
+
+        if (shouldUseLegacyRegistrationLink(existingEvent.registrationLink) && data.registrationLink) {
+          patch.registrationLink = data.registrationLink;
+        }
+
+        if (Object.keys(patch).length > 0) {
+          try {
+            await prisma.event.update({
+              where: { id: existingEvent.id },
+              data: patch,
+            });
+          } catch {
+            // Ignore per-row sync failures.
+          }
+        }
+
+        continue;
+      }
 
       try {
         await prisma.event.create({ data });
-        existingSlugs.add(data.slug);
+        const created = await prisma.event.findUnique({
+          where: { slug: data.slug },
+          select: { id: true, slug: true, bannerImage: true, sponsors: true, registrationLink: true },
+        });
+
+        if (created) {
+          existingBySlug.set(data.slug, created);
+        }
       } catch {
         // Skip rows that fail unique constraints or partial legacy data.
       }
@@ -185,9 +237,31 @@ export async function listPublishedEventsFromDb(): Promise<EventRecord[]> {
   try {
     await syncLegacyEventsToPrisma();
 
-    return await prisma.event.findMany({
+    const dbEvents = await prisma.event.findMany({
       where: { status: { equals: "published", mode: "insensitive" } },
       orderBy: { startDateTime: "asc" },
+    });
+
+    const legacyEvents = await listPublicEvents();
+    const legacyBySlug = new Map(
+      legacyEvents.map((legacyEvent) => {
+        const normalized = toLegacyEventRecord(legacyEvent);
+        return [normalized.slug, normalized] as const;
+      })
+    );
+
+    return dbEvents.map((event) => {
+      const legacy = legacyBySlug.get(event.slug);
+      if (!legacy) return event;
+
+      return {
+        ...event,
+        bannerImage: event.bannerImage || legacy.bannerImage,
+        sponsors: event.sponsors || legacy.sponsors,
+        registrationLink: shouldUseLegacyRegistrationLink(event.registrationLink)
+          ? legacy.registrationLink
+          : event.registrationLink,
+      };
     });
   } catch (error) {
     if (isMissingEventTableError(error)) {
@@ -223,12 +297,28 @@ export async function getPublishedEventBySlug(slug: string): Promise<EventRecord
   try {
     await syncLegacyEventsToPrisma();
 
-    return await prisma.event.findFirst({
+    const fromDb = await prisma.event.findFirst({
       where: {
         slug,
         status: { equals: "published", mode: "insensitive" },
       },
     });
+
+    if (!fromDb) return null;
+
+    const legacyEvents = await listPublicEvents();
+    const legacyMatch = legacyEvents.find((event) => slugify(event.title || "") === slug);
+    if (!legacyMatch) return fromDb;
+
+    const legacy = toLegacyEventRecord(legacyMatch);
+    return {
+      ...fromDb,
+      bannerImage: fromDb.bannerImage || legacy.bannerImage,
+      sponsors: fromDb.sponsors || legacy.sponsors,
+      registrationLink: shouldUseLegacyRegistrationLink(fromDb.registrationLink)
+        ? legacy.registrationLink
+        : fromDb.registrationLink,
+    };
   } catch (error) {
     if (isMissingEventTableError(error)) {
       const legacyEvents = await listPublicEvents();
