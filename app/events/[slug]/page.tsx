@@ -195,19 +195,19 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                   href={event.registrationUrl || '#'}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center rounded-lg border border-border bg-card px-4 py-3 transition-all hover:border-[#dc2626] hover:bg-[#dc2626]/10"
+                  className="inline-flex items-center rounded-lg border border-border bg-card px-5 py-3 transition-all hover:border-[#dc2626] hover:bg-[#dc2626]/10"
                   aria-label="Apply with Devfolio"
                 >
                   <img
                     src={normalizeEventImageUrl(applyLogoLight)}
                     alt="APPLY WITH DEVFOLIO"
-                    className="h-10 w-auto max-w-[240px] object-contain dark:hidden"
+                    className="h-14 w-auto max-w-[320px] object-contain dark:hidden"
                     loading="lazy"
                   />
                   <img
                     src={normalizeEventImageUrl(applyLogoDark)}
                     alt="APPLY WITH DEVFOLIO"
-                    className="hidden h-10 w-auto max-w-[240px] object-contain dark:block"
+                    className="hidden h-14 w-auto max-w-[320px] object-contain dark:block"
                     loading="lazy"
                   />
                 </Link>

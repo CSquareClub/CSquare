@@ -247,19 +247,19 @@ export default function EventCard({
               href={registrationUrl || '#'}
               target="_blank"
               rel="noreferrer"
-              className="rounded-lg border border-border bg-card px-3 py-2 transition-all duration-300 hover:border-[#dc2626] hover:bg-[#dc2626]/10"
+              className="rounded-lg border border-border bg-card px-4 py-3 transition-all duration-300 hover:border-[#dc2626] hover:bg-[#dc2626]/10"
               aria-label="Apply with Devfolio"
             >
               <img
                 src={normalizeEventImageUrl(applyLogoLight)}
                 alt="APPLY WITH DEVFOLIO"
-                className="h-10 w-auto max-w-[220px] object-contain dark:hidden"
+                className="h-12 w-auto max-w-[260px] object-contain dark:hidden"
                 loading="lazy"
               />
               <img
                 src={normalizeEventImageUrl(applyLogoDark)}
                 alt="APPLY WITH DEVFOLIO"
-                className="hidden h-10 w-auto max-w-[220px] object-contain dark:block"
+                className="hidden h-12 w-auto max-w-[260px] object-contain dark:block"
                 loading="lazy"
               />
             </Link>
