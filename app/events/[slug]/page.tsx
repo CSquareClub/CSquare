@@ -112,7 +112,7 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                 </div>
                 <div className="flex items-center gap-2">
                   <Users size={16} className="text-[#dc2626]" />
-                  <span>{event.attendees} attending</span>
+                  <span>Capacity: {event.attendees}</span>
                 </div>
               </div>
 

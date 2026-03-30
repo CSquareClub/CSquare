@@ -236,7 +236,7 @@ export default function AdminEventsPage() {
         <input
           type="number"
           min={0}
-          placeholder="Attendees"
+          placeholder="Capacity"
           value={form.attendees}
           onChange={(e) => setForm((prev) => ({ ...prev, attendees: e.target.value }))}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm"
@@ -335,7 +335,7 @@ export default function AdminEventsPage() {
                   <p className="mt-1 text-xs text-muted-foreground">
                     {new Date(event.startDate || event.date).toLocaleString()} - {new Date(event.endDate || event.date).toLocaleString()} • {event.location}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">{event.category} • {event.attendees} attending • {event.isPublished ? "Published" : "Draft"}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{event.category} • Capacity: {event.attendees} • {event.isPublished ? "Published" : "Draft"}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button

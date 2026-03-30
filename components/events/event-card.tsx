@@ -178,7 +178,7 @@ export default function EventCard({
           </div>
           <div className="flex items-center gap-2">
             <Users size={16} className="text-[#dc2626]" />
-            <span>{attendees} attending</span>
+            <span>Capacity: {attendees}</span>
           </div>
         </div>
 
