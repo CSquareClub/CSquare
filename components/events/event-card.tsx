@@ -156,15 +156,15 @@ export default function EventCard({
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#dc2626]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20" />
       
       {/* Image Banner */}
-      <div className="relative h-48 w-full flex-shrink-0 overflow-hidden bg-card">
+      <div className="relative min-h-52 w-full flex-shrink-0 overflow-hidden bg-card/80 p-3">
         <img
           src={currentImage}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className="h-full max-h-72 w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
           alt={safeTitle}
           onError={() => setCurrentImage(fallbackImage)}
         />
         {/* Gradient Overlay for Text Polish */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/55 via-background/10 to-transparent opacity-90" />
         
         {/* Floating Category Tag */}
         {category ? (

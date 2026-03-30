@@ -124,9 +124,13 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
           </Link>
 
           <article className="overflow-hidden rounded-2xl border border-border bg-card/70">
-            <div className="relative h-64 w-full bg-card md:h-96">
-              <img src={imageUrl || fallbackImage} alt={safeTitle} className="h-full w-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/15 to-transparent" />
+            <div className="relative w-full bg-card/80 p-4 md:p-5">
+              <img
+                src={imageUrl || fallbackImage}
+                alt={safeTitle}
+                className="mx-auto max-h-[520px] w-full object-contain"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-background/10 to-transparent" />
               {event.category ? (
                 <span className="absolute right-4 top-4 rounded-full border border-[#dc2626]/30 bg-[#dc2626]/20 px-3 py-1 text-xs font-semibold text-[#dc2626]">
                   {event.category}
