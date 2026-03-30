@@ -42,29 +42,6 @@ function normalizeImage(url: string) {
   return trimmed;
 }
 
-function parseSharedLinks(raw: string): GalleryItem[] {
-  return raw
-    .split(/\r?\n|,/)
-    .map((entry) => entry.trim())
-    .filter(Boolean)
-    .map((entry, index) => {
-      const [maybeTitle, maybeUrl] = entry.includes("|")
-        ? entry.split("|").map((part) => part.trim())
-        : ["", entry];
-
-      const url = maybeUrl || maybeTitle;
-      const title = maybeUrl ? maybeTitle : `Moment ${index + 1}`;
-
-      return {
-        id: `${index}-${url}`,
-        title: title || `Moment ${index + 1}`,
-        eventName: "C Square Moments",
-        imageUrl: normalizeImage(url),
-      };
-    })
-    .filter((item) => item.imageUrl.length > 0);
-}
-
 export default async function GalleryGrid() {
   const dbItems = await listPublicGalleryItems();
 
@@ -76,9 +53,7 @@ export default async function GalleryGrid() {
     description: item.description,
   }));
 
-  const rawLinks = process.env.NEXT_PUBLIC_MOMENTS_DRIVE_LINKS || "";
-  const fallbackItems = parseSharedLinks(rawLinks);
-  const items = itemsFromAdmin.length ? itemsFromAdmin : fallbackItems;
+  const items = itemsFromAdmin;
 
   if (!items.length) {
     return (

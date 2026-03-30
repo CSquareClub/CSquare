@@ -20,6 +20,14 @@ type FormState = {
   isPublished: boolean;
 };
 
+type EventOption = {
+  id: number;
+  title: string;
+};
+
+type GalleryItemWithEventId = GalleryItem & {
+  eventId: number | null;
+};
 const defaultForm: FormState = {
   title: "",
   eventName: "",
@@ -29,7 +37,7 @@ const defaultForm: FormState = {
 };
 
 export default function AdminGalleryPage() {
-  const [items, setItems] = useState<GalleryItem[]>([]);
+  const [items, setItems] = useState<GalleryItemWithEventId[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -37,6 +45,8 @@ export default function AdminGalleryPage() {
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [events, setEvents] = useState<EventOption[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const isEditing = useMemo(() => editingId !== null, [editingId]);
 
   async function loadItems() {
@@ -56,8 +66,20 @@ export default function AdminGalleryPage() {
 
   useEffect(() => {
     loadItems();
+    loadEvents();
   }, []);
 
+  async function loadEvents() {
+    try {
+      const res = await fetch("/api/admin/events", { cache: "no-store" });
+      const payload = await res.json();
+      if (res.ok && Array.isArray(payload)) {
+        setEvents(payload.map((e: any) => ({ id: e.id, title: e.title || "Untitled Event" })));
+      }
+    } catch (err) {
+      console.error("Failed to load events:", err);
+    }
+  }
   function handleImageFileChange(file: File | null) {
     if (!file) return;
 
@@ -73,6 +95,7 @@ export default function AdminGalleryPage() {
 
   function resetForm() {
     setEditingId(null);
+    setSelectedEventId(null);
     setForm(defaultForm);
   }
 
@@ -89,7 +112,7 @@ export default function AdminGalleryPage() {
       const res = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, eventId: selectedEventId }),
       });
 
       const payload = await res.json().catch(() => ({}));
@@ -99,6 +122,7 @@ export default function AdminGalleryPage() {
 
       setStatus(isEditing ? "Gallery item updated" : "Gallery item created");
       resetForm();
+      setSelectedEventId(null);
       await loadItems();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save gallery item");
@@ -107,8 +131,9 @@ export default function AdminGalleryPage() {
     }
   }
 
-  function startEdit(item: GalleryItem) {
+  function startEdit(item: GalleryItemWithEventId) {
     setEditingId(item.id);
+    setSelectedEventId(item.eventId || null);
     setForm({
       title: item.title,
       eventName: item.eventName,
@@ -154,6 +179,25 @@ export default function AdminGalleryPage() {
           onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm"
         />
+        <select
+          value={selectedEventId || ""}
+          onChange={(e) => {
+            const nextId = e.target.value ? Number(e.target.value) : null;
+            setSelectedEventId(nextId);
+            const selectedEvent = events.find((event) => event.id === nextId);
+            if (selectedEvent) {
+              setForm((prev) => ({ ...prev, eventName: selectedEvent.title }));
+            }
+          }}
+          className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+        >
+                  <option value="">Select Event (Optional)</option>
+                  {events.map((event) => (
+                    <option key={event.id} value={event.id}>
+                      {event.title}
+                    </option>
+                  ))}
+              </select>
         <input
           required
           placeholder="Event name"

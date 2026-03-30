@@ -29,6 +29,8 @@ export async function POST(req: NextRequest) {
 
     const title = String(body?.title || "").trim();
     const eventName = String(body?.eventName || "").trim();
+      const eventIdRaw = body?.eventId;
+      const eventId = typeof eventIdRaw === "number" && Number.isFinite(eventIdRaw) ? eventIdRaw : null;
     const imageUrl = String(body?.imageUrl || "").trim();
     const description = String(body?.description || "").trim();
     const isPublished = Boolean(body?.isPublished ?? true);
@@ -39,6 +41,7 @@ export async function POST(req: NextRequest) {
 
     const created = await createGalleryItem({
       title,
+        eventId,
       eventName,
       imageUrl,
       description,

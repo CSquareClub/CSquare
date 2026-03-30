@@ -6,6 +6,7 @@ import Navigation from '@/components/navigation';
 import Footer from '@/components/footer';
 import GridBackground from '@/components/grid-background';
 import { getPublicEventById, listPublicEvents } from '@/lib/events-store';
+import { listGalleryItemsByEventId } from '@/lib/gallery-store';
 
 export const dynamic = 'force-dynamic';
 
@@ -108,6 +109,8 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
   const fallbackImage =
     'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80';
 
+  // Fetch gallery items for this event
+  const galleryItems = await listGalleryItemsByEventId(event.id);
   return (
     <div className="relative isolate min-h-screen bg-background">
       <GridBackground />
@@ -234,6 +237,34 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
         </div>
       </main>
 
+      {galleryItems.length > 0 && (
+        <section className="relative z-10 py-16 md:py-20">
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <h2 className="mb-8 text-2xl font-bold tracking-tight md:text-3xl">Event Moments</h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {galleryItems.map((item) => (
+                <article key={item.id} className="overflow-hidden rounded-xl border border-border bg-card/70">
+                  <div className="flex min-h-48 items-center justify-center bg-background/40 p-3">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      className="max-h-56 w-full object-contain"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="space-y-1 p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-primary/80">{item.eventName}</p>
+                    <h3 className="text-sm font-semibold text-foreground">{item.title}</h3>
+                    {item.description && (
+                      <p className="text-xs text-foreground/60 line-clamp-2">{item.description}</p>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
       <Footer />
     </div>
   );

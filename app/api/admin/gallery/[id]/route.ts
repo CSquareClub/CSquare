@@ -20,6 +20,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
 
     const updated = await updateGalleryItem(itemId, {
       title: typeof body?.title === "string" ? body.title.trim() : undefined,
+        eventId: typeof body?.eventId === "number" && Number.isFinite(body.eventId) ? body.eventId : undefined,
       eventName: typeof body?.eventName === "string" ? body.eventName.trim() : undefined,
       imageUrl: typeof body?.imageUrl === "string" ? body.imageUrl.trim() : undefined,
       description: typeof body?.description === "string" ? body.description.trim() : undefined,
