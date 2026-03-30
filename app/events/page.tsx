@@ -91,7 +91,7 @@ export default async function EventsPage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-8 flex items-end justify-between gap-3">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Event Gallery</h2>
+                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">C Square Moments</h2>
                 <p className="mt-2 text-sm text-foreground/65">Captured moments from our workshops, hackathons, and community meetups.</p>
               </div>
             </div>
