@@ -60,6 +60,10 @@ function isDevfolioLink(url: string | null | undefined): boolean {
   return /devfolio\.(co|in|com)/i.test(url);
 }
 
+function isDevfolioSponsor(title: string | null | undefined): boolean {
+  return title?.trim().toLowerCase() === 'devfolio';
+}
+
 type EventDetailsPageProps = {
   params: Promise<{
     slug: string;
@@ -95,8 +99,10 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
   const imageUrl = normalizeEventImageUrl(event.image);
   const lightSponsorLogo = event.sponsorLogoLightUrl || event.sponsorLogoUrl;
   const darkSponsorLogo = event.sponsorLogoDarkUrl || event.sponsorLogoLightUrl || event.sponsorLogoUrl;
-  const sponsorLogoAlt = event.sponsorTitle?.trim().toLowerCase() === 'devfolio' ? 'DEVFOLIO LOGO' : 'Sponsor logo';
+  const isDevfolio = isDevfolioSponsor(event.sponsorTitle);
+  const sponsorLogoAlt = isDevfolio ? 'DEVFOLIO LOGO' : 'Sponsor logo';
   const registrationButtonLabel = isDevfolioLink(event.registrationUrl) ? 'Apply with Devfolio' : 'Register Now';
+  const hasDevfolioApplyLogos = Boolean(isDevfolio && event.registrationUrl && lightSponsorLogo && darkSponsorLogo);
   const fallbackImage =
     'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80';
 
@@ -182,7 +188,28 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                 </div>
               ) : null}
 
-              {event.registrationUrl ? (
+              {hasDevfolioApplyLogos ? (
+                <Link
+                  href={event.registrationUrl || '#'}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center rounded-lg border border-border bg-card px-4 py-3 transition-all hover:border-[#dc2626] hover:bg-[#dc2626]/10"
+                  aria-label="Apply with Devfolio"
+                >
+                  <img
+                    src={normalizeEventImageUrl(lightSponsorLogo)}
+                    alt={sponsorLogoAlt}
+                    className="h-8 w-auto max-w-[220px] object-contain dark:hidden"
+                    loading="lazy"
+                  />
+                  <img
+                    src={normalizeEventImageUrl(darkSponsorLogo)}
+                    alt={sponsorLogoAlt}
+                    className="hidden h-8 w-auto max-w-[220px] object-contain dark:block"
+                    loading="lazy"
+                  />
+                </Link>
+              ) : event.registrationUrl ? (
                 <Link
                   href={event.registrationUrl}
                   target="_blank"

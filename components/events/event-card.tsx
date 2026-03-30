@@ -72,6 +72,10 @@ function isDevfolioLink(url: string | null | undefined): boolean {
   return /devfolio\.(co|in|com)/i.test(url);
 }
 
+function isDevfolioSponsor(title: string | null | undefined): boolean {
+  return title?.trim().toLowerCase() === 'devfolio';
+}
+
 export default function EventCard({
   id,
   title,
@@ -102,8 +106,10 @@ export default function EventCard({
   const [currentImage, setCurrentImage] = useState(normalizedImage || fallbackImage);
   const lightSponsorLogo = sponsorLogoLightUrl || sponsorLogoUrl || null;
   const darkSponsorLogo = sponsorLogoDarkUrl || sponsorLogoLightUrl || sponsorLogoUrl || null;
-  const sponsorLogoAlt = sponsorTitle?.trim().toLowerCase() === 'devfolio' ? 'DEVFOLIO LOGO' : 'Sponsor logo';
+  const isDevfolio = isDevfolioSponsor(sponsorTitle);
+  const sponsorLogoAlt = isDevfolio ? 'DEVFOLIO LOGO' : 'Sponsor logo';
   const registrationButtonLabel = isDevfolioLink(registrationUrl) ? 'Apply with Devfolio' : 'Register Now';
+  const hasDevfolioApplyLogos = Boolean(isDevfolio && registrationUrl && lightSponsorLogo && darkSponsorLogo);
 
   const openEventInNewTab = () => {
     window.open(eventHref, '_blank', 'noopener,noreferrer');
@@ -230,7 +236,28 @@ export default function EventCard({
         ) : null}
 
         <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
-          {registrationUrl ? (
+          {hasDevfolioApplyLogos ? (
+            <Link
+              href={registrationUrl || '#'}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-lg border border-border bg-card px-3 py-2 transition-all duration-300 hover:border-[#dc2626] hover:bg-[#dc2626]/10"
+              aria-label="Apply with Devfolio"
+            >
+              <img
+                src={normalizeEventImageUrl(lightSponsorLogo)}
+                alt={sponsorLogoAlt}
+                className="h-8 w-auto max-w-[180px] object-contain dark:hidden"
+                loading="lazy"
+              />
+              <img
+                src={normalizeEventImageUrl(darkSponsorLogo)}
+                alt={sponsorLogoAlt}
+                className="hidden h-8 w-auto max-w-[180px] object-contain dark:block"
+                loading="lazy"
+              />
+            </Link>
+          ) : registrationUrl ? (
             <Link
               href={registrationUrl}
               target="_blank"
