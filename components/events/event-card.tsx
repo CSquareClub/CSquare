@@ -15,6 +15,8 @@ interface EventCardProps {
   category: string;
   image: string;
   sponsorLogoUrl?: string | null;
+  sponsorLogoLightUrl?: string | null;
+  sponsorLogoDarkUrl?: string | null;
   registrationUrl?: string | null;
 }
 
@@ -52,6 +54,8 @@ export default function EventCard({
   category,
   image,
   sponsorLogoUrl,
+  sponsorLogoLightUrl,
+  sponsorLogoDarkUrl,
   registrationUrl,
 }: EventCardProps) {
   const eventHref = useMemo(
@@ -65,6 +69,8 @@ export default function EventCard({
     []
   );
   const [currentImage, setCurrentImage] = useState(normalizedImage || fallbackImage);
+  const lightSponsorLogo = sponsorLogoLightUrl || sponsorLogoUrl || null;
+  const darkSponsorLogo = sponsorLogoDarkUrl || sponsorLogoLightUrl || sponsorLogoUrl || null;
 
   const openEventInNewTab = () => {
     window.open(eventHref, '_blank', 'noopener,noreferrer');
@@ -139,15 +145,25 @@ export default function EventCard({
 
         <p className="text-foreground/60 text-sm mb-6 leading-relaxed flex-grow">{description}</p>
 
-        {sponsorLogoUrl ? (
+        {lightSponsorLogo || darkSponsorLogo ? (
           <div className="mb-6 rounded-lg border border-border bg-background/60 p-3">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/60">Sponsored by</p>
-            <img
-              src={normalizeEventImageUrl(sponsorLogoUrl)}
-              alt="Sponsor logo"
-              className="h-16 w-full object-contain"
-              loading="lazy"
-            />
+            {lightSponsorLogo ? (
+              <img
+                src={normalizeEventImageUrl(lightSponsorLogo)}
+                alt="Sponsor logo"
+                className="h-16 w-full object-contain dark:hidden"
+                loading="lazy"
+              />
+            ) : null}
+            {darkSponsorLogo ? (
+              <img
+                src={normalizeEventImageUrl(darkSponsorLogo)}
+                alt="Sponsor logo"
+                className="hidden h-16 w-full object-contain dark:block"
+                loading="lazy"
+              />
+            ) : null}
           </div>
         ) : null}
 

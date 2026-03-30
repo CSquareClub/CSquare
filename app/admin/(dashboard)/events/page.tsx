@@ -15,6 +15,8 @@ type EventItem = {
   category: string;
   image: string;
   sponsorLogoUrl: string | null;
+  sponsorLogoLightUrl: string | null;
+  sponsorLogoDarkUrl: string | null;
   isPublished: boolean;
   registrationUrl: string | null;
 };
@@ -28,7 +30,8 @@ type EventFormState = {
   attendees: string;
   category: string;
   image: string;
-  sponsorLogoUrl: string;
+  sponsorLogoLightUrl: string;
+  sponsorLogoDarkUrl: string;
   isPublished: boolean;
   registrationUrl: string;
 };
@@ -42,7 +45,8 @@ const defaultForm: EventFormState = {
   attendees: "0",
   category: "Workshop",
   image: "",
-  sponsorLogoUrl: "",
+  sponsorLogoLightUrl: "",
+  sponsorLogoDarkUrl: "",
   isPublished: true,
   registrationUrl: "",
 };
@@ -84,13 +88,17 @@ export default function AdminEventsPage() {
     loadEvents();
   }, []);
 
-  function handleSponsorLogoFileChange(file: File | null) {
+  function handleSponsorLogoFileChange(file: File | null, mode: "light" | "dark") {
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result === "string") {
-        setForm((prev) => ({ ...prev, sponsorLogoUrl: reader.result }));
+        if (mode === "light") {
+          setForm((prev) => ({ ...prev, sponsorLogoLightUrl: reader.result }));
+        } else {
+          setForm((prev) => ({ ...prev, sponsorLogoDarkUrl: reader.result }));
+        }
       }
     };
     reader.readAsDataURL(file);
@@ -116,7 +124,8 @@ export default function AdminEventsPage() {
       attendees: Number(form.attendees || 0),
       category: form.category,
       image: form.image,
-      sponsorLogoUrl: form.sponsorLogoUrl || null,
+      sponsorLogoLightUrl: form.sponsorLogoLightUrl || null,
+      sponsorLogoDarkUrl: form.sponsorLogoDarkUrl || null,
       isPublished: form.isPublished,
       registrationUrl: form.registrationUrl || null,
     };
@@ -154,7 +163,8 @@ export default function AdminEventsPage() {
       attendees: String(event.attendees),
       category: event.category,
       image: event.image,
-      sponsorLogoUrl: event.sponsorLogoUrl || "",
+      sponsorLogoLightUrl: event.sponsorLogoLightUrl || event.sponsorLogoUrl || "",
+      sponsorLogoDarkUrl: event.sponsorLogoDarkUrl || event.sponsorLogoUrl || "",
       isPublished: event.isPublished,
       registrationUrl: event.registrationUrl || "",
     });
@@ -239,15 +249,27 @@ export default function AdminEventsPage() {
           className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
         />
         <input
-          placeholder="Sponsor logo URL (optional)"
-          value={form.sponsorLogoUrl}
-          onChange={(e) => setForm((prev) => ({ ...prev, sponsorLogoUrl: e.target.value }))}
+          placeholder="Sponsor logo URL (light theme)"
+          value={form.sponsorLogoLightUrl}
+          onChange={(e) => setForm((prev) => ({ ...prev, sponsorLogoLightUrl: e.target.value }))}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
         />
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => handleSponsorLogoFileChange(e.target.files?.[0] || null)}
+          onChange={(e) => handleSponsorLogoFileChange(e.target.files?.[0] || null, "light")}
+          className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+        />
+        <input
+          placeholder="Sponsor logo URL (dark theme)"
+          value={form.sponsorLogoDarkUrl}
+          onChange={(e) => setForm((prev) => ({ ...prev, sponsorLogoDarkUrl: e.target.value }))}
+          className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+        />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => handleSponsorLogoFileChange(e.target.files?.[0] || null, "dark")}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
         />
         <input
