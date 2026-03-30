@@ -67,6 +67,7 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
   const imageUrl = normalizeEventImageUrl(event.image);
   const lightSponsorLogo = event.sponsorLogoLightUrl || event.sponsorLogoUrl;
   const darkSponsorLogo = event.sponsorLogoDarkUrl || event.sponsorLogoLightUrl || event.sponsorLogoUrl;
+  const sponsorLogoAlt = event.sponsorTitle?.trim().toLowerCase() === 'devfolio' ? 'DEVFOLIO LOGO' : 'Sponsor logo';
   const fallbackImage =
     'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80';
 
@@ -136,7 +137,7 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                   {lightSponsorLogo ? (
                     <img
                       src={normalizeEventImageUrl(lightSponsorLogo)}
-                      alt="Sponsor logo"
+                      alt={sponsorLogoAlt}
                       className="h-20 w-full object-contain dark:hidden"
                       loading="lazy"
                     />
@@ -144,7 +145,7 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                   {darkSponsorLogo ? (
                     <img
                       src={normalizeEventImageUrl(darkSponsorLogo)}
-                      alt="Sponsor logo"
+                      alt={sponsorLogoAlt}
                       className="hidden h-20 w-full object-contain dark:block"
                       loading="lazy"
                     />

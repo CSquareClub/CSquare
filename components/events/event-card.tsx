@@ -74,6 +74,7 @@ export default function EventCard({
   const [currentImage, setCurrentImage] = useState(normalizedImage || fallbackImage);
   const lightSponsorLogo = sponsorLogoLightUrl || sponsorLogoUrl || null;
   const darkSponsorLogo = sponsorLogoDarkUrl || sponsorLogoLightUrl || sponsorLogoUrl || null;
+  const sponsorLogoAlt = sponsorTitle?.trim().toLowerCase() === 'devfolio' ? 'DEVFOLIO LOGO' : 'Sponsor logo';
 
   const openEventInNewTab = () => {
     window.open(eventHref, '_blank', 'noopener,noreferrer');
@@ -160,7 +161,7 @@ export default function EventCard({
             {lightSponsorLogo ? (
               <img
                 src={normalizeEventImageUrl(lightSponsorLogo)}
-                alt="Sponsor logo"
+                alt={sponsorLogoAlt}
                 className="h-16 w-full object-contain dark:hidden"
                 loading="lazy"
               />
@@ -168,7 +169,7 @@ export default function EventCard({
             {darkSponsorLogo ? (
               <img
                 src={normalizeEventImageUrl(darkSponsorLogo)}
-                alt="Sponsor logo"
+                alt={sponsorLogoAlt}
                 className="hidden h-16 w-full object-contain dark:block"
                 loading="lazy"
               />
