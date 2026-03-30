@@ -6,28 +6,44 @@ import Features from '@/components/home/features';
 import ClubDescription from '@/components/home/club-description';
 import GalleryGrid from '@/components/events/gallery-grid';
 import EventCard from '@/components/events/event-card';
-import { listPublicEvents } from '@/lib/events-store';
+import { listPublishedEventsFromDb } from '@/lib/event-service';
 import Link from 'next/link';
 
-function toEpoch(value: string | null | undefined): number | null {
+function toEpoch(value: Date | string | null | undefined): number | null {
   if (!value) return null;
   const timestamp = new Date(value).getTime();
   return Number.isNaN(timestamp) ? null : timestamp;
 }
 
-function formatEventDate(value: string | null | undefined): string | null {
+function formatEventDate(value: Date | string | null | undefined): string | null {
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
   return date.toLocaleDateString();
 }
 
+function formatEventTime(startValue: Date | string | null | undefined, endValue: Date | string | null | undefined): string | null {
+  if (!startValue) return null;
+
+  const start = new Date(startValue);
+  if (Number.isNaN(start.getTime())) return null;
+
+  const startLabel = start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  if (!endValue) return startLabel;
+
+  const end = new Date(endValue);
+  if (Number.isNaN(end.getTime())) return startLabel;
+
+  const endLabel = end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  return `${startLabel} - ${endLabel}`;
+}
+
 export default async function Home() {
-  const allEvents = await listPublicEvents();
+  const allEvents = await listPublishedEventsFromDb();
   const now = Date.now();
   const currentEvents = allEvents
     .filter((event) => {
-      const endEpoch = toEpoch(event.endDate || event.date);
+      const endEpoch = toEpoch(event.endDateTime || event.startDateTime);
       return endEpoch === null || endEpoch >= now;
     })
     .slice(0, 3);
@@ -59,8 +75,17 @@ export default async function Home() {
                 {currentEvents.map((event) => (
                   <EventCard
                     key={event.id}
-                    {...event}
-                    date={formatEventDate(event.startDate || event.date)}
+                    id={event.id}
+                    title={event.title}
+                    description={event.description}
+                    date={formatEventDate(event.startDateTime)}
+                    time={formatEventTime(event.startDateTime, event.endDateTime)}
+                    location={event.venueName || event.city || null}
+                    attendees={null}
+                    category={event.category}
+                    image={event.bannerImage}
+                    registrationUrl={event.registrationLink}
+                    isRegistrationOpen={toEpoch(event.endDateTime) === null || (toEpoch(event.endDateTime) ?? 0) >= now}
                   />
                 ))}
               </div>

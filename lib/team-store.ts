@@ -42,6 +42,14 @@ async function ensureTeamTable() {
     );
   `);
 
+  // Keep compatibility with older deployments that may have a partially different table shape.
+  await prisma.$executeRawUnsafe(`ALTER TABLE team_members ADD COLUMN IF NOT EXISTS linkedin_url TEXT;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE team_members ADD COLUMN IF NOT EXISTS image_url TEXT;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE team_members ADD COLUMN IF NOT EXISTS is_published BOOLEAN;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE team_members ADD COLUMN IF NOT EXISTS sort_order INTEGER;`);
+  await prisma.$executeRawUnsafe(`UPDATE team_members SET is_published = TRUE WHERE is_published IS NULL;`);
+  await prisma.$executeRawUnsafe(`UPDATE team_members SET sort_order = 0 WHERE sort_order IS NULL;`);
+
   tableReady = true;
 }
 
@@ -64,8 +72,8 @@ export async function listPublicTeam(): Promise<TeamMember[]> {
   const rows = await prisma.$queryRawUnsafe<TeamRow[]>(
     `SELECT id, name, role, about, linkedin_url, image_url, is_published, sort_order
      FROM team_members
-     WHERE is_published = TRUE
-     ORDER BY sort_order ASC, id ASC;`
+      WHERE COALESCE(is_published, TRUE) = TRUE
+      ORDER BY COALESCE(sort_order, 0) ASC, id ASC;`
   );
 
   return rows.map(rowToMember);
