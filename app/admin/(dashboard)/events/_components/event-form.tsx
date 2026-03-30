@@ -18,6 +18,7 @@ import {
   eventFormSchema,
   type EventFormInput,
 } from "@/lib/event-schema";
+import { parseEventSponsors } from "@/lib/event-sponsors";
 import type { EventActionResult } from "@/app/admin/(dashboard)/events/actions";
 
 function slugify(value: string): string {
@@ -35,9 +36,44 @@ type EventFormProps = {
   submitAction: (payload: EventFormInput) => Promise<EventActionResult>;
 };
 
+type SponsorFormRow = {
+  title: string;
+  logoLightUrl: string;
+  logoDarkUrl: string;
+  devfolioApplyLogoLightUrl: string;
+  devfolioApplyLogoDarkUrl: string;
+};
+
+function toSponsorRows(rawSponsors: string | undefined): SponsorFormRow[] {
+  const parsed = parseEventSponsors(rawSponsors);
+
+  if (!parsed.length) {
+    return [
+      {
+        title: "",
+        logoLightUrl: "",
+        logoDarkUrl: "",
+        devfolioApplyLogoLightUrl: "",
+        devfolioApplyLogoDarkUrl: "",
+      },
+    ];
+  }
+
+  return parsed.map((sponsor) => ({
+    title: sponsor.title,
+    logoLightUrl: sponsor.logoLightUrl || "",
+    logoDarkUrl: sponsor.logoDarkUrl || "",
+    devfolioApplyLogoLightUrl: sponsor.devfolioApplyLogoLightUrl || "",
+    devfolioApplyLogoDarkUrl: sponsor.devfolioApplyLogoDarkUrl || "",
+  }));
+}
+
 export function EventForm({ mode, defaultValues, submitAction }: EventFormProps) {
   const [serverMessage, setServerMessage] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [sponsorRows, setSponsorRows] = useState<SponsorFormRow[]>(
+    toSponsorRows(defaultValues.sponsors)
+  );
 
   const {
     register,
@@ -53,6 +89,24 @@ export function EventForm({ mode, defaultValues, submitAction }: EventFormProps)
 
   const watchedTitle = watch("title");
   const watchedSlug = watch("slug");
+
+  useEffect(() => {
+    const normalizedSponsors = sponsorRows
+      .map((row) => ({
+        title: row.title.trim(),
+        logoLightUrl: row.logoLightUrl.trim() || null,
+        logoDarkUrl: row.logoDarkUrl.trim() || null,
+        devfolioApplyLogoLightUrl: row.devfolioApplyLogoLightUrl.trim() || null,
+        devfolioApplyLogoDarkUrl: row.devfolioApplyLogoDarkUrl.trim() || null,
+      }))
+      .filter((row) => row.title.length > 0);
+
+    setValue(
+      "sponsors",
+      normalizedSponsors.length ? JSON.stringify(normalizedSponsors) : "",
+      { shouldValidate: true }
+    );
+  }, [sponsorRows, setValue]);
 
   useEffect(() => {
     if (!watchedSlug) {
@@ -89,6 +143,41 @@ export function EventForm({ mode, defaultValues, submitAction }: EventFormProps)
   }
 
   const hasFormErrors = Object.keys(errors).length > 0;
+
+  function updateSponsorRow(index: number, key: keyof SponsorFormRow, value: string) {
+    setSponsorRows((prev) => prev.map((row, i) => (i === index ? { ...row, [key]: value } : row)));
+  }
+
+  function addSponsorRow() {
+    setSponsorRows((prev) => [
+      ...prev,
+      {
+        title: "",
+        logoLightUrl: "",
+        logoDarkUrl: "",
+        devfolioApplyLogoLightUrl: "",
+        devfolioApplyLogoDarkUrl: "",
+      },
+    ]);
+  }
+
+  function removeSponsorRow(index: number) {
+    setSponsorRows((prev) => {
+      if (prev.length === 1) {
+        return [
+          {
+            title: "",
+            logoLightUrl: "",
+            logoDarkUrl: "",
+            devfolioApplyLogoLightUrl: "",
+            devfolioApplyLogoDarkUrl: "",
+          },
+        ];
+      }
+
+      return prev.filter((_, i) => i !== index);
+    });
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -255,10 +344,61 @@ export function EventForm({ mode, defaultValues, submitAction }: EventFormProps)
 
           <div className="md:col-span-2">
             <label className="mb-1 block text-sm font-medium">Sponsors</label>
-            <Textarea {...register("sponsors")} className="min-h-16" />
-            <p className="mt-1 text-xs text-muted-foreground">
-              Use plain text for one sponsor, or JSON array for multiple sponsors and logos.
-            </p>
+            <div className="space-y-3 rounded-xl border border-border bg-background/50 p-4">
+              {sponsorRows.map((row, index) => (
+                <div key={`sponsor-${index}`} className="space-y-3 rounded-lg border border-border bg-card p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Sponsor {index + 1}</p>
+                    <button
+                      type="button"
+                      onClick={() => removeSponsorRow(index)}
+                      className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      Remove
+                    </button>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <Input
+                      placeholder="Sponsor title (e.g. Devfolio)"
+                      value={row.title}
+                      onChange={(e) => updateSponsorRow(index, "title", e.target.value)}
+                    />
+                    <Input
+                      placeholder="Light logo URL"
+                      value={row.logoLightUrl}
+                      onChange={(e) => updateSponsorRow(index, "logoLightUrl", e.target.value)}
+                    />
+                    <Input
+                      placeholder="Dark logo URL"
+                      value={row.logoDarkUrl}
+                      onChange={(e) => updateSponsorRow(index, "logoDarkUrl", e.target.value)}
+                    />
+                    <Input
+                      placeholder="Devfolio apply logo (light)"
+                      value={row.devfolioApplyLogoLightUrl}
+                      onChange={(e) => updateSponsorRow(index, "devfolioApplyLogoLightUrl", e.target.value)}
+                    />
+                    <Input
+                      placeholder="Devfolio apply logo (dark)"
+                      value={row.devfolioApplyLogoDarkUrl}
+                      onChange={(e) => updateSponsorRow(index, "devfolioApplyLogoDarkUrl", e.target.value)}
+                    />
+                  </div>
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={addSponsorRow}
+                className="rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-card"
+              >
+                Add Sponsor
+              </button>
+            </div>
+
+            <input type="hidden" {...register("sponsors")} />
+            <p className="mt-2 text-xs text-muted-foreground">Multiple sponsors are now saved automatically from these rows.</p>
           </div>
         </div>
       </section>
