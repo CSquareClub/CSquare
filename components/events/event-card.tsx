@@ -27,9 +27,32 @@ function normalizeEventImageUrl(url: string | undefined | null): string {
   const trimmed = url.trim();
   if (!trimmed) return '';
 
-  const driveMatch = trimmed.match(/drive\.google\.com\/file\/d\/([^/]+)/i);
-  if (driveMatch?.[1]) {
-    return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+  const fileMatch = trimmed.match(/drive\.google\.com\/file\/d\/([^/?#]+)/i);
+  if (fileMatch?.[1]) {
+    return `https://drive.google.com/thumbnail?id=${fileMatch[1]}&sz=w1600`;
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    const host = parsed.hostname.toLowerCase();
+    const isDriveHost = host.includes('drive.google.com') || host.includes('docs.google.com');
+
+    if (isDriveHost) {
+      const idParam = parsed.searchParams.get('id');
+      if (idParam) {
+        return `https://drive.google.com/thumbnail?id=${idParam}&sz=w1600`;
+      }
+
+      const ucPathMatch = parsed.pathname.match(/\/uc$/i);
+      if (ucPathMatch) {
+        const ucId = parsed.searchParams.get('id');
+        if (ucId) {
+          return `https://drive.google.com/thumbnail?id=${ucId}&sz=w1600`;
+        }
+      }
+    }
+  } catch {
+    // Keep original URL when parsing fails.
   }
 
   return trimmed;
