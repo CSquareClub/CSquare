@@ -2,6 +2,7 @@ import Navigation from '@/components/navigation';
 import Footer from '@/components/footer';
 import GridBackground from '@/components/grid-background';
 import EventCard from '@/components/events/event-card';
+import GalleryGrid from '@/components/events/gallery-grid';
 import { listPublicEvents } from '@/lib/events-store';
 
 export const dynamic = 'force-dynamic';
@@ -83,6 +84,19 @@ export default async function EventsPage() {
                 Past highlights will appear here once events conclude.
               </div>
             )}
+          </div>
+        </section>
+
+        <section className="pb-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-8 flex items-end justify-between gap-3">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Event Gallery</h2>
+                <p className="mt-2 text-sm text-foreground/65">Captured moments from our workshops, hackathons, and community meetups.</p>
+              </div>
+            </div>
+
+            <GalleryGrid />
           </div>
         </section>
       </main>
