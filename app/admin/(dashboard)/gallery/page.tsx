@@ -48,6 +48,8 @@ export default function AdminGalleryPage() {
   const [events, setEvents] = useState<EventOption[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const isEditing = useMemo(() => editingId !== null, [editingId]);
+  const publishedCount = useMemo(() => items.filter((item) => item.isPublished).length, [items]);
+  const draftCount = items.length - publishedCount;
 
   async function loadItems() {
     try {
@@ -164,14 +166,31 @@ export default function AdminGalleryPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Event Gallery</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Upload and manage event pictures shown on the website gallery section.
-        </p>
+      <div className="rounded-2xl border border-border bg-card p-5 md:p-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Event Gallery</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Upload and manage event pictures shown on the website gallery section.
+          </p>
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border border-border bg-background/60 px-4 py-3">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Total</p>
+            <p className="mt-1 text-2xl font-semibold">{items.length}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-background/60 px-4 py-3">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Published</p>
+            <p className="mt-1 text-2xl font-semibold text-green-600">{publishedCount}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-background/60 px-4 py-3">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Drafts</p>
+            <p className="mt-1 text-2xl font-semibold text-amber-600">{draftCount}</p>
+          </div>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid gap-4 rounded-xl border border-border bg-card p-5 md:grid-cols-2">
+      <form onSubmit={handleSubmit} className="grid gap-4 rounded-2xl border border-border bg-card p-5 md:grid-cols-2 md:p-6">
         <input
           required
           placeholder="Image title"

@@ -12,10 +12,6 @@ import {
   Trash2,
 } from "lucide-react";
 import * as XLSX from "xlsx";
-import AdminSidebar from "@/components/admin/admin-sidebar";
-import AdminHeader from "@/components/admin/admin-header";
-import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 
 type CusocTrack = "2026" | "2027";
@@ -419,33 +415,54 @@ export default function CusocRegistrationsPage() {
   return (
     <div className="min-h-screen p-6 lg:p-8">
       {/* Header */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-black dark:text-white tracking-tight">
-            Registrations
-          </h1>
-          <p className="text-sm text-black/50 dark:text-white/30 mt-1">
-            View, manage, and export CUSoC plus outside registrations in one place
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={syncToGoogleSheet}
-            disabled={!data.length || exporting}
-            className="flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-all hover:bg-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25"
-          >
-            <RefreshCw className={`w-4 h-4 ${exporting ? "animate-spin" : ""}`} />
-            {exporting ? "Syncing..." : "Sync Google Sheet"}
-          </button>
+      <div className="mb-6 rounded-2xl border border-black/5 bg-white/70 p-5 dark:border-white/[0.06] dark:bg-white/[0.02]">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-black dark:text-white tracking-tight">
+              Registrations
+            </h1>
+            <p className="text-sm text-black/50 dark:text-white/30 mt-1">
+              View, manage, and export CUSoC plus outside registrations in one place
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={syncToGoogleSheet}
+              disabled={!data.length || exporting}
+              className="flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-all hover:bg-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25"
+            >
+              <RefreshCw className={`w-4 h-4 ${exporting ? "animate-spin" : ""}`} />
+              {exporting ? "Syncing..." : "Sync Google Sheet"}
+            </button>
 
-          <button
-            onClick={downloadExcel}
-            disabled={!data.length}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:shadow-xl hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <Download className="w-4 h-4" />
-            Export to Excel
-          </button>
+            <button
+              onClick={downloadExcel}
+              disabled={!data.length}
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:shadow-xl hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Download className="w-4 h-4" />
+              Export to Excel
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-4">
+          <div className="rounded-xl border border-black/5 bg-black/[0.02] px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
+            <p className="text-xs uppercase tracking-wide text-black/45 dark:text-white/35">CUSoC 2026</p>
+            <p className="mt-1 text-2xl font-semibold text-emerald-600 dark:text-emerald-400">{counts.count2026}</p>
+          </div>
+          <div className="rounded-xl border border-black/5 bg-black/[0.02] px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
+            <p className="text-xs uppercase tracking-wide text-black/45 dark:text-white/35">CUSoC 2027-28</p>
+            <p className="mt-1 text-2xl font-semibold text-amber-600 dark:text-amber-400">{counts.count2027}</p>
+          </div>
+          <div className="rounded-xl border border-black/5 bg-black/[0.02] px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
+            <p className="text-xs uppercase tracking-wide text-black/45 dark:text-white/35">Outside</p>
+            <p className="mt-1 text-2xl font-semibold text-sky-600 dark:text-sky-400">{counts.outsideTotal}</p>
+          </div>
+          <div className="rounded-xl border border-black/5 bg-black/[0.02] px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
+            <p className="text-xs uppercase tracking-wide text-black/45 dark:text-white/35">Ambassadors</p>
+            <p className="mt-1 text-2xl font-semibold text-indigo-600 dark:text-indigo-400">{counts.outsideAmbassadors}</p>
+          </div>
         </div>
       </div>
 
