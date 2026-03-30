@@ -16,6 +16,7 @@ import AdminSidebar from "@/components/admin/admin-sidebar";
 import AdminHeader from "@/components/admin/admin-header";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 type CusocTrack = "2026" | "2027";
 type RegistrationSource =
@@ -44,6 +45,7 @@ const CHIP_FIELDS = new Set([
 ]);
 
 export default function CusocRegistrationsPage() {
+  const searchParams = useSearchParams();
   const [source, setSource] = useState<RegistrationSource>("cusoc-2026");
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +59,24 @@ export default function CusocRegistrationsPage() {
 
   const isCusocSource = source === "cusoc-2026" || source === "cusoc-2027";
   const track: CusocTrack = source === "cusoc-2026" ? "2026" : "2027";
+
+  function normalizeSourceParam(value: string | null): RegistrationSource | null {
+    if (!value) return null;
+
+    if (value === "cusoc-2026" || value === "cusoc-2027" || value === "outside-all" || value === "outside-ambassadors") {
+      return value;
+    }
+
+    if (value === "campus-ambassadors") {
+      return "outside-ambassadors";
+    }
+
+    if (value === "cusoc") {
+      return "cusoc-2026";
+    }
+
+    return null;
+  }
 
   async function loadCounts() {
     try {
@@ -111,6 +131,13 @@ export default function CusocRegistrationsPage() {
   useEffect(() => {
     loadCounts();
   }, []);
+
+  useEffect(() => {
+    const fromQuery = normalizeSourceParam(searchParams.get("source"));
+    if (fromQuery && fromQuery !== source) {
+      setSource(fromQuery);
+    }
+  }, [searchParams, source]);
 
   // Fetch data on track change
   useEffect(() => {

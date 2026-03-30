@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import {
   LayoutDashboard,
@@ -9,6 +9,7 @@ import {
   CalendarDays,
   Image,
   User,
+  UserRoundCheck,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -18,7 +19,6 @@ import { useState } from "react";
 
 const navItems = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { label: "Registrations", href: "/admin/registrations", icon: Users },
   { label: "Events", href: "/admin/events", icon: CalendarDays },
   { label: "Gallery", href: "/admin/gallery", icon: Image },
   { label: "Team", href: "/admin/team", icon: User },
@@ -28,8 +28,14 @@ const navItems = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(false);
+
+  const source = searchParams.get("source") || "";
+  const registrationsRootActive = pathname.startsWith("/admin/registrations");
+  const cusocActive = registrationsRootActive && (source === "" || source.startsWith("cusoc"));
+  const ambassadorActive = registrationsRootActive && source.includes("outside-ambassadors");
 
   return (
     <aside
@@ -66,6 +72,54 @@ export default function AdminSidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <div className="mb-2">
+          <Link
+            href="/admin/registrations?source=cusoc-2026"
+            className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+              registrationsRootActive
+                ? "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 shadow-sm shadow-red-500/5"
+                : "text-black/50 hover:text-black/80 hover:bg-black/5 dark:text-white/40 dark:hover:text-white/70 dark:hover:bg-white/[0.03]"
+            } ${collapsed ? "justify-center" : ""}`}
+            title={collapsed ? "Registrations" : undefined}
+          >
+            <Users
+              className={`flex-shrink-0 w-[18px] h-[18px] transition-colors ${
+                registrationsRootActive
+                  ? "text-red-600 dark:text-red-400"
+                  : "text-black/40 group-hover:text-black/70 dark:text-white/30 dark:group-hover:text-white/60"
+              }`}
+            />
+            {!collapsed && <span>Registrations</span>}
+          </Link>
+
+          {!collapsed && (
+            <div className="mt-1 ml-6 space-y-1">
+              <Link
+                href="/admin/registrations?source=cusoc-2026"
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+                  cusocActive
+                    ? "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
+                    : "text-black/50 hover:bg-black/5 hover:text-black/80 dark:text-white/35 dark:hover:bg-white/[0.03] dark:hover:text-white/70"
+                }`}
+              >
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-current" />
+                CUSoC Registrations
+              </Link>
+              <Link
+                href="/admin/registrations?source=outside-ambassadors"
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+                  ambassadorActive
+                    ? "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
+                    : "text-black/50 hover:bg-black/5 hover:text-black/80 dark:text-white/35 dark:hover:bg-white/[0.03] dark:hover:text-white/70"
+                }`}
+              >
+                <UserRoundCheck className="h-3.5 w-3.5" />
+                Campus Ambassadors
+              </Link>
+            </div>
+          )}
+        </div>
+
         {navItems.map((item) => {
           const isActive =
             item.href === "/admin"
