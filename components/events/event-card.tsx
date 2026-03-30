@@ -31,7 +31,17 @@ function normalizeEventImageUrl(url: string | undefined | null): string {
   return trimmed;
 }
 
+function slugifyTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
 export default function EventCard({
+  id,
   title,
   description,
   date,
@@ -42,6 +52,10 @@ export default function EventCard({
   image,
   registrationUrl,
 }: EventCardProps) {
+  const eventHref = useMemo(
+    () => `/events/${slugifyTitle(title)}?id=${encodeURIComponent(String(id))}`,
+    [id, title]
+  );
   const normalizedImage = useMemo(() => normalizeEventImageUrl(image), [image]);
   const fallbackImage = useMemo(
     () =>
@@ -77,8 +91,15 @@ export default function EventCard({
           <span className="rounded-md border border-border bg-card/80 px-2 py-1 text-sm font-medium text-foreground/60 backdrop-blur-sm">{date}</span>
         </div>
 
-        <h3 className="text-xl font-bold mb-3 text-foreground/90 group-hover:text-[#dc2626] transition-colors leading-tight">
-          {title}
+        <h3 className="text-xl font-bold mb-3 text-foreground/90 transition-colors leading-tight">
+          <Link
+            href={eventHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group-hover:text-[#dc2626] hover:text-[#dc2626] transition-colors"
+          >
+            {title}
+          </Link>
         </h3>
 
         <p className="text-foreground/60 text-sm mb-6 leading-relaxed flex-grow">{description}</p>

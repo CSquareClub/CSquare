@@ -84,6 +84,21 @@ export async function listPublicEvents(): Promise<ClubEvent[]> {
   return rows.map(rowToEvent);
 }
 
+export async function getPublicEventById(id: number): Promise<ClubEvent | null> {
+  await ensureEventsTable();
+  const rows = await prisma.$queryRawUnsafe<EventRow[]>(
+    `SELECT id, title, description, event_date, time_text, location, attendees, category, image_url, is_published, registration_url
+     FROM events
+     WHERE id = $1
+       AND is_published = TRUE
+     LIMIT 1;`,
+    id
+  );
+
+  if (!rows.length) return null;
+  return rowToEvent(rows[0]);
+}
+
 export async function listAdminEvents(): Promise<ClubEvent[]> {
   await ensureEventsTable();
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
