@@ -25,49 +25,49 @@ model CusocRegistration2026 {
   createdAt DateTime @default(now())
 
   // Section 1 – Basic CU Details
-  fullName   String
-  rollNumber String
-  cuEmail       String   @unique
-  personalEmail String   @default("")
+  fullName      String
+  rollNumber    String
+  cuEmail       String @unique
+  personalEmail String @default("")
 
   phone      String
   department String
   year       String
 
   // Section 2 – Technical Background
-  languages         String   // comma-separated
-  dsaLevel          String   // beginner | intermediate | advanced
-  devExperience     String   // none | basic | intermediate | advanced
+  languages     String // comma-separated
+  dsaLevel      String // beginner | intermediate | advanced
+  devExperience String // none | basic | intermediate | advanced
 
   // Section 3 – Domain Selection
-  domainOrder       String   @default("") // comma-separated order of domains
+  domainOrder String @default("") // comma-separated order of domains
 
   // Section 4 – Experience
   githubProfile     String
-  projectCount      String   // 0 | 1-2 | 3+
+  projectCount      String // 0 | 1-2 | 3+
   bestProjectLink   String
-  openSourceContrib String   // yes | no
-  openSourceLink    String?  // optional link if yes
+  openSourceContrib String // yes | no
+  openSourceLink    String? // optional link if yes
 
   // Section 5 – Target Organization
-  targetOrgs        String   // comma-separated
-  exploredRepo      String   // yes | no
-  orgRepoLink       String?
+  targetOrgs   String // comma-separated
+  exploredRepo String // yes | no
+  orgRepoLink  String?
 
   // Section 6 – Goals
-  goals             String  @default("") // comma-separated
-  whyCusoc          String
+  goals    String @default("") // comma-separated
+  whyCusoc String
 
   // Section 7 – Commitment
-  hoursPerWeek      String   // <5 | 5-10 | 10+
-  readyWeeklyTasks  String   // yes | no
-  readyDeadlines    String   // yes | no
+  hoursPerWeek     String // <5 | 5-10 | 10+
+  readyWeeklyTasks String // yes | no
+  readyDeadlines   String // yes | no
 
   // Section 8 – Mini Proposal
-  proposalFileUrl   String   @default("")
+  proposalFileUrl String @default("")
 
   // Section 9 – Screening
-  screeningAnswer   String
+  screeningAnswer String
 }
 
 // ── CUSoC 2027-28 (Preparation Batch) ──────────────────────
@@ -78,25 +78,25 @@ model CusocRegistration2027 {
   // Section 1 – Basic CU Details
   fullName      String
   rollNumber    String
-  cuEmail       String   @unique
-  personalEmail String   @default("")
+  cuEmail       String @unique
+  personalEmail String @default("")
 
   phone      String
   department String
   year       String
 
   // Section 2 – Skill Level
-  skillLevel String   // beginner | basic | intermediate
-  languages  String   // comma-separated
+  skillLevel String // beginner | basic | intermediate
+  languages  String // comma-separated
 
   // Section 3 – Interest Area
   interestArea String // web | app | backend | opensource | dsa
 
   // Section 4 – Goals
-  goalLearnCoding    Boolean @default(false)
-  goalBuildProjects  Boolean @default(false)
-  goalTargetGsoc     Boolean @default(false)
-  whyJoin            String
+  goalLearnCoding   Boolean @default(false)
+  goalBuildProjects Boolean @default(false)
+  goalTargetGsoc    Boolean @default(false)
+  whyJoin           String
 
   // Section 5 – Awareness
   knowsOpenSource Boolean @default(false)
@@ -107,4 +107,41 @@ model CusocRegistration2027 {
 
   // Section 7 – Motivation
   motivation String
+}
+
+model Event {
+  id          String  @id @default(cuid())
+  title       String
+  slug        String  @unique
+  tagline     String?
+  description String
+
+  category  String
+  eventType String
+  tags      String[]
+
+  startDateTime DateTime
+  endDateTime   DateTime
+
+  venueName  String?
+  city       String?
+  onlineLink String?
+
+  organizerName String
+  contactEmail  String
+
+  registrationLink     String
+  registrationDeadline DateTime?
+
+  bannerImage String?
+
+  prizes   String?
+  rules    String?
+  schedule String?
+  sponsors String?
+
+  status String @default("draft")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
