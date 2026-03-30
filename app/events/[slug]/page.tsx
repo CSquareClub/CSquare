@@ -6,6 +6,7 @@ import Footer from "@/components/footer";
 import GridBackground from "@/components/grid-background";
 import { Button } from "@/components/ui/button";
 import { getPublishedEventBySlug } from "@/lib/event-service";
+import { hasDevfolioRegistrationLink, parseEventSponsors } from "@/lib/event-sponsors";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,12 @@ export default async function EventDetailPage({ params }: PageProps) {
   if (!event) {
     notFound();
   }
+
+  const parsedSponsors = parseEventSponsors(event.sponsors);
+  const hasSponsors = parsedSponsors.length > 0;
+  const registrationLabel = hasDevfolioRegistrationLink(event.registrationLink)
+    ? "Apply with Devfolio"
+    : "Register Now";
 
   return (
     <div className="relative isolate min-h-screen bg-background">
@@ -80,11 +87,45 @@ export default async function EventDetailPage({ params }: PageProps) {
               {event.prizes ? <section><h2 className="mb-1 text-lg font-semibold">Prizes</h2><p className="text-sm text-foreground/75">{event.prizes}</p></section> : null}
               {event.rules ? <section><h2 className="mb-1 text-lg font-semibold">Rules</h2><p className="text-sm text-foreground/75">{event.rules}</p></section> : null}
               {event.schedule ? <section><h2 className="mb-1 text-lg font-semibold">Schedule</h2><p className="text-sm text-foreground/75">{event.schedule}</p></section> : null}
-              {event.sponsors ? <section><h2 className="mb-1 text-lg font-semibold">Sponsors</h2><p className="text-sm text-foreground/75">{event.sponsors}</p></section> : null}
+              {hasSponsors ? (
+                <section>
+                  <h2 className="mb-3 text-lg font-semibold">Sponsors</h2>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {parsedSponsors.map((sponsor) => (
+                      <div key={`${event.id}-${sponsor.title}`} className="rounded-xl border border-border bg-background/40 p-4">
+                        <p className="mb-2 text-sm font-medium">{sponsor.title}</p>
+                        {sponsor.logoLightUrl || sponsor.logoDarkUrl ? (
+                          <div className="flex items-center justify-center rounded-lg border border-border bg-card/70 p-3">
+                            {sponsor.logoLightUrl ? (
+                              <img
+                                src={sponsor.logoLightUrl}
+                                alt={sponsor.title}
+                                className="max-h-12 w-auto object-contain dark:hidden"
+                              />
+                            ) : null}
+                            {sponsor.logoDarkUrl ? (
+                              <img
+                                src={sponsor.logoDarkUrl}
+                                alt={sponsor.title}
+                                className="hidden max-h-12 w-auto object-contain dark:block"
+                              />
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ) : event.sponsors ? (
+                <section>
+                  <h2 className="mb-1 text-lg font-semibold">Sponsors</h2>
+                  <p className="text-sm text-foreground/75">{event.sponsors}</p>
+                </section>
+              ) : null}
 
               <Button asChild>
                 <a href={event.registrationLink} target="_blank" rel="noreferrer">
-                  Register Now
+                  {registrationLabel}
                 </a>
               </Button>
             </div>

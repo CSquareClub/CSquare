@@ -17,6 +17,7 @@ interface Sponsor {
 
 interface EventCardProps {
   id: string | number;
+  slug?: string | null;
   title: string | null;
   description: string | null;
   date: string | null;
@@ -93,6 +94,7 @@ function isDevfolioSponsor(title: string | null | undefined): boolean {
 
 export default function EventCard({
   id,
+  slug,
   title,
   description,
   date,
@@ -113,8 +115,8 @@ export default function EventCard({
 }: EventCardProps) {
   const safeTitle = (title || 'Untitled Event').trim() || 'Untitled Event';
   const eventHref = useMemo(
-    () => `/events/${slugifyTitle(safeTitle)}?id=${encodeURIComponent(String(id))}`,
-    [id, safeTitle]
+    () => `/events/${encodeURIComponent((slug || slugifyTitle(safeTitle)).trim())}`,
+    [slug, safeTitle]
   );
   const normalizedImage = useMemo(() => normalizeEventImageUrl(image), [image]);
   const fallbackImage = useMemo(

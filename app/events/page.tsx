@@ -1,15 +1,20 @@
-import Link from "next/link";
-
 import Navigation from "@/components/navigation";
 import Footer from "@/components/footer";
 import GridBackground from "@/components/grid-background";
-import { Button } from "@/components/ui/button";
+import EventCard from "@/components/events/event-card";
 import { listPublishedEventsFromDb } from "@/lib/event-service";
+import { getDevfolioApplyLogos, parseEventSponsors } from "@/lib/event-sponsors";
 
 export const dynamic = "force-dynamic";
 
 function formatDate(value: Date): string {
-  return value.toLocaleString();
+  return value.toLocaleDateString();
+}
+
+function formatTime(start: Date, end: Date): string {
+  const startLabel = start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const endLabel = end.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  return `${startLabel} - ${endLabel}`;
 }
 
 export default async function EventsPage() {
@@ -41,25 +46,45 @@ export default async function EventsPage() {
               </div>
             ) : (
               <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {events.map((event) => (
-                  <article key={event.id} className="rounded-xl border border-border bg-card/70 p-5">
-                    <p className="mb-2 text-xs uppercase tracking-[0.16em] text-primary/80">{event.category}</p>
-                    <h2 className="text-xl font-semibold">{event.title}</h2>
-                    {event.tagline ? <p className="mt-2 text-sm text-foreground/70">{event.tagline}</p> : null}
-                    <p className="mt-3 text-sm text-foreground/65">{event.description}</p>
-                    <p className="mt-4 text-xs text-foreground/60">{formatDate(event.startDateTime)}</p>
-                    <div className="mt-5 flex items-center gap-2">
-                      <Button asChild variant="outline" size="sm">
-                        <Link href={`/events/${event.slug}`}>View Details</Link>
-                      </Button>
-                      <Button asChild size="sm">
-                        <a href={event.registrationLink} target="_blank" rel="noreferrer">
-                          Register Now
-                        </a>
-                      </Button>
-                    </div>
-                  </article>
-                ))}
+                {events.map((event) => {
+                  const parsedSponsors = parseEventSponsors(event.sponsors);
+                  const sponsorRows = parsedSponsors.map((sponsor, index) => ({
+                    id: index + 1,
+                    eventId: 0,
+                    title: sponsor.title,
+                    logoUrl: sponsor.logoUrl,
+                    logoLightUrl: sponsor.logoLightUrl,
+                    logoDarkUrl: sponsor.logoDarkUrl,
+                    devfolioApplyLogoLightUrl: sponsor.devfolioApplyLogoLightUrl,
+                    devfolioApplyLogoDarkUrl: sponsor.devfolioApplyLogoDarkUrl,
+                  }));
+                  const devfolioApplyLogos = getDevfolioApplyLogos(parsedSponsors);
+
+                  return (
+                    <EventCard
+                      key={event.id}
+                      id={event.id}
+                      slug={event.slug}
+                      title={event.title}
+                      description={event.description}
+                      date={formatDate(event.startDateTime)}
+                      time={formatTime(event.startDateTime, event.endDateTime)}
+                      location={event.venueName || event.city}
+                      attendees={null}
+                      category={event.category}
+                      image={event.bannerImage}
+                      sponsors={sponsorRows}
+                      sponsorTitle={sponsorRows[0]?.title || null}
+                      sponsorLogoUrl={sponsorRows[0]?.logoUrl || null}
+                      sponsorLogoLightUrl={sponsorRows[0]?.logoLightUrl || null}
+                      sponsorLogoDarkUrl={sponsorRows[0]?.logoDarkUrl || null}
+                      devfolioApplyLogoLightUrl={devfolioApplyLogos.light}
+                      devfolioApplyLogoDarkUrl={devfolioApplyLogos.dark}
+                      registrationUrl={event.registrationLink}
+                      isRegistrationOpen={event.endDateTime > new Date()}
+                    />
+                  );
+                })}
               </div>
             )}
           </div>

@@ -256,6 +256,9 @@ export function EventForm({ mode, defaultValues, submitAction }: EventFormProps)
           <div className="md:col-span-2">
             <label className="mb-1 block text-sm font-medium">Sponsors</label>
             <Textarea {...register("sponsors")} className="min-h-16" />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Use plain text for one sponsor, or JSON array for multiple sponsors and logos.
+            </p>
           </div>
         </div>
       </section>
