@@ -12,6 +12,7 @@ export type ClubEvent = {
   attendees: number;
   category: string;
   image: string;
+  sponsorTitle: string | null;
   sponsorLogoUrl: string | null;
   sponsorLogoLightUrl: string | null;
   sponsorLogoDarkUrl: string | null;
@@ -31,6 +32,7 @@ type EventRow = {
   attendees: number;
   category: string;
   image_url: string;
+  sponsor_title: string | null;
   sponsor_logo_url: string | null;
   sponsor_logo_light_url: string | null;
   sponsor_logo_dark_url: string | null;
@@ -56,6 +58,7 @@ async function ensureEventsTable() {
       attendees INTEGER NOT NULL DEFAULT 0,
       category TEXT NOT NULL,
       image_url TEXT NOT NULL,
+      sponsor_title TEXT,
       sponsor_logo_url TEXT,
       sponsor_logo_light_url TEXT,
       sponsor_logo_dark_url TEXT,
@@ -69,6 +72,7 @@ async function ensureEventsTable() {
   // Add start/end timestamps for older deployments that already have the events table.
   await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS start_at TIMESTAMPTZ;`);
   await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS end_at TIMESTAMPTZ;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_title TEXT;`);
   await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_url TEXT;`);
   await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_light_url TEXT;`);
   await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_dark_url TEXT;`);
@@ -110,6 +114,7 @@ function rowToEvent(row: EventRow): ClubEvent {
     attendees: row.attendees,
     category: row.category,
     image: row.image_url,
+    sponsorTitle: row.sponsor_title,
     sponsorLogoUrl: row.sponsor_logo_url,
     sponsorLogoLightUrl,
     sponsorLogoDarkUrl,
@@ -121,7 +126,7 @@ function rowToEvent(row: EventRow): ClubEvent {
 export async function listPublicEvents(): Promise<ClubEvent[]> {
   await ensureEventsTable();
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
-    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url
+    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url
      FROM events
      WHERE is_published = TRUE
      ORDER BY start_at ASC;`
@@ -133,7 +138,7 @@ export async function listPublicEvents(): Promise<ClubEvent[]> {
 export async function getPublicEventById(id: number): Promise<ClubEvent | null> {
   await ensureEventsTable();
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
-    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url
+    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url
      FROM events
      WHERE id = $1
        AND is_published = TRUE
@@ -148,7 +153,7 @@ export async function getPublicEventById(id: number): Promise<ClubEvent | null> 
 export async function listAdminEvents(): Promise<ClubEvent[]> {
   await ensureEventsTable();
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
-    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url
+    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url
      FROM events
      ORDER BY start_at DESC;`
   );
@@ -183,9 +188,9 @@ export async function createEvent(input: CreateEventInput): Promise<ClubEvent> {
 
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
     `INSERT INTO events
-      (title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
-     RETURNING id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url;`,
+      (title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+     RETURNING id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url;`,
     input.title,
     input.description,
     startDate,
@@ -196,6 +201,7 @@ export async function createEvent(input: CreateEventInput): Promise<ClubEvent> {
     input.attendees,
     input.category,
     input.image,
+    input.sponsorTitle,
     input.sponsorLogoUrl ?? input.sponsorLogoLightUrl ?? input.sponsorLogoDarkUrl,
     input.sponsorLogoLightUrl ?? input.sponsorLogoUrl,
     input.sponsorLogoDarkUrl ?? input.sponsorLogoLightUrl ?? input.sponsorLogoUrl,
@@ -212,7 +218,7 @@ export async function updateEvent(id: number, input: UpdateEventInput): Promise<
   await ensureEventsTable();
 
   const existing = await prisma.$queryRawUnsafe<EventRow[]>(
-    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url
+    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url
      FROM events
      WHERE id = $1;`,
     id
@@ -237,14 +243,15 @@ export async function updateEvent(id: number, input: UpdateEventInput): Promise<
          attendees = $8,
          category = $9,
          image_url = $10,
-         sponsor_logo_url = $11,
-         sponsor_logo_light_url = $12,
-         sponsor_logo_dark_url = $13,
-         is_published = $14,
-         registration_url = $15,
+         sponsor_title = $11,
+         sponsor_logo_url = $12,
+         sponsor_logo_light_url = $13,
+         sponsor_logo_dark_url = $14,
+         is_published = $15,
+         registration_url = $16,
          updated_at = NOW()
-       WHERE id = $16
-       RETURNING id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url;`,
+       WHERE id = $17
+       RETURNING id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url;`,
     input.title ?? current.title,
     input.description ?? current.description,
     startDate,
@@ -255,6 +262,7 @@ export async function updateEvent(id: number, input: UpdateEventInput): Promise<
     input.attendees ?? current.attendees,
     input.category ?? current.category,
     input.image ?? current.image,
+    input.sponsorTitle ?? current.sponsorTitle,
     input.sponsorLogoUrl ?? current.sponsorLogoUrl,
     input.sponsorLogoLightUrl ?? current.sponsorLogoLightUrl,
     input.sponsorLogoDarkUrl ?? current.sponsorLogoDarkUrl,

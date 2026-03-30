@@ -14,6 +14,7 @@ type EventItem = {
   attendees: number;
   category: string;
   image: string;
+  sponsorTitle: string | null;
   sponsorLogoUrl: string | null;
   sponsorLogoLightUrl: string | null;
   sponsorLogoDarkUrl: string | null;
@@ -30,6 +31,7 @@ type EventFormState = {
   attendees: string;
   category: string;
   image: string;
+  sponsorTitle: string;
   sponsorLogoLightUrl: string;
   sponsorLogoDarkUrl: string;
   isPublished: boolean;
@@ -45,6 +47,7 @@ const defaultForm: EventFormState = {
   attendees: "0",
   category: "Workshop",
   image: "",
+  sponsorTitle: "",
   sponsorLogoLightUrl: "",
   sponsorLogoDarkUrl: "",
   isPublished: true,
@@ -124,6 +127,7 @@ export default function AdminEventsPage() {
       attendees: Number(form.attendees || 0),
       category: form.category,
       image: form.image,
+      sponsorTitle: form.sponsorTitle || null,
       sponsorLogoLightUrl: form.sponsorLogoLightUrl || null,
       sponsorLogoDarkUrl: form.sponsorLogoDarkUrl || null,
       isPublished: form.isPublished,
@@ -163,6 +167,7 @@ export default function AdminEventsPage() {
       attendees: String(event.attendees),
       category: event.category,
       image: event.image,
+      sponsorTitle: event.sponsorTitle || "",
       sponsorLogoLightUrl: event.sponsorLogoLightUrl || event.sponsorLogoUrl || "",
       sponsorLogoDarkUrl: event.sponsorLogoDarkUrl || event.sponsorLogoUrl || "",
       isPublished: event.isPublished,
@@ -246,6 +251,12 @@ export default function AdminEventsPage() {
           placeholder="Image URL"
           value={form.image}
           onChange={(e) => setForm((prev) => ({ ...prev, image: e.target.value }))}
+          className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+        />
+        <input
+          placeholder="Sponsor title (optional)"
+          value={form.sponsorTitle}
+          onChange={(e) => setForm((prev) => ({ ...prev, sponsorTitle: e.target.value }))}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
         />
         <input

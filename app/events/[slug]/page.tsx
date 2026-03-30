@@ -118,7 +118,9 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
 
               {lightSponsorLogo || darkSponsorLogo ? (
                 <div className="rounded-xl border border-border bg-background/50 p-4">
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-foreground/65">Event Sponsor</p>
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-foreground/65">
+                    Sponsored by {event.sponsorTitle?.trim() || "Our Partner"}
+                  </p>
                   {lightSponsorLogo ? (
                     <img
                       src={normalizeEventImageUrl(lightSponsorLogo)}

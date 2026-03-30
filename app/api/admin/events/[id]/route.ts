@@ -34,6 +34,7 @@ export async function PATCH(req: Request, context: RouteContext) {
       attendees: typeof body.attendees !== "undefined" ? Number(body.attendees) : undefined,
       category: body.category,
       image: body.image,
+      sponsorTitle: typeof body.sponsorTitle !== "undefined" ? body.sponsorTitle || null : undefined,
       sponsorLogoLightUrl:
         typeof body.sponsorLogoLightUrl !== "undefined" ? body.sponsorLogoLightUrl || null : undefined,
       sponsorLogoDarkUrl:

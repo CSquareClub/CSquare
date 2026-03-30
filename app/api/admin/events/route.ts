@@ -38,6 +38,7 @@ export async function POST(req: Request) {
       attendees: Number(body.attendees || 0),
       category: body.category,
       image: body.image,
+      sponsorTitle: body.sponsorTitle || null,
       sponsorLogoLightUrl: body.sponsorLogoLightUrl || null,
       sponsorLogoDarkUrl: body.sponsorLogoDarkUrl || null,
       sponsorLogoUrl: body.sponsorLogoUrl || null,

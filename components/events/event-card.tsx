@@ -14,6 +14,7 @@ interface EventCardProps {
   attendees: number;
   category: string;
   image: string;
+  sponsorTitle?: string | null;
   sponsorLogoUrl?: string | null;
   sponsorLogoLightUrl?: string | null;
   sponsorLogoDarkUrl?: string | null;
@@ -53,6 +54,7 @@ export default function EventCard({
   attendees,
   category,
   image,
+  sponsorTitle,
   sponsorLogoUrl,
   sponsorLogoLightUrl,
   sponsorLogoDarkUrl,
@@ -147,7 +149,9 @@ export default function EventCard({
 
         {lightSponsorLogo || darkSponsorLogo ? (
           <div className="mb-6 rounded-lg border border-border bg-background/60 p-3">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/60">Sponsored by</p>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/60">
+              Sponsored by {sponsorTitle?.trim() || "Our Partner"}
+            </p>
             {lightSponsorLogo ? (
               <img
                 src={normalizeEventImageUrl(lightSponsorLogo)}
