@@ -1,6 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Trash2, Plus } from "lucide-react";
+
+type Sponsor = {
+  id?: number;
+  title: string;
+  logoUrl: string | null;
+  logoLightUrl: string | null;
+  logoDarkUrl: string | null;
+  devfolioApplyLogoLightUrl: string | null;
+  devfolioApplyLogoDarkUrl: string | null;
+};
 
 type EventItem = {
   id: number;
@@ -14,6 +25,7 @@ type EventItem = {
   attendees: number | null;
   category: string | null;
   image: string | null;
+  sponsors?: Sponsor[];
   sponsorTitle: string | null;
   sponsorLogoUrl: string | null;
   sponsorLogoLightUrl: string | null;
@@ -22,6 +34,7 @@ type EventItem = {
   devfolioApplyLogoDarkUrl: string | null;
   isPublished: boolean;
   registrationUrl: string | null;
+  isRegistrationOpen?: boolean;
 };
 
 type EventFormState = {
@@ -33,6 +46,7 @@ type EventFormState = {
   attendees: string;
   category: string;
   image: string;
+  sponsors: Sponsor[];
   sponsorTitle: string;
   sponsorLogoLightUrl: string;
   sponsorLogoDarkUrl: string;
@@ -51,6 +65,7 @@ const defaultForm: EventFormState = {
   attendees: "",
   category: "",
   image: "",
+  sponsors: [],
   sponsorTitle: "",
   sponsorLogoLightUrl: "",
   sponsorLogoDarkUrl: "",
@@ -102,18 +117,19 @@ export default function AdminEventsPage() {
 
     const reader = new FileReader();
     reader.onload = () => {
-      if (typeof reader.result === "string") {
+      const result = reader.result as string;
+      if (typeof result === "string") {
         if (variant === "sponsor") {
           if (mode === "light") {
-            setForm((prev) => ({ ...prev, sponsorLogoLightUrl: reader.result }));
+            setForm((prev) => ({ ...prev, sponsorLogoLightUrl: result }));
           } else {
-            setForm((prev) => ({ ...prev, sponsorLogoDarkUrl: reader.result }));
+            setForm((prev) => ({ ...prev, sponsorLogoDarkUrl: result }));
           }
         } else {
           if (mode === "light") {
-            setForm((prev) => ({ ...prev, devfolioApplyLogoLightUrl: reader.result }));
+            setForm((prev) => ({ ...prev, devfolioApplyLogoLightUrl: result }));
           } else {
-            setForm((prev) => ({ ...prev, devfolioApplyLogoDarkUrl: reader.result }));
+            setForm((prev) => ({ ...prev, devfolioApplyLogoDarkUrl: result }));
           }
         }
       }
@@ -162,6 +178,14 @@ export default function AdminEventsPage() {
       attendees: form.attendees ? Number(form.attendees) : null,
       category: form.category.trim() || null,
       image: form.image.trim() || null,
+      sponsors: form.sponsors.filter(s => s.title.trim()).map(s => ({
+        title: s.title.trim(),
+        logoUrl: s.logoUrl?.trim() || null,
+        logoLightUrl: s.logoLightUrl?.trim() || null,
+        logoDarkUrl: s.logoDarkUrl?.trim() || null,
+        devfolioApplyLogoLightUrl: s.devfolioApplyLogoLightUrl?.trim() || null,
+        devfolioApplyLogoDarkUrl: s.devfolioApplyLogoDarkUrl?.trim() || null,
+      })),
       sponsorTitle: form.sponsorTitle || null,
       sponsorLogoLightUrl: form.sponsorLogoLightUrl || null,
       sponsorLogoDarkUrl: form.sponsorLogoDarkUrl || null,
@@ -204,6 +228,7 @@ export default function AdminEventsPage() {
       attendees: typeof event.attendees === "number" ? String(event.attendees) : "",
       category: event.category || "",
       image: event.image || "",
+      sponsors: event.sponsors || [],
       sponsorTitle: event.sponsorTitle || "",
       sponsorLogoLightUrl: event.sponsorLogoLightUrl || event.sponsorLogoUrl || "",
       sponsorLogoDarkUrl: event.sponsorLogoDarkUrl || event.sponsorLogoUrl || "",
@@ -355,6 +380,94 @@ export default function AdminEventsPage() {
           onChange={(e) => setForm((prev) => ({ ...prev, registrationUrl: e.target.value }))}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
         />
+
+        {/* Multiple Sponsors Management */}
+        <div className="md:col-span-2">
+          <div className="mb-2 flex items-center justify-between">
+            <label className="text-sm font-semibold">Additional Sponsors</label>
+            <button
+              type="button"
+              onClick={() => {
+                setForm((prev) => ({
+                  ...prev,
+                  sponsors: [
+                    ...prev.sponsors,
+                    {
+                      title: "",
+                      logoUrl: null,
+                      logoLightUrl: null,
+                      logoDarkUrl: null,
+                      devfolioApplyLogoLightUrl: null,
+                      devfolioApplyLogoDarkUrl: null,
+                    },
+                  ],
+                }));
+              }}
+              className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-xs hover:bg-background/80"
+            >
+              <Plus size={14} />
+              Add Sponsor
+            </button>
+          </div>
+          
+          {form.sponsors.length > 0 ? (
+            <div className="space-y-3 rounded-md border border-border bg-background/30 p-3">
+              {form.sponsors.map((sponsor, idx) => (
+                <div key={idx} className="space-y-2 rounded border border-border bg-background p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <input
+                      placeholder="Sponsor name"
+                      value={sponsor.title}
+                      onChange={(e) => {
+                        const updated = [...form.sponsors];
+                        updated[idx].title = e.target.value;
+                        setForm((prev) => ({ ...prev, sponsors: updated }));
+                      }}
+                      className="flex-1 rounded border border-border bg-card px-2 py-1 text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setForm((prev) => ({
+                          ...prev,
+                          sponsors: prev.sponsors.filter((_, i) => i !== idx),
+                        }));
+                      }}
+                      className="rounded border border-red-200 bg-red-50 p-1 text-red-700 hover:bg-red-100"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                  
+                  <input
+                    placeholder="Logo Light URL"
+                    value={sponsor.logoLightUrl || ""}
+                    onChange={(e) => {
+                      const updated = [...form.sponsors];
+                      updated[idx].logoLightUrl = e.target.value || null;
+                      setForm((prev) => ({ ...prev, sponsors: updated }));
+                    }}
+                    className="w-full rounded border border-border bg-card px-2 py-1 text-xs"
+                  />
+                  
+                  <input
+                    placeholder="Logo Dark URL"
+                    value={sponsor.logoDarkUrl || ""}
+                    onChange={(e) => {
+                      const updated = [...form.sponsors];
+                      updated[idx].logoDarkUrl = e.target.value || null;
+                      setForm((prev) => ({ ...prev, sponsors: updated }));
+                    }}
+                    className="w-full rounded border border-border bg-card px-2 py-1 text-xs"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-foreground/50">No sponsors added yet</p>
+          )}
+        </div>
+
         <textarea
           placeholder="Description"
           value={form.description}

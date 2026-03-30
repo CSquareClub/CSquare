@@ -2,7 +2,18 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { Calendar, MapPin, Users, ArrowRight } from 'lucide-react';
+import { Calendar, MapPin, Users, ArrowRight, AlertCircle } from 'lucide-react';
+
+interface Sponsor {
+  id: number;
+  eventId: number;
+  title: string;
+  logoUrl: string | null;
+  logoLightUrl: string | null;
+  logoDarkUrl: string | null;
+  devfolioApplyLogoLightUrl: string | null;
+  devfolioApplyLogoDarkUrl: string | null;
+}
 
 interface EventCardProps {
   id: string | number;
@@ -14,6 +25,7 @@ interface EventCardProps {
   attendees: number | null;
   category: string | null;
   image: string | null;
+  sponsors?: Sponsor[];
   sponsorTitle?: string | null;
   sponsorLogoUrl?: string | null;
   sponsorLogoLightUrl?: string | null;
@@ -21,6 +33,7 @@ interface EventCardProps {
   devfolioApplyLogoLightUrl?: string | null;
   devfolioApplyLogoDarkUrl?: string | null;
   registrationUrl?: string | null;
+  isRegistrationOpen?: boolean;
 }
 
 function normalizeEventImageUrl(url: string | undefined | null): string {
@@ -88,6 +101,7 @@ export default function EventCard({
   attendees,
   category,
   image,
+  sponsors = [],
   sponsorTitle,
   sponsorLogoUrl,
   sponsorLogoLightUrl,
@@ -95,6 +109,7 @@ export default function EventCard({
   devfolioApplyLogoLightUrl,
   devfolioApplyLogoDarkUrl,
   registrationUrl,
+  isRegistrationOpen = true,
 }: EventCardProps) {
   const safeTitle = (title || 'Untitled Event').trim() || 'Untitled Event';
   const eventHref = useMemo(
@@ -108,6 +123,7 @@ export default function EventCard({
     []
   );
   const [currentImage, setCurrentImage] = useState(normalizedImage || fallbackImage);
+  const [imageError, setImageError] = useState(!normalizedImage);
   const lightSponsorLogo = sponsorLogoLightUrl || sponsorLogoUrl || null;
   const darkSponsorLogo = sponsorLogoDarkUrl || sponsorLogoLightUrl || sponsorLogoUrl || null;
   const isDevfolio = isDevfolioSponsor(sponsorTitle);
@@ -116,6 +132,8 @@ export default function EventCard({
   const applyLogoLight = devfolioApplyLogoLightUrl || null;
   const applyLogoDark = devfolioApplyLogoDarkUrl || applyLogoLight;
   const hasDevfolioApplyLogos = Boolean(isDevfolio && registrationUrl && applyLogoLight && applyLogoDark);
+  const hasMultiplesponsors = sponsors && sponsors.length > 0;
+  const legacySponsor = lightSponsorLogo || darkSponsorLogo;
 
   const openEventInNewTab = () => {
     window.open(eventHref, '_blank', 'noopener,noreferrer');
@@ -156,15 +174,27 @@ export default function EventCard({
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#dc2626]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20" />
       
       {/* Image Banner */}
-      <div className="relative min-h-52 w-full flex-shrink-0 overflow-hidden bg-card/80 p-3">
-        <img
-          src={currentImage}
-          className="h-full max-h-72 w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
-          alt={safeTitle}
-          onError={() => setCurrentImage(fallbackImage)}
-        />
-        {/* Gradient Overlay for Text Polish */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/55 via-background/10 to-transparent opacity-90" />
+      <div className="relative min-h-52 w-full flex-shrink-0 overflow-hidden bg-card/80 p-3 flex items-center justify-center">
+        {imageError || !normalizedImage ? (
+          <div className="flex flex-col items-center justify-center w-full h-full text-foreground/50">
+            <AlertCircle size={48} className="mb-2 text-foreground/40" />
+            <p className="text-sm font-medium">No media available</p>
+          </div>
+        ) : (
+          <>
+            <img
+              src={currentImage}
+              className="h-full max-h-72 w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
+              alt={safeTitle}
+              onError={() => {
+                setCurrentImage(fallbackImage);
+                setImageError(true);
+              }}
+            />
+            {/* Gradient Overlay for Text Polish */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background/55 via-background/10 to-transparent opacity-90" />
+          </>
+        )}
         
         {/* Floating Category Tag */}
         {category ? (
@@ -194,7 +224,41 @@ export default function EventCard({
 
         {description ? <p className="text-foreground/60 text-sm mb-6 leading-relaxed flex-grow">{description}</p> : null}
 
-        {lightSponsorLogo || darkSponsorLogo ? (
+        {/* Multiple Sponsors */}
+        {hasMultiplesponsors ? (
+          <div className="mb-6">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/60">
+              Sponsors
+            </p>
+            <div className="space-y-3">
+              {sponsors.map((sponsor) => (
+                <div key={sponsor.id} className="rounded-lg border border-border bg-background/60 p-3">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground/50">
+                    {sponsor.title}
+                  </p>
+                  <div className="flex items-center justify-center h-10">
+                    {sponsor.logoLightUrl ? (
+                      <img
+                        src={normalizeEventImageUrl(sponsor.logoLightUrl)}
+                        alt={sponsor.title}
+                        className="max-h-10 w-auto object-contain dark:hidden"
+                        loading="lazy"
+                      />
+                    ) : null}
+                    {sponsor.logoDarkUrl ? (
+                      <img
+                        src={normalizeEventImageUrl(sponsor.logoDarkUrl)}
+                        alt={sponsor.title}
+                        className="hidden max-h-10 w-auto object-contain dark:block"
+                        loading="lazy"
+                      />
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : legacySponsor ? (
           <div className="mb-6 rounded-lg border border-border bg-background/60 p-3">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/60">
               Sponsored by {sponsorTitle?.trim() || "Our Partner"}
@@ -242,7 +306,7 @@ export default function EventCard({
         ) : null}
 
         <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
-          {hasDevfolioApplyLogos ? (
+          {hasDevfolioApplyLogos && isRegistrationOpen ? (
             <Link
               href={registrationUrl || '#'}
               target="_blank"
@@ -263,7 +327,7 @@ export default function EventCard({
                 loading="lazy"
               />
             </Link>
-          ) : registrationUrl ? (
+          ) : registrationUrl && isRegistrationOpen ? (
             <Link
               href={registrationUrl}
               target="_blank"
@@ -272,6 +336,13 @@ export default function EventCard({
             >
               {registrationButtonLabel}
             </Link>
+          ) : !isRegistrationOpen ? (
+            <button
+              disabled
+              className="cursor-not-allowed rounded-lg border border-border bg-card/50 px-4 py-2 text-sm font-semibold text-foreground/40"
+            >
+              Registration Closed
+            </button>
           ) : (
             <button
               disabled

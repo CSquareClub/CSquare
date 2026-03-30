@@ -23,6 +23,16 @@ export async function PATCH(req: Request, context: RouteContext) {
 
     const body = await req.json();
 
+    // Process sponsors array if provided
+    const sponsors = body.sponsors !== undefined ? body.sponsors.map((sponsor: any) => ({
+      title: sponsor.title,
+      logoUrl: sponsor.logoUrl || null,
+      logoLightUrl: sponsor.logoLightUrl || null,
+      logoDarkUrl: sponsor.logoDarkUrl || null,
+      devfolioApplyLogoLightUrl: sponsor.devfolioApplyLogoLightUrl || null,
+      devfolioApplyLogoDarkUrl: sponsor.devfolioApplyLogoDarkUrl || null,
+    })) : undefined;
+
     const updated = await updateEvent(eventId, {
       title: body.title,
       description: body.description,
@@ -51,6 +61,7 @@ export async function PATCH(req: Request, context: RouteContext) {
       sponsorLogoUrl: typeof body.sponsorLogoUrl !== "undefined" ? body.sponsorLogoUrl || null : undefined,
       isPublished: typeof body.isPublished !== "undefined" ? Boolean(body.isPublished) : undefined,
       registrationUrl: typeof body.registrationUrl !== "undefined" ? body.registrationUrl || null : undefined,
+      sponsors,
     });
 
     if (!updated) {

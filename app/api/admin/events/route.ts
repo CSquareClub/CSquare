@@ -27,6 +27,16 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
+    // Process sponsors array if provided
+    const sponsors = body.sponsors ? body.sponsors.map((sponsor: any) => ({
+      title: sponsor.title,
+      logoUrl: sponsor.logoUrl || null,
+      logoLightUrl: sponsor.logoLightUrl || null,
+      logoDarkUrl: sponsor.logoDarkUrl || null,
+      devfolioApplyLogoLightUrl: sponsor.devfolioApplyLogoLightUrl || null,
+      devfolioApplyLogoDarkUrl: sponsor.devfolioApplyLogoDarkUrl || null,
+    })) : [];
+
     const event = await createEvent({
       title: body.title,
       description: body.description,
@@ -51,6 +61,7 @@ export async function POST(req: Request) {
       sponsorLogoUrl: body.sponsorLogoUrl || null,
       isPublished: Boolean(body.isPublished),
       registrationUrl: body.registrationUrl || null,
+      sponsors,
     });
 
     return NextResponse.json(event, { status: 201 });
