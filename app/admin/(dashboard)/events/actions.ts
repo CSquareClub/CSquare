@@ -7,6 +7,7 @@ import { authOptions } from "@/lib/authOptions";
 import prisma from "@/lib/db";
 import { eventFormSchema, toEventInput, type EventFormInput } from "@/lib/event-schema";
 import { updateEvent as updateLegacyEvent } from "@/lib/events-store";
+import { parseEventSponsors } from "@/lib/event-sponsors";
 
 export type EventActionResult = {
   ok: boolean;
@@ -69,6 +70,54 @@ export async function updateEventAction(id: string, payload: EventFormInput): Pr
   }
 
   const input = toEventInput(parsed.data);
+
+  if (id.startsWith("legacy-")) {
+    const legacyId = Number(id.replace("legacy-", ""));
+    if (Number.isNaN(legacyId)) {
+      return { ok: false, message: "Invalid legacy event id" };
+    }
+
+    const parsedSponsors = parseEventSponsors(input.sponsors || null);
+
+    try {
+      await updateLegacyEvent(legacyId, {
+        title: input.title,
+        description: input.description,
+        startDate: input.startDateTime.toISOString(),
+        endDate: input.endDateTime.toISOString(),
+        location: [input.venueName, input.city].filter(Boolean).join(", ") || null,
+        category: input.category,
+        image: input.bannerImage || null,
+        registrationUrl: input.registrationLink,
+        isPublished: input.status === "published",
+        sponsorTitle: parsedSponsors[0]?.title || null,
+        sponsorLogoUrl: parsedSponsors[0]?.logoUrl || parsedSponsors[0]?.logoLightUrl || null,
+        sponsorLogoLightUrl: parsedSponsors[0]?.logoLightUrl || parsedSponsors[0]?.logoUrl || null,
+        sponsorLogoDarkUrl:
+          parsedSponsors[0]?.logoDarkUrl || parsedSponsors[0]?.logoLightUrl || parsedSponsors[0]?.logoUrl || null,
+        devfolioApplyLogoLightUrl: parsedSponsors[0]?.devfolioApplyLogoLightUrl || null,
+        devfolioApplyLogoDarkUrl:
+          parsedSponsors[0]?.devfolioApplyLogoDarkUrl || parsedSponsors[0]?.devfolioApplyLogoLightUrl || null,
+        sponsors: parsedSponsors.map((sponsor) => ({
+          eventId: legacyId,
+          title: sponsor.title,
+          logoUrl: sponsor.logoUrl,
+          logoLightUrl: sponsor.logoLightUrl,
+          logoDarkUrl: sponsor.logoDarkUrl,
+          devfolioApplyLogoLightUrl: sponsor.devfolioApplyLogoLightUrl,
+          devfolioApplyLogoDarkUrl: sponsor.devfolioApplyLogoDarkUrl,
+        })),
+      });
+
+      revalidatePath("/admin/events");
+      revalidatePath(`/admin/events/${id}`);
+      revalidatePath("/events");
+
+      return { ok: true, message: "Event updated" };
+    } catch {
+      return { ok: false, message: "Failed to update event" };
+    }
+  }
 
   try {
     await prisma.event.update({

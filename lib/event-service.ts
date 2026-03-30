@@ -211,6 +211,15 @@ export async function listPublishedEventsFromDb(): Promise<EventRecord[]> {
 }
 
 export async function getAdminEventById(id: string): Promise<EventRecord | null> {
+  if (id.startsWith("legacy-")) {
+    const legacyId = Number(id.replace("legacy-", ""));
+    if (!Number.isNaN(legacyId)) {
+      const legacyEvents = await listAdminEvents();
+      const legacyMatch = legacyEvents.find((event) => event.id === legacyId);
+      return legacyMatch ? toLegacyEventRecord(legacyMatch) : null;
+    }
+  }
+
   try {
     await syncLegacyEventsToPrisma();
     return await prisma.event.findUnique({ where: { id } });
