@@ -104,8 +104,8 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
   const applyLogoDark = event.devfolioApplyLogoDarkUrl || applyLogoLight;
   const isDevfolio = isDevfolioSponsor(event.sponsorTitle);
   const sponsorLogoAlt = isDevfolio ? 'DEVFOLIO LOGO' : 'Sponsor logo';
-  const registrationButtonLabel = isDevfolioLink(event.registrationUrl) ? 'Apply with Devfolio' : 'Register Now';
-  const hasDevfolioApplyLogos = Boolean(isDevfolio && event.registrationUrl && applyLogoLight && applyLogoDark);
+  const registrationButtonLabel = isDevfolioLink(event.registrationLink) ? 'Apply with Devfolio' : 'Register Now';
+  const hasDevfolioApplyLogos = Boolean(isDevfolio && event.registrationLink && applyLogoLight && applyLogoDark);
   const fallbackImage =
     'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80';
 
@@ -199,7 +199,7 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
 
               {hasDevfolioApplyLogos ? (
                 <Link
-                  href={event.registrationUrl || '#'}
+                  href={event.registrationLink || '#'}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center rounded-lg border border-border bg-card px-5 py-3 transition-all hover:border-[#dc2626] hover:bg-[#dc2626]/10"
@@ -218,15 +218,15 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                     loading="lazy"
                   />
                 </Link>
-              ) : event.registrationUrl ? (
-                <Link
-                  href={event.registrationUrl}
+              ) : event.registrationLink ? (
+                <a
+                  href={event.registrationLink}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center rounded-lg border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground transition-all hover:border-[#dc2626] hover:bg-[#dc2626] hover:text-white"
                 >
                   {registrationButtonLabel}
-                </Link>
+                </a>
               ) : (
                 <div className="inline-flex cursor-not-allowed items-center rounded-lg border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground/50">
                   Registration unavailable

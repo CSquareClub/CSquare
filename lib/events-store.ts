@@ -32,6 +32,7 @@ export type ClubEvent = {
   devfolioApplyLogoDarkUrl: string | null; // Legacy single sponsor
   isPublished: boolean;
   registrationUrl: string | null;
+  registrationLink: string | null;
   isRegistrationOpen: boolean; // True if event hasn't ended
 };
 
@@ -173,6 +174,7 @@ function rowToEvent(row: EventRow, sponsors: Sponsor[] = []): ClubEvent {
     devfolioApplyLogoDarkUrl: row.devfolio_apply_logo_dark_url,
     isPublished: row.is_published,
     registrationUrl: isRegistrationOpen ? row.registration_url : null,
+    registrationLink: isRegistrationOpen ? row.registration_url : null,
     isRegistrationOpen,
   };
 }
@@ -251,7 +253,7 @@ export async function countActiveEvents(): Promise<number> {
   return Number(rows[0]?.count ?? 0);
 }
 
-export type CreateEventInput = Omit<ClubEvent, "id" | "date" | "time" | "sponsors" | "isRegistrationOpen"> & {
+export type CreateEventInput = Omit<ClubEvent, "id" | "date" | "time" | "sponsors" | "isRegistrationOpen" | "registrationLink"> & {
   date?: string;
   time?: string;
   sponsors?: CreateSponsorInput[];
