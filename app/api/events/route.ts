@@ -1,5 +1,6 @@
 import { createEvent, listPublicEvents } from "@/lib/events-store";
 import { authOptions } from "@/lib/authOptions";
+import { eventSchema } from "@/lib/event-schema";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
@@ -11,19 +12,6 @@ export async function GET() {
     console.error("Failed to fetch public events", error);
     return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
   }
-}
-
-function isValidUrl(value: string): boolean {
-  try {
-    const parsed = new URL(value);
-    return parsed.protocol === "http:" || parsed.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-function isValidEmail(value: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
 function slugify(value: string): string {
@@ -49,119 +37,97 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const title = String(body?.title || "").trim();
-    const tagline = String(body?.tagline || "").trim();
-    const description = String(body?.description || "").trim();
-    const category = String(body?.category || "").trim();
-    const eventType = String(body?.eventType || "").trim();
-    const tags = Array.isArray(body?.tags)
-      ? body.tags.filter((tag: unknown) => typeof tag === "string").map((tag: string) => tag.trim()).filter(Boolean)
-      : [];
-    const startDateTime = body?.startDateTime ? new Date(String(body.startDateTime)) : null;
-    const endDateTime = body?.endDateTime ? new Date(String(body.endDateTime)) : null;
-    const registrationDeadline = body?.registrationDeadline ? new Date(String(body.registrationDeadline)) : null;
-    const venueName = body?.venueName ? String(body.venueName).trim() : null;
-    const city = body?.city ? String(body.city).trim() : null;
-    const onlineLink = body?.onlineLink ? String(body.onlineLink).trim() : null;
-    const organizerName = String(body?.organizerName || "").trim();
-    const contactEmail = String(body?.contactEmail || "").trim();
-    const registrationLink = body?.registrationLink ? String(body.registrationLink).trim() : "";
-    const bannerImage = body?.bannerImage ? String(body.bannerImage).trim() : null;
-    const prizes = body?.prizes ? String(body.prizes).trim() : null;
-    const rules = body?.rules ? String(body.rules).trim() : null;
-    const schedule = body?.schedule ? String(body.schedule).trim() : null;
-    const sponsors = body?.sponsors ? String(body.sponsors).trim() : null;
-    const status = body?.status === "published" ? "published" : "draft";
-    const slugInput = body?.slug ? String(body.slug).trim() : "";
-    const slug = slugInput || slugify(title);
+    const parsed = eventSchema.safeParse({
+      title: String(body?.title ?? "").trim(),
+      tagline: body?.tagline ? String(body.tagline).trim() : undefined,
+      description: String(body?.description ?? "").trim(),
+      category: String(body?.category ?? "").trim(),
+      eventType: body?.eventType,
+      tags: Array.isArray(body?.tags)
+        ? body.tags.filter((tag: unknown) => typeof tag === "string").map((tag: string) => tag.trim()).filter(Boolean)
+        : undefined,
+      startDateTime: body?.startDateTime ? new Date(String(body.startDateTime)) : undefined,
+      endDateTime: body?.endDateTime ? new Date(String(body.endDateTime)) : undefined,
+      venueName: body?.venueName ? String(body.venueName).trim() : undefined,
+      city: body?.city ? String(body.city).trim() : undefined,
+      onlineLink: body?.onlineLink ? String(body.onlineLink).trim() : undefined,
+      organizerName: String(body?.organizerName ?? "").trim(),
+      contactEmail: String(body?.contactEmail ?? "").trim(),
+      registrationLink: String(body?.registrationLink ?? "").trim(),
+      registrationDeadline: body?.registrationDeadline ? new Date(String(body.registrationDeadline)) : undefined,
+      bannerImage: body?.bannerImage ? String(body.bannerImage).trim() : undefined,
+      prizes: body?.prizes ? String(body.prizes).trim() : undefined,
+      rules: body?.rules ? String(body.rules).trim() : undefined,
+      schedule: body?.schedule ? String(body.schedule).trim() : undefined,
+      sponsors: body?.sponsors ? String(body.sponsors).trim() : undefined,
+      status: body?.status,
+      slug: body?.slug ? String(body.slug).trim() : slugify(String(body?.title ?? "")),
+    });
 
-    if (!title) {
-      return NextResponse.json({ error: "title is required" }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
-    if (!description) {
-      return NextResponse.json({ error: "description is required" }, { status: 400 });
-    }
-    if (!startDateTime || Number.isNaN(startDateTime.getTime())) {
-      return NextResponse.json({ error: "startDateTime is required and must be valid" }, { status: 400 });
-    }
-    if (!endDateTime || Number.isNaN(endDateTime.getTime())) {
-      return NextResponse.json({ error: "endDateTime is required and must be valid" }, { status: 400 });
-    }
-    if (endDateTime.getTime() <= startDateTime.getTime()) {
+
+    const input = parsed.data;
+
+    if (input.endDateTime.getTime() <= input.startDateTime.getTime()) {
       return NextResponse.json({ error: "endDateTime must be after startDateTime" }, { status: 400 });
     }
-    if (!organizerName) {
-      return NextResponse.json({ error: "organizerName is required" }, { status: 400 });
-    }
-    if (!contactEmail || !isValidEmail(contactEmail)) {
-      return NextResponse.json({ error: "contactEmail is required and must be valid" }, { status: 400 });
-    }
-    if (registrationDeadline && Number.isNaN(registrationDeadline.getTime())) {
-      return NextResponse.json({ error: "registrationDeadline must be valid" }, { status: 400 });
-    }
-    if (registrationDeadline && registrationDeadline.getTime() > startDateTime.getTime()) {
+    if (input.registrationDeadline && input.registrationDeadline.getTime() > input.startDateTime.getTime()) {
       return NextResponse.json({ error: "registrationDeadline must be before startDateTime" }, { status: 400 });
     }
-    if (onlineLink && !isValidUrl(onlineLink)) {
-      return NextResponse.json({ error: "onlineLink must be a valid URL" }, { status: 400 });
-    }
-    if (!registrationLink) {
-      return NextResponse.json({ error: "registrationLink is required" }, { status: 400 });
-    }
-    if (!isValidUrl(registrationLink)) {
-      return NextResponse.json({ error: "registrationLink must be a valid URL" }, { status: 400 });
-    }
-    if (!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(input.slug)) {
       return NextResponse.json({ error: "slug must use lowercase letters, numbers, and hyphens only" }, { status: 400 });
     }
 
     const allowedCategories = ["Hackathon", "Workshop", "Fest", "Meetup"];
-    const safeCategory = allowedCategories.includes(category) ? category : "Meetup";
-    const allowedTypes = ["Online", "Offline", "Hybrid"];
-    const safeEventType = allowedTypes.includes(eventType) ? eventType : "Offline";
+    const safeCategory = allowedCategories.includes(input.category) ? input.category : "Meetup";
 
-    const location = safeEventType === "Online" ? onlineLink || "Online" : buildLocation(venueName, city);
+    const location = input.eventType === "Online" ? input.onlineLink || "Online" : buildLocation(input.venueName, input.city);
 
     const detailLines = [
-      tagline ? `Tagline: ${tagline}` : null,
-      `Event Type: ${safeEventType}`,
-      tags.length ? `Tags: ${tags.join(", ")}` : null,
-      `Slug: ${slug}`,
-      registrationDeadline ? `Registration Deadline: ${registrationDeadline.toISOString()}` : null,
-      onlineLink ? `Online Link: ${onlineLink}` : null,
-      `Organizer: ${organizerName}`,
-      `Contact Email: ${contactEmail}`,
-      prizes ? `Prizes: ${prizes}` : null,
-      rules ? `Rules: ${rules}` : null,
-      schedule ? `Schedule: ${schedule}` : null,
-      sponsors ? `Sponsors: ${sponsors}` : null,
+      input.tagline ? `Tagline: ${input.tagline}` : null,
+      `Event Type: ${input.eventType}`,
+      input.tags?.length ? `Tags: ${input.tags.join(", ")}` : null,
+      `Slug: ${input.slug}`,
+      input.registrationDeadline ? `Registration Deadline: ${input.registrationDeadline.toISOString()}` : null,
+      input.onlineLink ? `Online Link: ${input.onlineLink}` : null,
+      `Organizer: ${input.organizerName}`,
+      `Contact Email: ${input.contactEmail}`,
+      input.prizes ? `Prizes: ${input.prizes}` : null,
+      input.rules ? `Rules: ${input.rules}` : null,
+      input.schedule ? `Schedule: ${input.schedule}` : null,
+      input.sponsors ? `Sponsors: ${input.sponsors}` : null,
     ].filter(Boolean);
 
     const fullDescription = detailLines.length
-      ? `${description}\n\n---\n${detailLines.join("\n")}`
-      : description;
+      ? `${input.description}\n\n---\n${detailLines.join("\n")}`
+      : input.description;
 
     const created = await createEvent({
-      title,
+      title: input.title,
       description: fullDescription,
-      startDate: startDateTime.toISOString(),
-      endDate: endDateTime.toISOString(),
+      startDate: input.startDateTime.toISOString(),
+      endDate: input.endDateTime.toISOString(),
       location,
       attendees: null,
       category: safeCategory,
-      image: bannerImage,
+      image: input.bannerImage || null,
       sponsorTitle: null,
       sponsorLogoUrl: null,
       sponsorLogoLightUrl: null,
       sponsorLogoDarkUrl: null,
       devfolioApplyLogoLightUrl: null,
       devfolioApplyLogoDarkUrl: null,
-      isPublished: status === "published",
-      registrationUrl: registrationLink,
+      isPublished: input.status === "published",
+      registrationUrl: input.registrationLink,
       sponsors: [],
     });
 
-    return NextResponse.json({ ...created, slug, status }, { status: 201 });
+    return NextResponse.json({ ...created, slug: input.slug, status: input.status }, { status: 201 });
   } catch (error) {
     console.error("Failed to create event", error);
     return NextResponse.json({ error: "Failed to create event" }, { status: 500 });
