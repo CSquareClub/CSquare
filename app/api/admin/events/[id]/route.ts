@@ -44,6 +44,10 @@ export async function PATCH(req: Request, context: RouteContext) {
         typeof body.sponsorLogoLightUrl !== "undefined" ? body.sponsorLogoLightUrl || null : undefined,
       sponsorLogoDarkUrl:
         typeof body.sponsorLogoDarkUrl !== "undefined" ? body.sponsorLogoDarkUrl || null : undefined,
+      devfolioApplyLogoLightUrl:
+        typeof body.devfolioApplyLogoLightUrl !== "undefined" ? body.devfolioApplyLogoLightUrl || null : undefined,
+      devfolioApplyLogoDarkUrl:
+        typeof body.devfolioApplyLogoDarkUrl !== "undefined" ? body.devfolioApplyLogoDarkUrl || null : undefined,
       sponsorLogoUrl: typeof body.sponsorLogoUrl !== "undefined" ? body.sponsorLogoUrl || null : undefined,
       isPublished: typeof body.isPublished !== "undefined" ? Boolean(body.isPublished) : undefined,
       registrationUrl: typeof body.registrationUrl !== "undefined" ? body.registrationUrl || null : undefined,

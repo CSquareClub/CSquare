@@ -99,10 +99,12 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
   const imageUrl = normalizeEventImageUrl(event.image);
   const lightSponsorLogo = event.sponsorLogoLightUrl || event.sponsorLogoUrl;
   const darkSponsorLogo = event.sponsorLogoDarkUrl || event.sponsorLogoLightUrl || event.sponsorLogoUrl;
+  const applyLogoLight = event.devfolioApplyLogoLightUrl || null;
+  const applyLogoDark = event.devfolioApplyLogoDarkUrl || applyLogoLight;
   const isDevfolio = isDevfolioSponsor(event.sponsorTitle);
   const sponsorLogoAlt = isDevfolio ? 'DEVFOLIO LOGO' : 'Sponsor logo';
   const registrationButtonLabel = isDevfolioLink(event.registrationUrl) ? 'Apply with Devfolio' : 'Register Now';
-  const hasDevfolioApplyLogos = Boolean(isDevfolio && event.registrationUrl && lightSponsorLogo && darkSponsorLogo);
+  const hasDevfolioApplyLogos = Boolean(isDevfolio && event.registrationUrl && applyLogoLight && applyLogoDark);
   const fallbackImage =
     'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80';
 
@@ -173,7 +175,7 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                     <img
                       src={normalizeEventImageUrl(lightSponsorLogo)}
                       alt={sponsorLogoAlt}
-                      className="h-20 w-full object-contain dark:hidden"
+                      className="h-16 w-full object-contain dark:hidden"
                       loading="lazy"
                     />
                   ) : null}
@@ -181,7 +183,7 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                     <img
                       src={normalizeEventImageUrl(darkSponsorLogo)}
                       alt={sponsorLogoAlt}
-                      className="hidden h-20 w-full object-contain dark:block"
+                      className="hidden h-16 w-full object-contain dark:block"
                       loading="lazy"
                     />
                   ) : null}
@@ -197,15 +199,15 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                   aria-label="Apply with Devfolio"
                 >
                   <img
-                    src={normalizeEventImageUrl(lightSponsorLogo)}
-                    alt={sponsorLogoAlt}
-                    className="h-8 w-auto max-w-[220px] object-contain dark:hidden"
+                    src={normalizeEventImageUrl(applyLogoLight)}
+                    alt="APPLY WITH DEVFOLIO"
+                    className="h-10 w-auto max-w-[240px] object-contain dark:hidden"
                     loading="lazy"
                   />
                   <img
-                    src={normalizeEventImageUrl(darkSponsorLogo)}
-                    alt={sponsorLogoAlt}
-                    className="hidden h-8 w-auto max-w-[220px] object-contain dark:block"
+                    src={normalizeEventImageUrl(applyLogoDark)}
+                    alt="APPLY WITH DEVFOLIO"
+                    className="hidden h-10 w-auto max-w-[240px] object-contain dark:block"
                     loading="lazy"
                   />
                 </Link>

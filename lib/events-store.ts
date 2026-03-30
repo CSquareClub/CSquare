@@ -16,6 +16,8 @@ export type ClubEvent = {
   sponsorLogoUrl: string | null;
   sponsorLogoLightUrl: string | null;
   sponsorLogoDarkUrl: string | null;
+  devfolioApplyLogoLightUrl: string | null;
+  devfolioApplyLogoDarkUrl: string | null;
   isPublished: boolean;
   registrationUrl: string | null;
 };
@@ -36,6 +38,8 @@ type EventRow = {
   sponsor_logo_url: string | null;
   sponsor_logo_light_url: string | null;
   sponsor_logo_dark_url: string | null;
+  devfolio_apply_logo_light_url: string | null;
+  devfolio_apply_logo_dark_url: string | null;
   is_published: boolean;
   registration_url: string | null;
 };
@@ -62,6 +66,8 @@ async function ensureEventsTable() {
       sponsor_logo_url TEXT,
       sponsor_logo_light_url TEXT,
       sponsor_logo_dark_url TEXT,
+      devfolio_apply_logo_light_url TEXT,
+      devfolio_apply_logo_dark_url TEXT,
       is_published BOOLEAN NOT NULL DEFAULT TRUE,
       registration_url TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -76,6 +82,8 @@ async function ensureEventsTable() {
   await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_url TEXT;`);
   await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_light_url TEXT;`);
   await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_dark_url TEXT;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS devfolio_apply_logo_light_url TEXT;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS devfolio_apply_logo_dark_url TEXT;`);
   await prisma.$executeRawUnsafe(`UPDATE events SET start_at = event_date WHERE start_at IS NULL;`);
   await prisma.$executeRawUnsafe(`UPDATE events SET end_at = event_date WHERE end_at IS NULL;`);
   await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN title DROP NOT NULL;`);
@@ -124,6 +132,8 @@ function rowToEvent(row: EventRow): ClubEvent {
     sponsorLogoUrl: row.sponsor_logo_url,
     sponsorLogoLightUrl,
     sponsorLogoDarkUrl,
+    devfolioApplyLogoLightUrl: row.devfolio_apply_logo_light_url,
+    devfolioApplyLogoDarkUrl: row.devfolio_apply_logo_dark_url,
     isPublished: row.is_published,
     registrationUrl: row.registration_url,
   };
@@ -132,7 +142,7 @@ function rowToEvent(row: EventRow): ClubEvent {
 export async function listPublicEvents(): Promise<ClubEvent[]> {
   await ensureEventsTable();
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
-    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url
+    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url
      FROM events
      WHERE is_published = TRUE
       ORDER BY COALESCE(start_at, event_date) ASC, id DESC;`
@@ -144,7 +154,7 @@ export async function listPublicEvents(): Promise<ClubEvent[]> {
 export async function getPublicEventById(id: number): Promise<ClubEvent | null> {
   await ensureEventsTable();
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
-    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url
+    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url
      FROM events
      WHERE id = $1
        AND is_published = TRUE
@@ -159,7 +169,7 @@ export async function getPublicEventById(id: number): Promise<ClubEvent | null> 
 export async function listAdminEvents(): Promise<ClubEvent[]> {
   await ensureEventsTable();
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
-    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url
+    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url
      FROM events
       ORDER BY COALESCE(start_at, event_date) DESC, id DESC;`
   );
@@ -200,9 +210,9 @@ export async function createEvent(input: CreateEventInput): Promise<ClubEvent> {
 
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
     `INSERT INTO events
-      (title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
-     RETURNING id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url;`,
+      (title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+     RETURNING id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url;`,
     input.title,
     input.description,
     safeStartDate,
@@ -217,6 +227,8 @@ export async function createEvent(input: CreateEventInput): Promise<ClubEvent> {
     input.sponsorLogoUrl ?? input.sponsorLogoLightUrl ?? input.sponsorLogoDarkUrl,
     input.sponsorLogoLightUrl ?? input.sponsorLogoUrl,
     input.sponsorLogoDarkUrl ?? input.sponsorLogoLightUrl ?? input.sponsorLogoUrl,
+    input.devfolioApplyLogoLightUrl,
+    input.devfolioApplyLogoDarkUrl,
     input.isPublished,
     input.registrationUrl
   );
@@ -230,7 +242,7 @@ export async function updateEvent(id: number, input: UpdateEventInput): Promise<
   await ensureEventsTable();
 
   const existing = await prisma.$queryRawUnsafe<EventRow[]>(
-    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url
+    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url
      FROM events
      WHERE id = $1;`,
     id
@@ -266,11 +278,13 @@ export async function updateEvent(id: number, input: UpdateEventInput): Promise<
          sponsor_logo_url = $12,
          sponsor_logo_light_url = $13,
          sponsor_logo_dark_url = $14,
-         is_published = $15,
-         registration_url = $16,
+         devfolio_apply_logo_light_url = $15,
+         devfolio_apply_logo_dark_url = $16,
+         is_published = $17,
+         registration_url = $18,
          updated_at = NOW()
-       WHERE id = $17
-       RETURNING id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url;`,
+       WHERE id = $19
+       RETURNING id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url;`,
     input.title ?? current.title,
     input.description ?? current.description,
     safeStartDate,
@@ -289,6 +303,8 @@ export async function updateEvent(id: number, input: UpdateEventInput): Promise<
     input.sponsorLogoUrl ?? current.sponsorLogoUrl,
     input.sponsorLogoLightUrl ?? current.sponsorLogoLightUrl,
     input.sponsorLogoDarkUrl ?? current.sponsorLogoDarkUrl,
+    input.devfolioApplyLogoLightUrl ?? current.devfolioApplyLogoLightUrl,
+    input.devfolioApplyLogoDarkUrl ?? current.devfolioApplyLogoDarkUrl,
     input.isPublished ?? current.isPublished,
     input.registrationUrl ?? current.registrationUrl,
     id

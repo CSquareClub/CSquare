@@ -18,6 +18,8 @@ interface EventCardProps {
   sponsorLogoUrl?: string | null;
   sponsorLogoLightUrl?: string | null;
   sponsorLogoDarkUrl?: string | null;
+  devfolioApplyLogoLightUrl?: string | null;
+  devfolioApplyLogoDarkUrl?: string | null;
   registrationUrl?: string | null;
 }
 
@@ -90,6 +92,8 @@ export default function EventCard({
   sponsorLogoUrl,
   sponsorLogoLightUrl,
   sponsorLogoDarkUrl,
+  devfolioApplyLogoLightUrl,
+  devfolioApplyLogoDarkUrl,
   registrationUrl,
 }: EventCardProps) {
   const safeTitle = (title || 'Untitled Event').trim() || 'Untitled Event';
@@ -109,7 +113,9 @@ export default function EventCard({
   const isDevfolio = isDevfolioSponsor(sponsorTitle);
   const sponsorLogoAlt = isDevfolio ? 'DEVFOLIO LOGO' : 'Sponsor logo';
   const registrationButtonLabel = isDevfolioLink(registrationUrl) ? 'Apply with Devfolio' : 'Register Now';
-  const hasDevfolioApplyLogos = Boolean(isDevfolio && registrationUrl && lightSponsorLogo && darkSponsorLogo);
+  const applyLogoLight = devfolioApplyLogoLightUrl || null;
+  const applyLogoDark = devfolioApplyLogoDarkUrl || applyLogoLight;
+  const hasDevfolioApplyLogos = Boolean(isDevfolio && registrationUrl && applyLogoLight && applyLogoDark);
 
   const openEventInNewTab = () => {
     window.open(eventHref, '_blank', 'noopener,noreferrer');
@@ -197,7 +203,7 @@ export default function EventCard({
               <img
                 src={normalizeEventImageUrl(lightSponsorLogo)}
                 alt={sponsorLogoAlt}
-                className="h-16 w-full object-contain dark:hidden"
+                className="h-14 w-full object-contain dark:hidden"
                 loading="lazy"
               />
             ) : null}
@@ -205,7 +211,7 @@ export default function EventCard({
               <img
                 src={normalizeEventImageUrl(darkSponsorLogo)}
                 alt={sponsorLogoAlt}
-                className="hidden h-16 w-full object-contain dark:block"
+                className="hidden h-14 w-full object-contain dark:block"
                 loading="lazy"
               />
             ) : null}
@@ -245,15 +251,15 @@ export default function EventCard({
               aria-label="Apply with Devfolio"
             >
               <img
-                src={normalizeEventImageUrl(lightSponsorLogo)}
-                alt={sponsorLogoAlt}
-                className="h-8 w-auto max-w-[180px] object-contain dark:hidden"
+                src={normalizeEventImageUrl(applyLogoLight)}
+                alt="APPLY WITH DEVFOLIO"
+                className="h-10 w-auto max-w-[220px] object-contain dark:hidden"
                 loading="lazy"
               />
               <img
-                src={normalizeEventImageUrl(darkSponsorLogo)}
-                alt={sponsorLogoAlt}
-                className="hidden h-8 w-auto max-w-[180px] object-contain dark:block"
+                src={normalizeEventImageUrl(applyLogoDark)}
+                alt="APPLY WITH DEVFOLIO"
+                className="hidden h-10 w-auto max-w-[220px] object-contain dark:block"
                 loading="lazy"
               />
             </Link>

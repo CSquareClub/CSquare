@@ -46,6 +46,8 @@ export async function POST(req: Request) {
       sponsorTitle: body.sponsorTitle || null,
       sponsorLogoLightUrl: body.sponsorLogoLightUrl || null,
       sponsorLogoDarkUrl: body.sponsorLogoDarkUrl || null,
+      devfolioApplyLogoLightUrl: body.devfolioApplyLogoLightUrl || null,
+      devfolioApplyLogoDarkUrl: body.devfolioApplyLogoDarkUrl || null,
       sponsorLogoUrl: body.sponsorLogoUrl || null,
       isPublished: Boolean(body.isPublished),
       registrationUrl: body.registrationUrl || null,
