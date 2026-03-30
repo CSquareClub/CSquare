@@ -80,6 +80,76 @@ function toLegacyEventRecord(event: ClubEvent): EventRecord {
   };
 }
 
+function toLegacyEventCreateData(event: ClubEvent) {
+  const normalized = toLegacyEventRecord(event);
+
+  return {
+    title: normalized.title,
+    slug: normalized.slug,
+    tagline: normalized.tagline,
+    description: normalized.description,
+    category: normalized.category,
+    eventType: normalized.eventType,
+    tags: normalized.tags,
+    startDateTime: normalized.startDateTime,
+    endDateTime: normalized.endDateTime,
+    venueName: normalized.venueName,
+    city: normalized.city,
+    onlineLink: normalized.onlineLink,
+    organizerName: normalized.organizerName,
+    contactEmail: normalized.contactEmail,
+    registrationLink: normalized.registrationLink,
+    registrationDeadline: normalized.registrationDeadline,
+    bannerImage: normalized.bannerImage,
+    prizes: normalized.prizes,
+    rules: normalized.rules,
+    schedule: normalized.schedule,
+    sponsors: normalized.sponsors,
+    status: normalized.status,
+  };
+}
+
+let legacySyncPromise: Promise<void> | null = null;
+
+async function syncLegacyEventsToPrisma(): Promise<void> {
+  if (legacySyncPromise) {
+    return legacySyncPromise;
+  }
+
+  legacySyncPromise = (async () => {
+    let legacyEvents: ClubEvent[];
+    try {
+      legacyEvents = await listAdminEvents();
+    } catch {
+      return;
+    }
+
+    if (!legacyEvents.length) return;
+
+    const existing = await prisma.event.findMany({
+      select: { slug: true },
+    });
+
+    const existingSlugs = new Set(existing.map((event) => event.slug));
+
+    for (const legacyEvent of legacyEvents) {
+      const data = toLegacyEventCreateData(legacyEvent);
+      if (!data.slug || existingSlugs.has(data.slug)) continue;
+
+      try {
+        await prisma.event.create({ data });
+        existingSlugs.add(data.slug);
+      } catch {
+        // Skip rows that fail unique constraints or partial legacy data.
+      }
+    }
+  })().finally(() => {
+    legacySyncPromise = null;
+  });
+
+  return legacySyncPromise;
+}
+
 function mergeEventRecords(primary: EventRecord[], fallback: EventRecord[]): EventRecord[] {
   const seen = new Set(primary.map((event) => event.slug));
   const merged = [...primary];
@@ -95,6 +165,8 @@ function mergeEventRecords(primary: EventRecord[], fallback: EventRecord[]): Eve
 
 export async function listAdminEventsFromDb(): Promise<EventRecord[]> {
   try {
+    await syncLegacyEventsToPrisma();
+
     const dbEvents = await prisma.event.findMany({
       orderBy: { startDateTime: "desc" },
     });
@@ -116,6 +188,8 @@ export async function listAdminEventsFromDb(): Promise<EventRecord[]> {
 
 export async function listPublishedEventsFromDb(): Promise<EventRecord[]> {
   try {
+    await syncLegacyEventsToPrisma();
+
     const dbEvents = await prisma.event.findMany({
       where: { status: { equals: "published", mode: "insensitive" } },
       orderBy: { startDateTime: "asc" },
@@ -138,6 +212,7 @@ export async function listPublishedEventsFromDb(): Promise<EventRecord[]> {
 
 export async function getAdminEventById(id: string): Promise<EventRecord | null> {
   try {
+    await syncLegacyEventsToPrisma();
     return await prisma.event.findUnique({ where: { id } });
   } catch (error) {
     if (isMissingEventTableError(error)) return null;
@@ -147,6 +222,8 @@ export async function getAdminEventById(id: string): Promise<EventRecord | null>
 
 export async function getPublishedEventBySlug(slug: string): Promise<EventRecord | null> {
   try {
+    await syncLegacyEventsToPrisma();
+
     const fromDb = await prisma.event.findFirst({
       where: {
         slug,
