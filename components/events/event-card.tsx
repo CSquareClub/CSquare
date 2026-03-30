@@ -64,8 +64,41 @@ export default function EventCard({
   );
   const [currentImage, setCurrentImage] = useState(normalizedImage || fallbackImage);
 
+  const openEventInNewTab = () => {
+    window.open(eventHref, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleCardClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const target = event.target;
+    if (target instanceof Element && target.closest('a,button')) {
+      return;
+    }
+
+    openEventInNewTab();
+  };
+
+  const handleCardKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    if (event.target instanceof Element && event.target.closest('a,button')) {
+      return;
+    }
+
+    event.preventDefault();
+    openEventInNewTab();
+  };
+
   return (
-    <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card/70 transition-all duration-500 hover:border-[#dc2626]/35 hover:bg-card hover:shadow-[0_0_30px_rgba(220,38,38,0.15)]">
+    <div
+      className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-border bg-card/70 transition-all duration-500 hover:border-[#dc2626]/35 hover:bg-card hover:shadow-[0_0_30px_rgba(220,38,38,0.15)]"
+      role="link"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
+      aria-label={`Open ${title} details`}
+    >
       {/* Subtle top highlight on hover */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#dc2626]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20" />
       
@@ -137,7 +170,15 @@ export default function EventCard({
               Details Soon
             </button>
           )}
-          <ArrowRight size={16} className="text-[#dc2626] group-hover:translate-x-1 transition-transform" />
+          <Link
+            href={eventHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Open ${title} details`}
+            className="rounded-md p-1 text-[#dc2626] transition-transform hover:translate-x-1"
+          >
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
       </div>
     </div>
