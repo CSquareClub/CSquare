@@ -67,6 +67,11 @@ function slugifyTitle(title: string): string {
     .replace(/-+/g, '-');
 }
 
+function isDevfolioLink(url: string | null | undefined): boolean {
+  if (!url) return false;
+  return /devfolio\.(co|in|com)/i.test(url);
+}
+
 export default function EventCard({
   id,
   title,
@@ -98,6 +103,7 @@ export default function EventCard({
   const lightSponsorLogo = sponsorLogoLightUrl || sponsorLogoUrl || null;
   const darkSponsorLogo = sponsorLogoDarkUrl || sponsorLogoLightUrl || sponsorLogoUrl || null;
   const sponsorLogoAlt = sponsorTitle?.trim().toLowerCase() === 'devfolio' ? 'DEVFOLIO LOGO' : 'Sponsor logo';
+  const registrationButtonLabel = isDevfolioLink(registrationUrl) ? 'Apply with Devfolio' : 'Register Now';
 
   const openEventInNewTab = () => {
     window.open(eventHref, '_blank', 'noopener,noreferrer');
@@ -231,7 +237,7 @@ export default function EventCard({
               rel="noreferrer"
               className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition-all duration-300 hover:border-[#dc2626] hover:bg-[#dc2626] hover:text-white group-hover:shadow-[0_0_15px_rgba(220,38,38,0.3)]"
             >
-              Register Now
+              {registrationButtonLabel}
             </Link>
           ) : (
             <button

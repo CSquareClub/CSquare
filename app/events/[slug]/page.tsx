@@ -55,6 +55,11 @@ function slugifyTitle(title: string): string {
     .replace(/-+/g, '-');
 }
 
+function isDevfolioLink(url: string | null | undefined): boolean {
+  if (!url) return false;
+  return /devfolio\.(co|in|com)/i.test(url);
+}
+
 type EventDetailsPageProps = {
   params: Promise<{
     slug: string;
@@ -91,6 +96,7 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
   const lightSponsorLogo = event.sponsorLogoLightUrl || event.sponsorLogoUrl;
   const darkSponsorLogo = event.sponsorLogoDarkUrl || event.sponsorLogoLightUrl || event.sponsorLogoUrl;
   const sponsorLogoAlt = event.sponsorTitle?.trim().toLowerCase() === 'devfolio' ? 'DEVFOLIO LOGO' : 'Sponsor logo';
+  const registrationButtonLabel = isDevfolioLink(event.registrationUrl) ? 'Apply with Devfolio' : 'Register Now';
   const fallbackImage =
     'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80';
 
@@ -183,7 +189,7 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                   rel="noreferrer"
                   className="inline-flex items-center rounded-lg border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground transition-all hover:border-[#dc2626] hover:bg-[#dc2626] hover:text-white"
                 >
-                  Register Now
+                  {registrationButtonLabel}
                 </Link>
               ) : (
                 <div className="inline-flex cursor-not-allowed items-center rounded-lg border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground/50">
