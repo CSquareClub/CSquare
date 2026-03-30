@@ -223,7 +223,7 @@ export async function updateEvent(id: number, input: UpdateEventInput): Promise<
   const current = rowToEvent(existing[0]);
   const startDate = new Date(input.startDate ?? input.date ?? current.startDate);
   const endDate = new Date(input.endDate ?? current.endDate);
-  const timeText = input.time ?? current.time || formatTimeRange(startDate, endDate);
+  const timeText = input.time ?? current.time ?? formatTimeRange(startDate, endDate);
 
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
     `UPDATE events
