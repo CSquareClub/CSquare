@@ -58,6 +58,19 @@ export default function AdminGalleryPage() {
     loadItems();
   }, []);
 
+  function handleImageFileChange(file: File | null) {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result === "string") {
+        setForm((prev) => ({ ...prev, imageUrl: result }));
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
   function resetForm() {
     setEditingId(null);
     setForm(defaultForm);
@@ -153,6 +166,12 @@ export default function AdminGalleryPage() {
           placeholder="Image URL (Drive or public URL)"
           value={form.imageUrl}
           onChange={(e) => setForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
+          className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+        />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => handleImageFileChange(e.target.files?.[0] || null)}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
         />
         <textarea
