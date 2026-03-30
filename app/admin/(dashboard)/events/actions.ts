@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import prisma from "@/lib/db";
 import { eventFormSchema, toEventInput, type EventFormInput } from "@/lib/event-schema";
+import { updateEvent as updateLegacyEvent } from "@/lib/events-store";
 
 export type EventActionResult = {
   ok: boolean;
@@ -90,6 +91,17 @@ export async function updateEventAction(id: string, payload: EventFormInput): Pr
 
 export async function setEventStatusAction(id: string, status: "draft" | "published"): Promise<void> {
   await ensureAdmin();
+
+  if (id.startsWith("legacy-")) {
+    const legacyId = Number(id.replace("legacy-", ""));
+    if (!Number.isNaN(legacyId)) {
+      await updateLegacyEvent(legacyId, { isPublished: status === "published" });
+
+      revalidatePath("/admin/events");
+      revalidatePath("/events");
+      return;
+    }
+  }
 
   await prisma.event.update({
     where: { id },
