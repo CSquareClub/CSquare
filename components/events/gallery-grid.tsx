@@ -1,8 +1,11 @@
+import { listPublicGalleryItems } from "@/lib/gallery-store";
+
 type GalleryItem = {
   id: string;
   title: string;
   eventName: string;
   imageUrl: string;
+  description?: string;
 };
 
 function extractDriveId(url: string): string | null {
@@ -62,14 +65,25 @@ function parseSharedLinks(raw: string): GalleryItem[] {
     .filter((item) => item.imageUrl.length > 0);
 }
 
-export default function GalleryGrid() {
+export default async function GalleryGrid() {
+  const dbItems = await listPublicGalleryItems();
+
+  const itemsFromAdmin: GalleryItem[] = dbItems.map((item) => ({
+    id: String(item.id),
+    title: item.title,
+    eventName: item.eventName,
+    imageUrl: normalizeImage(item.imageUrl),
+    description: item.description,
+  }));
+
   const rawLinks = process.env.NEXT_PUBLIC_MOMENTS_DRIVE_LINKS || "";
-  const items = parseSharedLinks(rawLinks);
+  const fallbackItems = parseSharedLinks(rawLinks);
+  const items = itemsFromAdmin.length ? itemsFromAdmin : fallbackItems;
 
   if (!items.length) {
     return (
       <div className="rounded-xl border border-border bg-card/60 p-6 text-sm text-foreground/65">
-        Add your shared Drive image links to NEXT_PUBLIC_MOMENTS_DRIVE_LINKS to show C Square Moments.
+        Add images from Admin Gallery to show C Square Moments.
       </div>
     );
   }
@@ -78,10 +92,13 @@ export default function GalleryGrid() {
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((item) => (
         <article key={item.id} className="overflow-hidden rounded-xl border border-border bg-card/70">
-          <img src={item.imageUrl} alt={item.title} className="h-52 w-full object-cover" loading="lazy" />
+          <div className="flex min-h-52 items-center justify-center bg-background/40 p-3">
+            <img src={item.imageUrl} alt={item.title} className="max-h-72 w-full object-contain" loading="lazy" />
+          </div>
           <div className="space-y-1 p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-primary/80">{item.eventName}</p>
             <h3 className="text-sm font-semibold text-foreground">{item.title}</h3>
+            {item.description ? <p className="text-xs text-foreground/65">{item.description}</p> : null}
           </div>
         </article>
       ))}
