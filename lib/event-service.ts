@@ -67,7 +67,7 @@ function toLegacyEventRecord(event: ClubEvent): EventRecord {
     onlineLink: null,
     organizerName: "C Square",
     contactEmail: "events@csquare.club",
-    registrationLink: event.registrationLink || event.registrationUrl || "#",
+    registrationLink: event.registrationLink || event.registrationUrl || "https://csquare.club/events",
     registrationDeadline: null,
     bannerImage: event.image || null,
     prizes: null,
@@ -110,7 +110,16 @@ function toLegacyEventCreateData(event: ClubEvent) {
 }
 
 function shouldUseLegacyRegistrationLink(link: string | null): boolean {
-  return !link || link.trim() === "#";
+  if (!link) return true;
+  const trimmed = link.trim();
+  if (!trimmed || trimmed === "#") return true;
+
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol !== "http:" && parsed.protocol !== "https:";
+  } catch {
+    return true;
+  }
 }
 
 let legacySyncPromise: Promise<void> | null = null;

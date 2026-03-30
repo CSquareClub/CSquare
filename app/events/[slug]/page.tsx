@@ -18,6 +18,43 @@ function formatDate(value: Date): string {
   return value.toLocaleString();
 }
 
+function normalizeEventImageUrl(url: string | undefined | null): string {
+  if (!url) return "";
+
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+
+  const fileMatch = trimmed.match(/drive\.google\.com\/file\/d\/([^/?#]+)/i);
+  if (fileMatch?.[1]) {
+    return `https://drive.google.com/thumbnail?id=${fileMatch[1]}&sz=w1600`;
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    const host = parsed.hostname.toLowerCase();
+    const isDriveHost = host.includes("drive.google.com") || host.includes("docs.google.com");
+
+    if (isDriveHost) {
+      const idParam = parsed.searchParams.get("id");
+      if (idParam) {
+        return `https://drive.google.com/thumbnail?id=${idParam}&sz=w1600`;
+      }
+
+      const ucPathMatch = parsed.pathname.match(/\/uc$/i);
+      if (ucPathMatch) {
+        const ucId = parsed.searchParams.get("id");
+        if (ucId) {
+          return `https://drive.google.com/thumbnail?id=${ucId}&sz=w1600`;
+        }
+      }
+    }
+  } catch {
+    // Keep original URL if parsing fails.
+  }
+
+  return trimmed;
+}
+
 export default async function EventDetailPage({ params }: PageProps) {
   const { slug } = await params;
   const event = await getPublishedEventBySlug(slug);
@@ -31,6 +68,7 @@ export default async function EventDetailPage({ params }: PageProps) {
   const registrationLabel = hasDevfolioRegistrationLink(event.registrationLink)
     ? "Apply with Devfolio"
     : "Register Now";
+  const bannerImage = normalizeEventImageUrl(event.bannerImage);
 
   return (
     <div className="relative isolate min-h-screen bg-background">
@@ -44,9 +82,9 @@ export default async function EventDetailPage({ params }: PageProps) {
           </Button>
 
           <article className="overflow-hidden rounded-2xl border border-border bg-card/70">
-            {event.bannerImage ? (
+            {bannerImage ? (
               <div className="border-b border-border bg-background/40 p-4">
-                <img src={event.bannerImage} alt={event.title} className="mx-auto max-h-[420px] w-full object-contain" />
+                <img src={bannerImage} alt={event.title} className="mx-auto max-h-[420px] w-full object-contain" />
               </div>
             ) : null}
 
@@ -98,14 +136,14 @@ export default async function EventDetailPage({ params }: PageProps) {
                           <div className="flex items-center justify-center rounded-lg border border-border bg-card/70 p-3">
                             {sponsor.logoLightUrl ? (
                               <img
-                                src={sponsor.logoLightUrl}
+                                src={normalizeEventImageUrl(sponsor.logoLightUrl)}
                                 alt={sponsor.title}
                                 className="max-h-12 w-auto object-contain dark:hidden"
                               />
                             ) : null}
                             {sponsor.logoDarkUrl ? (
                               <img
-                                src={sponsor.logoDarkUrl}
+                                src={normalizeEventImageUrl(sponsor.logoDarkUrl)}
                                 alt={sponsor.title}
                                 className="hidden max-h-12 w-auto object-contain dark:block"
                               />

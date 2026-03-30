@@ -9,9 +9,37 @@ type PageProps = {
   params: Promise<{ id: string }>;
 };
 
+const ALLOWED_CATEGORIES: EventFormInput["category"][] = ["Hackathon", "Workshop", "Fest", "Meetup"];
+const ALLOWED_EVENT_TYPES: EventFormInput["eventType"][] = ["Online", "Offline", "Hybrid"];
+
 function toInputDateValue(value: Date): string {
   const local = new Date(value.getTime() - value.getTimezoneOffset() * 60000);
   return local.toISOString().slice(0, 16);
+}
+
+function normalizeCategory(value: string): EventFormInput["category"] {
+  return ALLOWED_CATEGORIES.includes(value as EventFormInput["category"])
+    ? (value as EventFormInput["category"])
+    : "Workshop";
+}
+
+function normalizeEventType(value: string): EventFormInput["eventType"] {
+  return ALLOWED_EVENT_TYPES.includes(value as EventFormInput["eventType"])
+    ? (value as EventFormInput["eventType"])
+    : "Offline";
+}
+
+function normalizeRegistrationLink(value: string): string {
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      return value;
+    }
+  } catch {
+    // Fall through to default.
+  }
+
+  return "https://csquare.club/events";
 }
 
 export default async function EditEventPage({ params }: PageProps) {
@@ -26,8 +54,8 @@ export default async function EditEventPage({ params }: PageProps) {
     title: event.title,
     tagline: event.tagline || "",
     description: event.description,
-    category: (event.category as EventFormInput["category"]) || "Workshop",
-    eventType: (event.eventType as EventFormInput["eventType"]) || "Offline",
+    category: normalizeCategory(event.category),
+    eventType: normalizeEventType(event.eventType),
     tagsInput: event.tags.join(", "),
     startDateTime: toInputDateValue(event.startDateTime),
     endDateTime: toInputDateValue(event.endDateTime),
@@ -36,7 +64,7 @@ export default async function EditEventPage({ params }: PageProps) {
     onlineLink: event.onlineLink || "",
     organizerName: event.organizerName,
     contactEmail: event.contactEmail,
-    registrationLink: event.registrationLink,
+    registrationLink: normalizeRegistrationLink(event.registrationLink),
     registrationDeadline: event.registrationDeadline ? toInputDateValue(event.registrationDeadline) : "",
     bannerImage: event.bannerImage || "",
     prizes: event.prizes || "",
