@@ -35,7 +35,12 @@ export async function POST(req: Request) {
       date: body.date,
       time: body.time,
       location: body.location,
-      attendees: Number(body.attendees || 0),
+      attendees:
+        typeof body.attendees === "number"
+          ? body.attendees
+          : typeof body.attendees === "string" && body.attendees.trim() !== ""
+            ? Number(body.attendees)
+            : null,
       category: body.category,
       image: body.image,
       sponsorTitle: body.sponsorTitle || null,

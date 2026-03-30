@@ -2,16 +2,16 @@ import prisma from "@/lib/db";
 
 export type ClubEvent = {
   id: number;
-  title: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  date: string;
-  time: string;
-  location: string;
-  attendees: number;
-  category: string;
-  image: string;
+  title: string | null;
+  description: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  date: string | null;
+  time: string | null;
+  location: string | null;
+  attendees: number | null;
+  category: string | null;
+  image: string | null;
   sponsorTitle: string | null;
   sponsorLogoUrl: string | null;
   sponsorLogoLightUrl: string | null;
@@ -22,16 +22,16 @@ export type ClubEvent = {
 
 type EventRow = {
   id: number;
-  title: string;
-  description: string;
+  title: string | null;
+  description: string | null;
   start_at: Date | string | null;
   end_at: Date | string | null;
-  event_date: Date | string;
-  time_text: string;
-  location: string;
-  attendees: number;
-  category: string;
-  image_url: string;
+  event_date: Date | string | null;
+  time_text: string | null;
+  location: string | null;
+  attendees: number | null;
+  category: string | null;
+  image_url: string | null;
   sponsor_title: string | null;
   sponsor_logo_url: string | null;
   sponsor_logo_light_url: string | null;
@@ -78,8 +78,14 @@ async function ensureEventsTable() {
   await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_dark_url TEXT;`);
   await prisma.$executeRawUnsafe(`UPDATE events SET start_at = event_date WHERE start_at IS NULL;`);
   await prisma.$executeRawUnsafe(`UPDATE events SET end_at = event_date WHERE end_at IS NULL;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN start_at SET NOT NULL;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN end_at SET NOT NULL;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN title DROP NOT NULL;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN description DROP NOT NULL;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN start_at DROP NOT NULL;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN end_at DROP NOT NULL;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN time_text DROP NOT NULL;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN location DROP NOT NULL;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN category DROP NOT NULL;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN image_url DROP NOT NULL;`);
 
   tableReady = true;
 }
@@ -94,11 +100,11 @@ function formatTimeRange(startDate: Date, endDate: Date): string {
 }
 
 function rowToEvent(row: EventRow): ClubEvent {
-  const legacyDate = row.event_date instanceof Date ? row.event_date : new Date(row.event_date);
+  const legacyDate = row.event_date ? (row.event_date instanceof Date ? row.event_date : new Date(row.event_date)) : null;
   const startDateRaw = row.start_at ?? legacyDate;
   const endDateRaw = row.end_at ?? startDateRaw;
-  const startDate = startDateRaw instanceof Date ? startDateRaw : new Date(startDateRaw);
-  const endDate = endDateRaw instanceof Date ? endDateRaw : new Date(endDateRaw);
+  const startDate = startDateRaw ? (startDateRaw instanceof Date ? startDateRaw : new Date(startDateRaw)) : null;
+  const endDate = endDateRaw ? (endDateRaw instanceof Date ? endDateRaw : new Date(endDateRaw)) : null;
   const sponsorLogoLightUrl = row.sponsor_logo_light_url ?? row.sponsor_logo_url;
   const sponsorLogoDarkUrl = row.sponsor_logo_dark_url ?? sponsorLogoLightUrl;
 
@@ -106,10 +112,10 @@ function rowToEvent(row: EventRow): ClubEvent {
     id: row.id,
     title: row.title,
     description: row.description,
-    startDate: startDate.toISOString(),
-    endDate: endDate.toISOString(),
-    date: startDate.toISOString(),
-    time: row.time_text || formatTimeRange(startDate, endDate),
+    startDate: startDate ? startDate.toISOString() : null,
+    endDate: endDate ? endDate.toISOString() : null,
+    date: startDate ? startDate.toISOString() : null,
+    time: row.time_text || (startDate && endDate ? formatTimeRange(startDate, endDate) : null),
     location: row.location,
     attendees: row.attendees,
     category: row.category,
@@ -129,7 +135,7 @@ export async function listPublicEvents(): Promise<ClubEvent[]> {
     `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url
      FROM events
      WHERE is_published = TRUE
-     ORDER BY start_at ASC;`
+      ORDER BY COALESCE(start_at, event_date) ASC, id DESC;`
   );
 
   return rows.map(rowToEvent);
@@ -155,7 +161,7 @@ export async function listAdminEvents(): Promise<ClubEvent[]> {
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
     `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url
      FROM events
-     ORDER BY start_at DESC;`
+      ORDER BY COALESCE(start_at, event_date) DESC, id DESC;`
   );
 
   return rows.map(rowToEvent);
@@ -182,9 +188,15 @@ export type CreateEventInput = Omit<ClubEvent, "id" | "date" | "time"> & {
 export async function createEvent(input: CreateEventInput): Promise<ClubEvent> {
   await ensureEventsTable();
 
-  const startDate = new Date(input.startDate || input.date);
-  const endDate = new Date(input.endDate || input.date);
-  const timeText = input.time || formatTimeRange(startDate, endDate);
+  const startDate = input.startDate || input.date ? new Date(input.startDate || input.date || "") : null;
+  const endDate = input.endDate || input.date ? new Date(input.endDate || input.date || "") : null;
+  const fallbackDate = new Date();
+  const safeStartDate = startDate && !Number.isNaN(startDate.getTime()) ? startDate : null;
+  const safeEndDate = endDate && !Number.isNaN(endDate.getTime()) ? endDate : null;
+  const eventDate = safeStartDate ?? safeEndDate ?? fallbackDate;
+  const timeText =
+    input.time ||
+    (safeStartDate && safeEndDate ? formatTimeRange(safeStartDate, safeEndDate) : null);
 
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
     `INSERT INTO events
@@ -193,12 +205,12 @@ export async function createEvent(input: CreateEventInput): Promise<ClubEvent> {
      RETURNING id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url;`,
     input.title,
     input.description,
-    startDate,
-    endDate,
-    startDate,
+    safeStartDate,
+    safeEndDate,
+    eventDate,
     timeText,
     input.location,
-    input.attendees,
+    typeof input.attendees === "number" && Number.isFinite(input.attendees) ? input.attendees : null,
     input.category,
     input.image,
     input.sponsorTitle,
@@ -227,9 +239,16 @@ export async function updateEvent(id: number, input: UpdateEventInput): Promise<
   if (!existing.length) return null;
 
   const current = rowToEvent(existing[0]);
-  const startDate = new Date(input.startDate ?? input.date ?? current.startDate);
-  const endDate = new Date(input.endDate ?? current.endDate);
-  const timeText = input.time ?? current.time ?? formatTimeRange(startDate, endDate);
+  const resolvedStartDateValue = input.startDate ?? input.date ?? current.startDate;
+  const resolvedEndDateValue = input.endDate ?? current.endDate;
+  const startDate = resolvedStartDateValue ? new Date(resolvedStartDateValue) : null;
+  const endDate = resolvedEndDateValue ? new Date(resolvedEndDateValue) : null;
+  const safeStartDate = startDate && !Number.isNaN(startDate.getTime()) ? startDate : null;
+  const safeEndDate = endDate && !Number.isNaN(endDate.getTime()) ? endDate : null;
+  const currentEventDate = current.date ? new Date(current.date) : null;
+  const eventDate = safeStartDate ?? safeEndDate ?? currentEventDate ?? new Date();
+  const timeText =
+    input.time ?? current.time ?? (safeStartDate && safeEndDate ? formatTimeRange(safeStartDate, safeEndDate) : null);
 
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
     `UPDATE events
@@ -254,12 +273,16 @@ export async function updateEvent(id: number, input: UpdateEventInput): Promise<
        RETURNING id, title, description, start_at, end_at, event_date, time_text, location, attendees, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, is_published, registration_url;`,
     input.title ?? current.title,
     input.description ?? current.description,
-    startDate,
-    endDate,
-    startDate,
+    safeStartDate,
+    safeEndDate,
+    eventDate,
     timeText,
     input.location ?? current.location,
-    input.attendees ?? current.attendees,
+    typeof input.attendees === "number" && Number.isFinite(input.attendees)
+      ? input.attendees
+      : input.attendees === null
+        ? null
+        : current.attendees,
     input.category ?? current.category,
     input.image ?? current.image,
     input.sponsorTitle ?? current.sponsorTitle,

@@ -4,16 +4,16 @@ import { useEffect, useMemo, useState } from "react";
 
 type EventItem = {
   id: number;
-  title: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  date: string;
-  time: string;
-  location: string;
-  attendees: number;
-  category: string;
-  image: string;
+  title: string | null;
+  description: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  date: string | null;
+  time: string | null;
+  location: string | null;
+  attendees: number | null;
+  category: string | null;
+  image: string | null;
   sponsorTitle: string | null;
   sponsorLogoUrl: string | null;
   sponsorLogoLightUrl: string | null;
@@ -44,8 +44,8 @@ const defaultForm: EventFormState = {
   startDate: "",
   endDate: "",
   location: "",
-  attendees: "0",
-  category: "Workshop",
+  attendees: "",
+  category: "",
   image: "",
   sponsorTitle: "",
   sponsorLogoLightUrl: "",
@@ -119,14 +119,14 @@ export default function AdminEventsPage() {
     setStatus(null);
 
     const payload = {
-      title: form.title,
-      description: form.description,
-      startDate: new Date(form.startDate).toISOString(),
-      endDate: new Date(form.endDate).toISOString(),
-      location: form.location,
-      attendees: Number(form.attendees || 0),
-      category: form.category,
-      image: form.image,
+      title: form.title.trim() || null,
+      description: form.description.trim() || null,
+      startDate: form.startDate ? new Date(form.startDate).toISOString() : null,
+      endDate: form.endDate ? new Date(form.endDate).toISOString() : null,
+      location: form.location.trim() || null,
+      attendees: form.attendees ? Number(form.attendees) : null,
+      category: form.category.trim() || null,
+      image: form.image.trim() || null,
       sponsorTitle: form.sponsorTitle || null,
       sponsorLogoLightUrl: form.sponsorLogoLightUrl || null,
       sponsorLogoDarkUrl: form.sponsorLogoDarkUrl || null,
@@ -159,14 +159,14 @@ export default function AdminEventsPage() {
   function startEdit(event: EventItem) {
     setEditingId(event.id);
     setForm({
-      title: event.title,
-      description: event.description,
-      startDate: toInputDateValue(event.startDate || event.date),
-      endDate: toInputDateValue(event.endDate || event.date),
-      location: event.location,
-      attendees: String(event.attendees),
-      category: event.category,
-      image: event.image,
+      title: event.title || "",
+      description: event.description || "",
+      startDate: event.startDate || event.date ? toInputDateValue(event.startDate || event.date || "") : "",
+      endDate: event.endDate || event.date ? toInputDateValue(event.endDate || event.date || "") : "",
+      location: event.location || "",
+      attendees: typeof event.attendees === "number" ? String(event.attendees) : "",
+      category: event.category || "",
+      image: event.image || "",
       sponsorTitle: event.sponsorTitle || "",
       sponsorLogoLightUrl: event.sponsorLogoLightUrl || event.sponsorLogoUrl || "",
       sponsorLogoDarkUrl: event.sponsorLogoDarkUrl || event.sponsorLogoUrl || "",
@@ -204,35 +204,30 @@ export default function AdminEventsPage() {
 
       <form onSubmit={handleSubmit} className="grid gap-4 rounded-xl border border-border bg-card p-5 md:grid-cols-2">
         <input
-          required
           placeholder="Event title"
           value={form.title}
           onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm"
         />
         <input
-          required
           type="datetime-local"
           value={form.startDate}
           onChange={(e) => setForm((prev) => ({ ...prev, startDate: e.target.value }))}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm"
         />
         <input
-          required
           type="datetime-local"
           value={form.endDate}
           onChange={(e) => setForm((prev) => ({ ...prev, endDate: e.target.value }))}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm"
         />
         <input
-          required
           placeholder="Location"
           value={form.location}
           onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm"
         />
         <input
-          required
           placeholder="Category"
           value={form.category}
           onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
@@ -247,7 +242,6 @@ export default function AdminEventsPage() {
           className="rounded-md border border-border bg-background px-3 py-2 text-sm"
         />
         <input
-          required
           placeholder="Image URL"
           value={form.image}
           onChange={(e) => setForm((prev) => ({ ...prev, image: e.target.value }))}
@@ -290,7 +284,6 @@ export default function AdminEventsPage() {
           className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
         />
         <textarea
-          required
           placeholder="Description"
           value={form.description}
           onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
@@ -342,11 +335,17 @@ export default function AdminEventsPage() {
             {events.map((event) => (
               <div key={event.id} className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-start md:justify-between">
                 <div>
-                  <p className="font-semibold">{event.title}</p>
+                  <p className="font-semibold">{event.title || "Untitled Event"}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {new Date(event.startDate || event.date).toLocaleString()} - {new Date(event.endDate || event.date).toLocaleString()} • {event.location}
+                    {event.startDate || event.date ? new Date(event.startDate || event.date || "").toLocaleString() : "No start date"}
+                    {event.endDate ? ` - ${new Date(event.endDate).toLocaleString()}` : ""}
+                    {event.location ? ` • ${event.location}` : ""}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">{event.category} • Capacity: {event.attendees} • {event.isPublished ? "Published" : "Draft"}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {event.category || "Uncategorized"}
+                    {typeof event.attendees === "number" ? ` • Capacity: ${event.attendees}` : ""}
+                    {` • ${event.isPublished ? "Published" : "Draft"}`}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button

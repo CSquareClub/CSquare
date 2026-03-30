@@ -56,13 +56,14 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
 
   if (!event) {
     const events = await listPublicEvents();
-    event = events.find((entry) => slugifyTitle(entry.title) === slug) ?? null;
+    event = events.find((entry) => slugifyTitle(entry.title || `event-${entry.id}`) === slug) ?? null;
   }
 
   if (!event) {
     notFound();
   }
 
+  const safeTitle = event.title?.trim() || 'Untitled Event';
   const imageUrl = normalizeEventImageUrl(event.image);
   const lightSponsorLogo = event.sponsorLogoLightUrl || event.sponsorLogoUrl;
   const darkSponsorLogo = event.sponsorLogoDarkUrl || event.sponsorLogoLightUrl || event.sponsorLogoUrl;
@@ -86,35 +87,46 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
 
           <article className="overflow-hidden rounded-2xl border border-border bg-card/70">
             <div className="relative h-64 w-full bg-card md:h-96">
-              <img src={imageUrl || fallbackImage} alt={event.title} className="h-full w-full object-cover" />
+              <img src={imageUrl || fallbackImage} alt={safeTitle} className="h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-background via-background/15 to-transparent" />
-              <span className="absolute right-4 top-4 rounded-full border border-[#dc2626]/30 bg-[#dc2626]/20 px-3 py-1 text-xs font-semibold text-[#dc2626]">
-                {event.category}
-              </span>
+              {event.category ? (
+                <span className="absolute right-4 top-4 rounded-full border border-[#dc2626]/30 bg-[#dc2626]/20 px-3 py-1 text-xs font-semibold text-[#dc2626]">
+                  {event.category}
+                </span>
+              ) : null}
             </div>
 
             <div className="space-y-6 p-6 md:p-8">
               <header className="space-y-3">
-                <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{event.title}</h1>
-                <p className="text-foreground/70">{event.description}</p>
+                <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{safeTitle}</h1>
+                {event.description ? <p className="text-foreground/70">{event.description}</p> : null}
               </header>
 
-              <div className="grid gap-4 rounded-xl border border-border bg-background/50 p-4 text-sm text-foreground/75 md:grid-cols-3">
-                <div className="flex items-center gap-2">
-                  <Calendar size={16} className="text-[#dc2626]" />
-                  <span>
-                    {new Date(event.startDate || event.date).toLocaleString()} - {new Date(event.endDate || event.date).toLocaleString()}
-                  </span>
+              {event.startDate || event.endDate || event.location || typeof event.attendees === 'number' ? (
+                <div className="grid gap-4 rounded-xl border border-border bg-background/50 p-4 text-sm text-foreground/75 md:grid-cols-3">
+                  {event.startDate || event.endDate ? (
+                    <div className="flex items-center gap-2">
+                      <Calendar size={16} className="text-[#dc2626]" />
+                      <span>
+                        {event.startDate ? new Date(event.startDate).toLocaleString() : 'Start TBD'}
+                        {event.endDate ? ` - ${new Date(event.endDate).toLocaleString()}` : ''}
+                      </span>
+                    </div>
+                  ) : null}
+                  {event.location ? (
+                    <div className="flex items-center gap-2">
+                      <MapPin size={16} className="text-[#dc2626]" />
+                      <span>{event.location}</span>
+                    </div>
+                  ) : null}
+                  {typeof event.attendees === 'number' ? (
+                    <div className="flex items-center gap-2">
+                      <Users size={16} className="text-[#dc2626]" />
+                      <span>Capacity: {event.attendees}</span>
+                    </div>
+                  ) : null}
                 </div>
-                <div className="flex items-center gap-2">
-                  <MapPin size={16} className="text-[#dc2626]" />
-                  <span>{event.location}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users size={16} className="text-[#dc2626]" />
-                  <span>Capacity: {event.attendees}</span>
-                </div>
-              </div>
+              ) : null}
 
               {lightSponsorLogo || darkSponsorLogo ? (
                 <div className="rounded-xl border border-border bg-background/50 p-4">

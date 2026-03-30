@@ -7,11 +7,30 @@ import { listPublicEvents } from '@/lib/events-store';
 
 export const dynamic = 'force-dynamic';
 
+function toEpoch(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? null : timestamp;
+}
+
+function formatEventDate(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString();
+}
+
 export default async function EventsPage() {
   const allEvents = await listPublicEvents();
   const now = Date.now();
-  const upcomingEvents = allEvents.filter((event) => new Date(event.endDate || event.date).getTime() >= now);
-  const pastHighlights = allEvents.filter((event) => new Date(event.endDate || event.date).getTime() < now);
+  const upcomingEvents = allEvents.filter((event) => {
+    const endEpoch = toEpoch(event.endDate || event.date);
+    return endEpoch === null || endEpoch >= now;
+  });
+  const pastHighlights = allEvents.filter((event) => {
+    const endEpoch = toEpoch(event.endDate || event.date);
+    return endEpoch !== null && endEpoch < now;
+  });
 
   return (
     <div className="relative isolate min-h-screen bg-background">
@@ -48,7 +67,7 @@ export default async function EventsPage() {
                   <EventCard
                     key={event.id}
                     {...event}
-                    date={new Date(event.date).toLocaleDateString()}
+                    date={formatEventDate(event.startDate || event.date)}
                   />
                 ))
               ) : (
@@ -75,7 +94,7 @@ export default async function EventsPage() {
                   <EventCard
                     key={event.id}
                     {...event}
-                    date={new Date(event.date).toLocaleDateString()}
+                    date={formatEventDate(event.startDate || event.date)}
                   />
                 ))}
               </div>
