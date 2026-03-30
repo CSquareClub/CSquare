@@ -28,25 +28,52 @@ export type EventRecord = {
   updatedAt: Date;
 };
 
+function isMissingEventTableError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+
+  const maybeError = error as { code?: string; meta?: { modelName?: string } };
+  return maybeError.code === "P2021" && maybeError.meta?.modelName === "Event";
+}
+
 export async function listAdminEventsFromDb(): Promise<EventRecord[]> {
-  return prisma.event.findMany({
-    orderBy: { startDateTime: "desc" },
-  });
+  try {
+    return await prisma.event.findMany({
+      orderBy: { startDateTime: "desc" },
+    });
+  } catch (error) {
+    if (isMissingEventTableError(error)) return [];
+    throw error;
+  }
 }
 
 export async function listPublishedEventsFromDb(): Promise<EventRecord[]> {
-  return prisma.event.findMany({
-    where: { status: "published" },
-    orderBy: { startDateTime: "asc" },
-  });
+  try {
+    return await prisma.event.findMany({
+      where: { status: "published" },
+      orderBy: { startDateTime: "asc" },
+    });
+  } catch (error) {
+    if (isMissingEventTableError(error)) return [];
+    throw error;
+  }
 }
 
 export async function getAdminEventById(id: string): Promise<EventRecord | null> {
-  return prisma.event.findUnique({ where: { id } });
+  try {
+    return await prisma.event.findUnique({ where: { id } });
+  } catch (error) {
+    if (isMissingEventTableError(error)) return null;
+    throw error;
+  }
 }
 
 export async function getPublishedEventBySlug(slug: string): Promise<EventRecord | null> {
-  return prisma.event.findFirst({
-    where: { slug, status: "published" },
-  });
+  try {
+    return await prisma.event.findFirst({
+      where: { slug, status: "published" },
+    });
+  } catch (error) {
+    if (isMissingEventTableError(error)) return null;
+    throw error;
+  }
 }

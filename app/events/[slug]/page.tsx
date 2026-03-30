@@ -7,6 +7,8 @@ import GridBackground from "@/components/grid-background";
 import { Button } from "@/components/ui/button";
 import { getPublishedEventBySlug } from "@/lib/event-service";
 
+export const dynamic = "force-dynamic";
+
 type PageProps = {
   params: Promise<{ slug: string }>;
 };

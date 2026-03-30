@@ -6,6 +6,8 @@ import GridBackground from "@/components/grid-background";
 import { Button } from "@/components/ui/button";
 import { listPublishedEventsFromDb } from "@/lib/event-service";
 
+export const dynamic = "force-dynamic";
+
 function formatDate(value: Date): string {
   return value.toLocaleString();
 }
