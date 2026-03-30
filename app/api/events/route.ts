@@ -1,5 +1,4 @@
-import { listPublicEvents } from "@/lib/events-store";
-import { createEvent } from "@/lib/events-store";
+import { createEvent, listPublicEvents } from "@/lib/events-store";
 import { authOptions } from "@/lib/authOptions";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
@@ -27,8 +26,17 @@ function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-function buildLocation(venueName?: string | null, address?: string | null, city?: string | null): string | null {
-  const parts = [venueName, address, city].map((part) => (part || "").trim()).filter(Boolean);
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+function buildLocation(venueName?: string | null, city?: string | null): string | null {
+  const parts = [venueName, city].map((part) => (part || "").trim()).filter(Boolean);
   return parts.length ? parts.join(", ") : null;
 }
 
@@ -46,25 +54,26 @@ export async function POST(req: Request) {
     const description = String(body?.description || "").trim();
     const category = String(body?.category || "").trim();
     const eventType = String(body?.eventType || "").trim();
-    const tags = Array.isArray(body?.tags) ? body.tags.filter((tag: unknown) => typeof tag === "string").map((tag: string) => tag.trim()).filter(Boolean) : [];
+    const tags = Array.isArray(body?.tags)
+      ? body.tags.filter((tag: unknown) => typeof tag === "string").map((tag: string) => tag.trim()).filter(Boolean)
+      : [];
     const startDateTime = body?.startDateTime ? new Date(String(body.startDateTime)) : null;
     const endDateTime = body?.endDateTime ? new Date(String(body.endDateTime)) : null;
     const registrationDeadline = body?.registrationDeadline ? new Date(String(body.registrationDeadline)) : null;
     const venueName = body?.venueName ? String(body.venueName).trim() : null;
-    const address = body?.address ? String(body.address).trim() : null;
     const city = body?.city ? String(body.city).trim() : null;
     const onlineLink = body?.onlineLink ? String(body.onlineLink).trim() : null;
     const organizerName = String(body?.organizerName || "").trim();
     const contactEmail = String(body?.contactEmail || "").trim();
-    const phoneNumber = body?.phoneNumber ? String(body.phoneNumber).trim() : null;
-    const registrationRequired = Boolean(body?.registrationRequired);
-    const registrationLink = body?.registrationLink ? String(body.registrationLink).trim() : null;
-    const maxParticipants = typeof body?.maxParticipants === "number" ? body.maxParticipants : null;
+    const registrationLink = body?.registrationLink ? String(body.registrationLink).trim() : "";
     const bannerImage = body?.bannerImage ? String(body.bannerImage).trim() : null;
     const prizes = body?.prizes ? String(body.prizes).trim() : null;
     const rules = body?.rules ? String(body.rules).trim() : null;
     const schedule = body?.schedule ? String(body.schedule).trim() : null;
     const sponsors = body?.sponsors ? String(body.sponsors).trim() : null;
+    const status = body?.status === "published" ? "published" : "draft";
+    const slugInput = body?.slug ? String(body.slug).trim() : "";
+    const slug = slugInput || slugify(title);
 
     if (!title) {
       return NextResponse.json({ error: "title is required" }, { status: 400 });
@@ -96,14 +105,14 @@ export async function POST(req: Request) {
     if (onlineLink && !isValidUrl(onlineLink)) {
       return NextResponse.json({ error: "onlineLink must be a valid URL" }, { status: 400 });
     }
-    if (registrationRequired && !registrationLink) {
-      return NextResponse.json({ error: "registrationLink is required when registrationRequired is true" }, { status: 400 });
+    if (!registrationLink) {
+      return NextResponse.json({ error: "registrationLink is required" }, { status: 400 });
     }
-    if (registrationLink && !isValidUrl(registrationLink)) {
+    if (!isValidUrl(registrationLink)) {
       return NextResponse.json({ error: "registrationLink must be a valid URL" }, { status: 400 });
     }
-    if (maxParticipants !== null && (!Number.isFinite(maxParticipants) || maxParticipants <= 0)) {
-      return NextResponse.json({ error: "maxParticipants must be a positive number" }, { status: 400 });
+    if (!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+      return NextResponse.json({ error: "slug must use lowercase letters, numbers, and hyphens only" }, { status: 400 });
     }
 
     const allowedCategories = ["Hackathon", "Workshop", "Fest", "Meetup"];
@@ -111,19 +120,17 @@ export async function POST(req: Request) {
     const allowedTypes = ["Online", "Offline", "Hybrid"];
     const safeEventType = allowedTypes.includes(eventType) ? eventType : "Offline";
 
-    const location = safeEventType === "Online"
-      ? onlineLink || "Online"
-      : buildLocation(venueName, address, city);
+    const location = safeEventType === "Online" ? onlineLink || "Online" : buildLocation(venueName, city);
 
     const detailLines = [
       tagline ? `Tagline: ${tagline}` : null,
       `Event Type: ${safeEventType}`,
       tags.length ? `Tags: ${tags.join(", ")}` : null,
+      `Slug: ${slug}`,
       registrationDeadline ? `Registration Deadline: ${registrationDeadline.toISOString()}` : null,
       onlineLink ? `Online Link: ${onlineLink}` : null,
       `Organizer: ${organizerName}`,
       `Contact Email: ${contactEmail}`,
-      phoneNumber ? `Phone: ${phoneNumber}` : null,
       prizes ? `Prizes: ${prizes}` : null,
       rules ? `Rules: ${rules}` : null,
       schedule ? `Schedule: ${schedule}` : null,
@@ -140,7 +147,7 @@ export async function POST(req: Request) {
       startDate: startDateTime.toISOString(),
       endDate: endDateTime.toISOString(),
       location,
-      attendees: maxParticipants,
+      attendees: null,
       category: safeCategory,
       image: bannerImage,
       sponsorTitle: null,
@@ -149,12 +156,12 @@ export async function POST(req: Request) {
       sponsorLogoDarkUrl: null,
       devfolioApplyLogoLightUrl: null,
       devfolioApplyLogoDarkUrl: null,
-      isPublished: true,
-      registrationUrl: registrationRequired ? registrationLink : null,
+      isPublished: status === "published",
+      registrationUrl: registrationLink,
       sponsors: [],
     });
 
-    return NextResponse.json(created, { status: 201 });
+    return NextResponse.json({ ...created, slug, status }, { status: 201 });
   } catch (error) {
     console.error("Failed to create event", error);
     return NextResponse.json({ error: "Failed to create event" }, { status: 500 });

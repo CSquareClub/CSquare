@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type EventType = "Online" | "Offline" | "Hybrid";
 type EventCategory = "Hackathon" | "Workshop" | "Fest" | "Meetup";
+type EventStatus = "draft" | "published";
 
 type FormState = {
   title: string;
@@ -14,22 +15,20 @@ type FormState = {
   tagsInput: string;
   startDateTime: string;
   endDateTime: string;
-  registrationDeadline: string;
   venueName: string;
-  address: string;
   city: string;
   onlineLink: string;
   organizerName: string;
   contactEmail: string;
-  phoneNumber: string;
-  registrationRequired: boolean;
   registrationLink: string;
-  maxParticipants: string;
+  registrationDeadline: string;
   bannerImage: string;
   prizes: string;
   rules: string;
   schedule: string;
   sponsors: string;
+  status: EventStatus;
+  slug: string;
 };
 
 type FormErrors = Partial<Record<keyof FormState, string>>;
@@ -43,23 +42,30 @@ const initialForm: FormState = {
   tagsInput: "",
   startDateTime: "",
   endDateTime: "",
-  registrationDeadline: "",
   venueName: "",
-  address: "",
   city: "",
   onlineLink: "",
   organizerName: "",
   contactEmail: "",
-  phoneNumber: "",
-  registrationRequired: false,
   registrationLink: "",
-  maxParticipants: "",
+  registrationDeadline: "",
   bannerImage: "",
   prizes: "",
   rules: "",
   schedule: "",
   sponsors: "",
+  status: "draft",
+  slug: "",
 };
+
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
 
 function isValidUrl(value: string): boolean {
   try {
@@ -81,6 +87,13 @@ export default function CreateEventPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!form.slug.trim()) {
+      setForm((prev) => ({ ...prev, slug: slugify(prev.title) }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.title]);
+
   function update<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
@@ -94,10 +107,23 @@ export default function CreateEventPage() {
     if (!form.startDateTime) nextErrors.startDateTime = "Start date and time is required.";
     if (!form.endDateTime) nextErrors.endDateTime = "End date and time is required.";
     if (!form.organizerName.trim()) nextErrors.organizerName = "Organizer name is required.";
+
     if (!form.contactEmail.trim()) {
       nextErrors.contactEmail = "Contact email is required.";
     } else if (!isValidEmail(form.contactEmail.trim())) {
       nextErrors.contactEmail = "Enter a valid email address.";
+    }
+
+    if (!form.registrationLink.trim()) {
+      nextErrors.registrationLink = "Registration link is required.";
+    } else if (!isValidUrl(form.registrationLink.trim())) {
+      nextErrors.registrationLink = "Registration link must be a valid URL.";
+    }
+
+    if (!form.slug.trim()) {
+      nextErrors.slug = "Slug is required.";
+    } else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug.trim())) {
+      nextErrors.slug = "Slug can contain lowercase letters, numbers, and hyphens only.";
     }
 
     if (form.startDateTime && form.endDateTime) {
@@ -120,19 +146,6 @@ export default function CreateEventPage() {
 
     if (form.onlineLink.trim() && !isValidUrl(form.onlineLink.trim())) {
       nextErrors.onlineLink = "Online link must be a valid URL.";
-    }
-
-    if (form.registrationRequired && !form.registrationLink.trim()) {
-      nextErrors.registrationLink = "Registration link is required when registration is enabled.";
-    } else if (form.registrationLink.trim() && !isValidUrl(form.registrationLink.trim())) {
-      nextErrors.registrationLink = "Registration link must be a valid URL.";
-    }
-
-    if (form.maxParticipants.trim()) {
-      const count = Number(form.maxParticipants);
-      if (!Number.isFinite(count) || count <= 0) {
-        nextErrors.maxParticipants = "Max participants must be a positive number.";
-      }
     }
 
     return nextErrors;
@@ -177,22 +190,20 @@ export default function CreateEventPage() {
           .filter(Boolean),
         startDateTime: new Date(form.startDateTime).toISOString(),
         endDateTime: new Date(form.endDateTime).toISOString(),
-        registrationDeadline: form.registrationDeadline ? new Date(form.registrationDeadline).toISOString() : null,
         venueName: form.venueName.trim() || null,
-        address: form.address.trim() || null,
         city: form.city.trim() || null,
         onlineLink: form.onlineLink.trim() || null,
         organizerName: form.organizerName.trim(),
         contactEmail: form.contactEmail.trim(),
-        phoneNumber: form.phoneNumber.trim() || null,
-        registrationRequired: form.registrationRequired,
-        registrationLink: form.registrationLink.trim() || null,
-        maxParticipants: form.maxParticipants.trim() ? Number(form.maxParticipants) : null,
+        registrationLink: form.registrationLink.trim(),
+        registrationDeadline: form.registrationDeadline ? new Date(form.registrationDeadline).toISOString() : null,
         bannerImage: form.bannerImage || null,
         prizes: form.prizes.trim() || null,
         rules: form.rules.trim() || null,
         schedule: form.schedule.trim() || null,
         sponsors: form.sponsors.trim() || null,
+        status: form.status,
+        slug: form.slug.trim(),
       };
 
       const res = await fetch("/api/events", {
@@ -226,40 +237,24 @@ export default function CreateEventPage() {
       <form onSubmit={handleSubmit} className="grid gap-4 rounded-xl border border-border bg-card p-5 md:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm font-medium">Title *</label>
-          <input
-            value={form.title}
-            onChange={(e) => update("title", e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <input value={form.title} onChange={(e) => update("title", e.target.value)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
           {errors.title ? <p className="mt-1 text-xs text-red-600">{errors.title}</p> : null}
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium">Tagline</label>
-          <input
-            value={form.tagline}
-            onChange={(e) => update("tagline", e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <input value={form.tagline} onChange={(e) => update("tagline", e.target.value)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
         </div>
 
         <div className="md:col-span-2">
           <label className="mb-1 block text-sm font-medium">Description *</label>
-          <textarea
-            value={form.description}
-            onChange={(e) => update("description", e.target.value)}
-            className="min-h-24 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <textarea value={form.description} onChange={(e) => update("description", e.target.value)} className="min-h-24 w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
           {errors.description ? <p className="mt-1 text-xs text-red-600">{errors.description}</p> : null}
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium">Category</label>
-          <select
-            value={form.category}
-            onChange={(e) => update("category", e.target.value as EventCategory)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          >
+          <select value={form.category} onChange={(e) => update("category", e.target.value as EventCategory)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm">
             <option>Hackathon</option>
             <option>Workshop</option>
             <option>Fest</option>
@@ -269,11 +264,7 @@ export default function CreateEventPage() {
 
         <div>
           <label className="mb-1 block text-sm font-medium">Event Type</label>
-          <select
-            value={form.eventType}
-            onChange={(e) => update("eventType", e.target.value as EventType)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          >
+          <select value={form.eventType} onChange={(e) => update("eventType", e.target.value as EventType)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm">
             <option>Online</option>
             <option>Offline</option>
             <option>Hybrid</option>
@@ -282,195 +273,102 @@ export default function CreateEventPage() {
 
         <div className="md:col-span-2">
           <label className="mb-1 block text-sm font-medium">Tags (comma-separated)</label>
-          <input
-            value={form.tagsInput}
-            onChange={(e) => update("tagsInput", e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <input value={form.tagsInput} onChange={(e) => update("tagsInput", e.target.value)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium">Start Date & Time *</label>
-          <input
-            type="datetime-local"
-            value={form.startDateTime}
-            onChange={(e) => update("startDateTime", e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <input type="datetime-local" value={form.startDateTime} onChange={(e) => update("startDateTime", e.target.value)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
           {errors.startDateTime ? <p className="mt-1 text-xs text-red-600">{errors.startDateTime}</p> : null}
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium">End Date & Time *</label>
-          <input
-            type="datetime-local"
-            value={form.endDateTime}
-            onChange={(e) => update("endDateTime", e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <input type="datetime-local" value={form.endDateTime} onChange={(e) => update("endDateTime", e.target.value)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
           {errors.endDateTime ? <p className="mt-1 text-xs text-red-600">{errors.endDateTime}</p> : null}
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Registration Deadline</label>
-          <input
-            type="datetime-local"
-            value={form.registrationDeadline}
-            onChange={(e) => update("registrationDeadline", e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
-          {errors.registrationDeadline ? <p className="mt-1 text-xs text-red-600">{errors.registrationDeadline}</p> : null}
-        </div>
-
-        <div>
           <label className="mb-1 block text-sm font-medium">Venue Name</label>
-          <input
-            value={form.venueName}
-            onChange={(e) => update("venueName", e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block text-sm font-medium">Address</label>
-          <input
-            value={form.address}
-            onChange={(e) => update("address", e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <input value={form.venueName} onChange={(e) => update("venueName", e.target.value)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium">City</label>
-          <input
-            value={form.city}
-            onChange={(e) => update("city", e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <input value={form.city} onChange={(e) => update("city", e.target.value)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="mb-1 block text-sm font-medium">Online Link</label>
-          <input
-            value={form.onlineLink}
-            onChange={(e) => update("onlineLink", e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <input value={form.onlineLink} onChange={(e) => update("onlineLink", e.target.value)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
           {errors.onlineLink ? <p className="mt-1 text-xs text-red-600">{errors.onlineLink}</p> : null}
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium">Organizer Name *</label>
-          <input
-            value={form.organizerName}
-            onChange={(e) => update("organizerName", e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <input value={form.organizerName} onChange={(e) => update("organizerName", e.target.value)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
           {errors.organizerName ? <p className="mt-1 text-xs text-red-600">{errors.organizerName}</p> : null}
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium">Contact Email *</label>
-          <input
-            value={form.contactEmail}
-            onChange={(e) => update("contactEmail", e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <input value={form.contactEmail} onChange={(e) => update("contactEmail", e.target.value)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
           {errors.contactEmail ? <p className="mt-1 text-xs text-red-600">{errors.contactEmail}</p> : null}
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Phone Number</label>
-          <input
-            value={form.phoneNumber}
-            onChange={(e) => update("phoneNumber", e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
-        </div>
-
-        <label className="inline-flex items-center gap-2 text-sm md:col-span-2">
-          <input
-            type="checkbox"
-            checked={form.registrationRequired}
-            onChange={(e) => update("registrationRequired", e.target.checked)}
-          />
-          Registration Required
-        </label>
-
-        <div>
-          <label className="mb-1 block text-sm font-medium">Registration Link</label>
-          <input
-            value={form.registrationLink}
-            onChange={(e) => update("registrationLink", e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <label className="mb-1 block text-sm font-medium">Registration Link *</label>
+          <input value={form.registrationLink} onChange={(e) => update("registrationLink", e.target.value)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
           {errors.registrationLink ? <p className="mt-1 text-xs text-red-600">{errors.registrationLink}</p> : null}
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Max Participants</label>
-          <input
-            type="number"
-            min={1}
-            value={form.maxParticipants}
-            onChange={(e) => update("maxParticipants", e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
-          {errors.maxParticipants ? <p className="mt-1 text-xs text-red-600">{errors.maxParticipants}</p> : null}
+          <label className="mb-1 block text-sm font-medium">Registration Deadline (optional)</label>
+          <input type="datetime-local" value={form.registrationDeadline} onChange={(e) => update("registrationDeadline", e.target.value)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
+          {errors.registrationDeadline ? <p className="mt-1 text-xs text-red-600">{errors.registrationDeadline}</p> : null}
         </div>
 
         <div className="md:col-span-2">
-          <label className="mb-1 block text-sm font-medium">Banner Image Upload</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleBannerFile(e.target.files?.[0] || null)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <label className="mb-1 block text-sm font-medium">Banner Image</label>
+          <input type="file" accept="image/*" onChange={(e) => handleBannerFile(e.target.files?.[0] || null)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
         </div>
 
         <div className="md:col-span-2">
           <label className="mb-1 block text-sm font-medium">Prizes</label>
-          <textarea
-            value={form.prizes}
-            onChange={(e) => update("prizes", e.target.value)}
-            className="min-h-20 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <textarea value={form.prizes} onChange={(e) => update("prizes", e.target.value)} className="min-h-20 w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
         </div>
 
         <div className="md:col-span-2">
           <label className="mb-1 block text-sm font-medium">Rules</label>
-          <textarea
-            value={form.rules}
-            onChange={(e) => update("rules", e.target.value)}
-            className="min-h-20 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <textarea value={form.rules} onChange={(e) => update("rules", e.target.value)} className="min-h-20 w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
         </div>
 
         <div className="md:col-span-2">
           <label className="mb-1 block text-sm font-medium">Schedule</label>
-          <textarea
-            value={form.schedule}
-            onChange={(e) => update("schedule", e.target.value)}
-            className="min-h-20 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <textarea value={form.schedule} onChange={(e) => update("schedule", e.target.value)} className="min-h-20 w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
         </div>
 
         <div className="md:col-span-2">
           <label className="mb-1 block text-sm font-medium">Sponsors</label>
-          <textarea
-            value={form.sponsors}
-            onChange={(e) => update("sponsors", e.target.value)}
-            className="min-h-20 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
+          <textarea value={form.sponsors} onChange={(e) => update("sponsors", e.target.value)} className="min-h-20 w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium">Status</label>
+          <select value={form.status} onChange={(e) => update("status", e.target.value as EventStatus)} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm">
+            <option value="draft">draft</option>
+            <option value="published">published</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium">Slug *</label>
+          <input value={form.slug} onChange={(e) => update("slug", slugify(e.target.value))} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
+          {errors.slug ? <p className="mt-1 text-xs text-red-600">{errors.slug}</p> : null}
         </div>
 
         <div className="md:col-span-2">
-          <button
-            type="submit"
-            disabled={submitting}
-            className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
-          >
+          <button type="submit" disabled={submitting} className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60">
             {submitting ? "Submitting..." : "Create Event"}
           </button>
         </div>
