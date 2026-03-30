@@ -1,121 +1,65 @@
-import Navigation from '@/components/navigation';
-import Footer from '@/components/footer';
-import GridBackground from '@/components/grid-background';
-import EventCard from '@/components/events/event-card';
-import GalleryGrid from '@/components/events/gallery-grid';
-import { listPublicEvents } from '@/lib/events-store';
+import Link from "next/link";
 
-export const dynamic = 'force-dynamic';
+import Navigation from "@/components/navigation";
+import Footer from "@/components/footer";
+import GridBackground from "@/components/grid-background";
+import { Button } from "@/components/ui/button";
+import { listPublishedEventsFromDb } from "@/lib/event-service";
 
-function toEpoch(value: string | null | undefined): number | null {
-  if (!value) return null;
-  const timestamp = new Date(value).getTime();
-  return Number.isNaN(timestamp) ? null : timestamp;
-}
-
-function formatEventDate(value: string | null | undefined): string | null {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString();
+function formatDate(value: Date): string {
+  return value.toLocaleString();
 }
 
 export default async function EventsPage() {
-  const allEvents = await listPublicEvents();
-  const now = Date.now();
-  const upcomingEvents = allEvents.filter((event) => {
-    const endEpoch = toEpoch(event.endDate || event.date);
-    return endEpoch === null || endEpoch >= now;
-  });
-  const pastHighlights = allEvents.filter((event) => {
-    const endEpoch = toEpoch(event.endDate || event.date);
-    return endEpoch !== null && endEpoch < now;
-  });
+  const events = await listPublishedEventsFromDb();
 
   return (
     <div className="relative isolate min-h-screen bg-background">
       <GridBackground />
       <Navigation />
 
-      <main className="relative z-10">
-        <section className="py-16 md:py-20">
-          <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+      <main className="relative z-10 py-16 md:py-20">
+        <section className="mb-12">
+          <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
             <p className="mb-4 inline-flex items-center rounded-full border border-border bg-card/70 px-4 py-2 text-xs font-medium uppercase tracking-[0.22em] text-foreground/70">
               Events
             </p>
-            <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-              Learn, Build, Ship
-            </h1>
+            <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">Upcoming & Live Events</h1>
             <p className="text-lg text-foreground/65">
-              Join C Square events to sharpen your skills through workshops, hack nights, and real build experiences.
+              Explore club events and register via external links.
             </p>
           </div>
         </section>
 
-        <section className="pb-20">
+        <section>
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-8 flex items-end justify-between gap-3">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Upcoming Events</h2>
-                <p className="mt-2 text-sm text-foreground/65">Register early to reserve your slot.</p>
-              </div>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {upcomingEvents.length ? (
-                upcomingEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    {...event}
-                    date={formatEventDate(event.startDate || event.date)}
-                  />
-                ))
-              ) : (
-                <div className="rounded-xl border border-border bg-card/60 p-6 text-sm text-foreground/65">
-                  No upcoming events right now. Check back soon.
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        <section className="pb-24">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-8 flex items-end justify-between gap-3">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Past Highlights</h2>
-                <p className="mt-2 text-sm text-foreground/65">Moments that shaped our technical community.</p>
-              </div>
-            </div>
-
-            {pastHighlights.length ? (
-              <div className="grid gap-6 md:grid-cols-2">
-                {pastHighlights.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    {...event}
-                    date={formatEventDate(event.startDate || event.date)}
-                  />
-                ))}
+            {events.length === 0 ? (
+              <div className="rounded-xl border border-border bg-card/60 p-6 text-sm text-foreground/65">
+                No published events right now.
               </div>
             ) : (
-              <div className="rounded-xl border border-border bg-card/60 p-6 text-sm text-foreground/65">
-                Past highlights will appear here once events conclude.
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {events.map((event) => (
+                  <article key={event.id} className="rounded-xl border border-border bg-card/70 p-5">
+                    <p className="mb-2 text-xs uppercase tracking-[0.16em] text-primary/80">{event.category}</p>
+                    <h2 className="text-xl font-semibold">{event.title}</h2>
+                    {event.tagline ? <p className="mt-2 text-sm text-foreground/70">{event.tagline}</p> : null}
+                    <p className="mt-3 text-sm text-foreground/65">{event.description}</p>
+                    <p className="mt-4 text-xs text-foreground/60">{formatDate(event.startDateTime)}</p>
+                    <div className="mt-5 flex items-center gap-2">
+                      <Button asChild variant="outline" size="sm">
+                        <Link href={`/events/${event.slug}`}>View Details</Link>
+                      </Button>
+                      <Button asChild size="sm">
+                        <a href={event.registrationLink} target="_blank" rel="noreferrer">
+                          Register Now
+                        </a>
+                      </Button>
+                    </div>
+                  </article>
+                ))}
               </div>
             )}
-          </div>
-        </section>
-
-        <section className="pb-24">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-8 flex items-end justify-between gap-3">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">C Square Moments</h2>
-                <p className="mt-2 text-sm text-foreground/65">Captured moments from our workshops, hackathons, and community meetups.</p>
-              </div>
-            </div>
-
-            <GalleryGrid />
           </div>
         </section>
       </main>
