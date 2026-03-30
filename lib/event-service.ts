@@ -167,14 +167,9 @@ export async function listAdminEventsFromDb(): Promise<EventRecord[]> {
   try {
     await syncLegacyEventsToPrisma();
 
-    const dbEvents = await prisma.event.findMany({
+    return await prisma.event.findMany({
       orderBy: { startDateTime: "desc" },
     });
-
-    const legacyEvents = await listAdminEvents();
-    return mergeEventRecords(dbEvents, legacyEvents.map(toLegacyEventRecord)).sort(
-      (a, b) => b.startDateTime.getTime() - a.startDateTime.getTime()
-    );
   } catch (error) {
     if (isMissingEventTableError(error)) {
       const legacyEvents = await listAdminEvents();
@@ -190,15 +185,10 @@ export async function listPublishedEventsFromDb(): Promise<EventRecord[]> {
   try {
     await syncLegacyEventsToPrisma();
 
-    const dbEvents = await prisma.event.findMany({
+    return await prisma.event.findMany({
       where: { status: { equals: "published", mode: "insensitive" } },
       orderBy: { startDateTime: "asc" },
     });
-
-    const legacyEvents = await listPublicEvents();
-    return mergeEventRecords(dbEvents, legacyEvents.map(toLegacyEventRecord)).sort(
-      (a, b) => a.startDateTime.getTime() - b.startDateTime.getTime()
-    );
   } catch (error) {
     if (isMissingEventTableError(error)) {
       const legacyEvents = await listPublicEvents();
@@ -233,18 +223,12 @@ export async function getPublishedEventBySlug(slug: string): Promise<EventRecord
   try {
     await syncLegacyEventsToPrisma();
 
-    const fromDb = await prisma.event.findFirst({
+    return await prisma.event.findFirst({
       where: {
         slug,
         status: { equals: "published", mode: "insensitive" },
       },
     });
-
-    if (fromDb) return fromDb;
-
-    const legacyEvents = await listPublicEvents();
-    const legacyMatch = legacyEvents.find((event) => slugify(event.title || "") === slug);
-    return legacyMatch ? toLegacyEventRecord(legacyMatch) : null;
   } catch (error) {
     if (isMissingEventTableError(error)) {
       const legacyEvents = await listPublicEvents();
