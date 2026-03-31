@@ -1,16 +1,10 @@
 'use client';
 
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
 
 export default function GridBackground() {
-  const { theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  const isDarkTheme = theme !== 'light';
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const { resolvedTheme } = useTheme();
+  const isDarkTheme = resolvedTheme !== 'light';
 
   const baseBg = isDarkTheme ? '#100c08' : '#faf6f0';
   const gridLine = isDarkTheme ? 'rgba(251,146,60,0.08)' : 'rgba(194,65,12,0.08)';
@@ -18,7 +12,7 @@ export default function GridBackground() {
   const overlayEnd = isDarkTheme ? 'rgba(16,12,8,0.93)' : 'rgba(250,246,240,0.94)';
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" style={{ backgroundColor: mounted ? baseBg : '#000000' }}>
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" style={{ backgroundColor: baseBg }}>
       {/* Lightweight grid pattern */}
       <div
         className="absolute inset-0 opacity-[0.52] animate-grid"

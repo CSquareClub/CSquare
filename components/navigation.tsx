@@ -14,8 +14,8 @@ export default function Navigation() {
   const [mounted, setMounted] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [nowLabel, setNowLabel] = useState("");
-  const { theme, setTheme } = useTheme();
-  const isDark = theme !== 'light';
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDark = resolvedTheme !== 'light';
 
   useEffect(() => {
     setMounted(true);
@@ -48,6 +48,22 @@ export default function Navigation() {
       window.clearInterval(timer);
     };
   }, []);
+
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      document.body.style.overflow = '';
+      return;
+    }
+
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const logoSrc = mounted && !isDark ? '/c-square.png' : '/c-square-white.png';
 
@@ -111,6 +127,8 @@ export default function Navigation() {
             className="md:hidden rounded-lg border border-border bg-card/65 p-2 text-foreground/80"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
+            aria-expanded={isOpen}
+            aria-controls="mobile-navigation"
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -118,7 +136,7 @@ export default function Navigation() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden pb-4 pt-2">
+          <div id="mobile-navigation" className="animate-fade-in-up md:hidden pb-4 pt-2">
             <div className="space-y-2 rounded-2xl border border-border/80 bg-card/90 p-3 shadow-xl backdrop-blur">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)} className={`block rounded-xl px-4 py-3 transition-colors ${pathname === item.href ? 'bg-primary/10 text-primary font-semibold' : 'text-foreground/70 hover:text-foreground hover:bg-background/70'}`}>
