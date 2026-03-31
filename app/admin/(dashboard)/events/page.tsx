@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { DeleteEventButton } from "@/app/admin/(dashboard)/events/_components/delete-event-button";
 import { Button } from "@/components/ui/button";
 import { listAdminEventsFromDb } from "@/lib/event-service";
 import { setEventStatusAction } from "@/app/admin/(dashboard)/events/actions";
@@ -77,6 +78,7 @@ export default async function AdminEventsPage() {
                         {actionLabel}
                       </Button>
                     </form>
+                    <DeleteEventButton eventId={event.id} eventSlug={event.slug} eventTitle={event.title} />
                   </div>
                 </div>
               );

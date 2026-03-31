@@ -58,7 +58,7 @@ export default async function GalleryGrid() {
   if (!items.length) {
     return (
       <div className="rounded-xl border border-border bg-card/60 p-6 text-sm text-foreground/65">
-        Add images from Admin Gallery to show C Square Moments.
+        No moments are published yet.
       </div>
     );
   }

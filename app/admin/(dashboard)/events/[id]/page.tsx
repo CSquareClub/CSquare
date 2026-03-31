@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { DeleteEventButton } from "@/app/admin/(dashboard)/events/_components/delete-event-button";
 import { EventForm } from "@/app/admin/(dashboard)/events/_components/event-form";
 import { updateEventAction } from "@/app/admin/(dashboard)/events/actions";
 import { getAdminEventById } from "@/lib/event-service";
@@ -77,9 +78,12 @@ export default async function EditEventPage({ params }: PageProps) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Edit Event</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Update event content and publish state.</p>
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Edit Event</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Update event content and publish state.</p>
+        </div>
+        <DeleteEventButton eventId={event.id} eventSlug={event.slug} eventTitle={event.title} />
       </div>
       <EventForm mode="edit" defaultValues={defaults} submitAction={updateEventAction.bind(null, event.id)} />
     </div>

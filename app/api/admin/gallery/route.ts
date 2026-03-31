@@ -1,5 +1,6 @@
 import { authOptions } from "@/lib/authOptions";
 import { createGalleryItem, listAdminGalleryItems } from "@/lib/gallery-store";
+import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -41,12 +42,15 @@ export async function POST(req: NextRequest) {
 
     const created = await createGalleryItem({
       title,
-        eventId,
+      eventId,
       eventName,
       imageUrl,
       description,
       isPublished,
     });
+
+    revalidatePath("/");
+    revalidatePath("/events");
 
     return NextResponse.json(created, { status: 201 });
   } catch (error) {

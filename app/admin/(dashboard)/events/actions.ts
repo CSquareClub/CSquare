@@ -6,7 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import prisma from "@/lib/db";
 import { eventFormSchema, toEventInput, type EventFormInput } from "@/lib/event-schema";
-import { updateEvent as updateLegacyEvent } from "@/lib/events-store";
+import { deleteEvent as deleteLegacyEvent, listAdminEvents, updateEvent as updateLegacyEvent } from "@/lib/events-store";
 import { parseEventSponsors } from "@/lib/event-sponsors";
 
 export type EventActionResult = {
@@ -16,6 +16,15 @@ export type EventActionResult = {
 
 function slugify(value: string): string {
   return value.toLowerCase().replace(/\s+/g, "-");
+}
+
+function normalizeSlug(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 }
 
 async function ensureAdmin() {
@@ -159,4 +168,45 @@ export async function setEventStatusAction(id: string, status: "draft" | "publis
 
   revalidatePath("/admin/events");
   revalidatePath("/events");
+}
+
+export async function deleteEventAction(id: string, slug: string): Promise<EventActionResult> {
+  await ensureAdmin();
+
+  try {
+    if (id.startsWith("legacy-")) {
+      const legacyId = Number(id.replace("legacy-", ""));
+      if (Number.isNaN(legacyId)) {
+        return { ok: false, message: "Invalid legacy event id" };
+      }
+
+      const deletedLegacy = await deleteLegacyEvent(legacyId);
+      if (!deletedLegacy) {
+        return { ok: false, message: "Event not found" };
+      }
+
+      await prisma.event.deleteMany({ where: { slug } });
+    } else {
+      await prisma.event.delete({ where: { id } });
+
+      // Remove matching legacy rows so sync logic cannot recreate the deleted event.
+      const legacyEvents = await listAdminEvents();
+      const matchingLegacyIds = legacyEvents
+        .filter((event) => normalizeSlug(event.title || "") === slug)
+        .map((event) => event.id);
+
+      if (matchingLegacyIds.length > 0) {
+        await Promise.all(matchingLegacyIds.map((legacyId) => deleteLegacyEvent(legacyId)));
+      }
+    }
+
+    revalidatePath("/admin/events");
+    revalidatePath(`/admin/events/${id}`);
+    revalidatePath("/events");
+    revalidatePath(`/events/${slug}`);
+
+    return { ok: true, message: "Event deleted" };
+  } catch {
+    return { ok: false, message: "Failed to delete event" };
+  }
 }
