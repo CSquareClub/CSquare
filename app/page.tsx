@@ -6,8 +6,7 @@ import Features from '@/components/home/features';
 import ClubDescription from '@/components/home/club-description';
 import GalleryGrid from '@/components/events/gallery-grid';
 import EventCard from '@/components/events/event-card';
-import { listPublishedEventsFromDb } from '@/lib/event-service';
-import { getDevfolioApplyLogos, parseEventSponsors } from '@/lib/event-sponsors';
+import { listPublicEvents } from '@/lib/events-store';
 import Link from 'next/link';
 
 function toEpoch(value: Date | string | null | undefined): number | null {
@@ -40,11 +39,11 @@ function formatEventTime(startValue: Date | string | null | undefined, endValue:
 }
 
 export default async function Home() {
-  const allEvents = await listPublishedEventsFromDb();
+  const allEvents = await listPublicEvents();
   const now = Date.now();
   const currentEvents = allEvents
     .filter((event) => {
-      const endEpoch = toEpoch(event.endDateTime || event.startDateTime);
+      const endEpoch = toEpoch(event.endDate || event.date);
       return endEpoch === null || endEpoch >= now;
     })
     .slice(0, 3);
@@ -74,45 +73,12 @@ export default async function Home() {
             {currentEvents.length ? (
               <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {currentEvents.map((event) => (
-                  (() => {
-                    const parsedSponsors = parseEventSponsors(event.sponsors);
-                    const sponsorRows = parsedSponsors.map((sponsor, index) => ({
-                      id: index + 1,
-                      eventId: 0,
-                      title: sponsor.title,
-                      logoUrl: sponsor.logoUrl,
-                      logoLightUrl: sponsor.logoLightUrl,
-                      logoDarkUrl: sponsor.logoDarkUrl,
-                      devfolioApplyLogoLightUrl: sponsor.devfolioApplyLogoLightUrl,
-                      devfolioApplyLogoDarkUrl: sponsor.devfolioApplyLogoDarkUrl,
-                    }));
-                    const devfolioApplyLogos = getDevfolioApplyLogos(parsedSponsors);
-
-                    return (
-                      <EventCard
-                        key={event.id}
-                        id={event.id}
-                        slug={event.slug}
-                        title={event.title}
-                        description={event.description}
-                        date={formatEventDate(event.startDateTime)}
-                        time={formatEventTime(event.startDateTime, event.endDateTime)}
-                        location={event.venueName || event.city || null}
-                        attendees={null}
-                        category={event.category}
-                        image={event.bannerImage}
-                        sponsors={sponsorRows}
-                        sponsorTitle={sponsorRows[0]?.title || null}
-                        sponsorLogoUrl={sponsorRows[0]?.logoUrl || null}
-                        sponsorLogoLightUrl={sponsorRows[0]?.logoLightUrl || null}
-                        sponsorLogoDarkUrl={sponsorRows[0]?.logoDarkUrl || null}
-                        devfolioApplyLogoLightUrl={devfolioApplyLogos.light}
-                        devfolioApplyLogoDarkUrl={devfolioApplyLogos.dark}
-                        registrationUrl={event.registrationLink}
-                        isRegistrationOpen={toEpoch(event.endDateTime) === null || (toEpoch(event.endDateTime) ?? 0) >= now}
-                      />
-                    );
-                  })()
+                  <EventCard
+                    key={event.id}
+                    {...event}
+                    date={formatEventDate(event.startDate || event.date)}
+                    time={formatEventTime(event.startDate || event.date, event.endDate || event.startDate || event.date)}
+                  />
                 ))}
               </div>
             ) : (
