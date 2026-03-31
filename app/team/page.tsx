@@ -6,8 +6,16 @@ import { listPublicTeam } from '@/lib/team-store';
 
 export const dynamic = 'force-dynamic';
 
+import { useMemo, useState } from 'react';
+
 export default async function TeamPage() {
   const members = await listPublicTeam();
+  // Memoize members
+  const memoizedMembers = useMemo(() => members, [members]);
+  // Limit number of items rendered at once
+  const [showAll, setShowAll] = useState(false);
+  const MEMBER_LIMIT = 9;
+  const displayedMembers = showAll ? memoizedMembers : memoizedMembers.slice(0, MEMBER_LIMIT);
 
   return (
     <div className="relative isolate min-h-screen bg-background">
@@ -27,9 +35,9 @@ export default async function TeamPage() {
 
         <section className="pb-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            {members.length ? (
+            {displayedMembers.length ? (
               <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {members.map((member) => (
+                {displayedMembers.map((member) => (
                   <TeamCard
                     key={member.id}
                     name={member.name}
@@ -43,6 +51,13 @@ export default async function TeamPage() {
             ) : (
               <div className="rounded-xl border border-border bg-card/60 p-6 text-sm text-foreground/65">
                 Team members will appear here once they are added from the admin portal.
+              </div>
+            )}
+            {memoizedMembers.length > MEMBER_LIMIT && !showAll && (
+              <div className="flex justify-center mt-6">
+                <button className="rounded-full bg-blue-600 text-white px-6 py-2 font-semibold shadow hover:bg-blue-700 transition" onClick={() => setShowAll(true)}>
+                  Show More
+                </button>
               </div>
             )}
           </div>

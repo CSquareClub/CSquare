@@ -26,17 +26,32 @@ function formatEventDate(value: string | null | undefined): string | null {
   });
 }
 
+import { useMemo, useState } from 'react';
+
 export default async function EventsPage() {
   const allEvents = await listPublicEvents();
   const now = Date.now();
-  const upcomingEvents = allEvents.filter((event) => {
-    const endEpoch = toEpoch(event.endDate || event.date);
-    return endEpoch === null || endEpoch >= now;
-  });
-  const pastHighlights = allEvents.filter((event) => {
-    const endEpoch = toEpoch(event.endDate || event.date);
-    return endEpoch !== null && endEpoch < now;
-  });
+  // Memoize filtered lists
+  const upcomingEvents = useMemo(() =>
+    allEvents.filter((event) => {
+      const endEpoch = toEpoch(event.endDate || event.date);
+      return endEpoch === null || endEpoch >= now;
+    }), [allEvents, now]
+  );
+  const pastHighlights = useMemo(() =>
+    allEvents.filter((event) => {
+      const endEpoch = toEpoch(event.endDate || event.date);
+      return endEpoch !== null && endEpoch < now;
+    }), [allEvents, now]
+  );
+
+  // Limit number of items rendered at once
+  const [showAllUpcoming, setShowAllUpcoming] = useState(false);
+  const [showAllPast, setShowAllPast] = useState(false);
+  const UPCOMING_LIMIT = 6;
+  const PAST_LIMIT = 6;
+  const displayedUpcoming = showAllUpcoming ? upcomingEvents : upcomingEvents.slice(0, UPCOMING_LIMIT);
+  const displayedPast = showAllPast ? pastHighlights : pastHighlights.slice(0, PAST_LIMIT);
 
   return (
     <div className="relative isolate min-h-screen bg-background">
@@ -68,8 +83,8 @@ export default async function EventsPage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {upcomingEvents.length ? (
-                upcomingEvents.map((event) => (
+              {displayedUpcoming.length ? (
+                displayedUpcoming.map((event) => (
                   <EventCard
                     key={event.id}
                     {...event}
@@ -81,6 +96,14 @@ export default async function EventsPage() {
                   No upcoming events right now. Check back soon.
                 </div>
               )}
+            </div>
+            {upcomingEvents.length > UPCOMING_LIMIT && !showAllUpcoming && (
+              <div className="flex justify-center mt-6">
+                <button className="rounded-full bg-blue-600 text-white px-6 py-2 font-semibold shadow hover:bg-blue-700 transition" onClick={() => setShowAllUpcoming(true)}>
+                  Show More
+                </button>
+              </div>
+            )}
             </div>
           </div>
         </section>
@@ -94,9 +117,9 @@ export default async function EventsPage() {
               </div>
             </div>
 
-            {pastHighlights.length ? (
+            {displayedPast.length ? (
               <div className="grid gap-6 md:grid-cols-2">
-                {pastHighlights.map((event) => (
+                {displayedPast.map((event) => (
                   <EventCard
                     key={event.id}
                     {...event}
@@ -107,6 +130,13 @@ export default async function EventsPage() {
             ) : (
               <div className="rounded-xl border border-border bg-card/60 p-6 text-sm text-foreground/65">
                 Past highlights will appear here once events conclude.
+              </div>
+            )}
+            {pastHighlights.length > PAST_LIMIT && !showAllPast && (
+              <div className="flex justify-center mt-6">
+                <button className="rounded-full bg-blue-600 text-white px-6 py-2 font-semibold shadow hover:bg-blue-700 transition" onClick={() => setShowAllPast(true)}>
+                  Show More
+                </button>
               </div>
             )}
           </div>
