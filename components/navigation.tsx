@@ -145,7 +145,7 @@ export default function Navigation() {
             ))}
             <div onClick={() => setIsOpen(false)}>
               <JoinNowModal
-                className="mt-2 inline-flex w-full items-center justify-center rounded-xl border-2 border-primary bg-primary/10 px-4 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-primary transition-all hover:bg-primary/20 hover:shadow-[0_0_18px_color-mix(in_oklab,var(--primary)_28%,transparent)]"
+                className="mt-2 inline-flex w-full items-center justify-center rounded-xl border-2 border-primary bg-primary/10 px-4 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-primary transition-all hover:bg-primary/20"
               >
                 Join Now
               </JoinNowModal>
