@@ -59,7 +59,7 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur-md">
+    <nav className="sticky top-0 z-40 border-b border-border/60 bg-background/75 backdrop-blur-xl">
       <div className="absolute left-0 top-0 h-[2px] w-full bg-border/40">
         <div
           className="h-full bg-primary transition-[width] duration-150"
@@ -68,38 +68,38 @@ export default function Navigation() {
       </div>
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-90">
+          <Link href="/" className="flex items-center gap-3 transition-all hover:opacity-95 hover:scale-[1.01]">
             <Image src={logoSrc} alt="C Square Club" width={160} height={36} className="h-9 w-auto object-contain" priority />
             <span className="font-mono text-lg font-bold tracking-tight text-foreground/90">&lt;C_Square/&gt;</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6 lg:gap-8">
-            <span className="rounded-full border border-border bg-card/60 px-3 py-1 font-mono text-xs text-foreground/70">
+          <div className="hidden md:flex items-center gap-4 lg:gap-5">
+            <span className="rounded-full border border-border bg-card/70 px-3 py-1 font-mono text-xs text-foreground/70 shadow-sm">
               LIVE {nowLabel || '--:--'}
             </span>
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-sm transition-colors ${
+                className={`rounded-full px-3 py-1.5 text-sm transition-all ${
                   pathname === item.href
-                    ? 'text-primary'
-                    : 'text-foreground/70 hover:text-foreground'
+                    ? 'bg-primary/10 text-primary font-semibold shadow-[0_0_0_1px_color-mix(in_oklab,var(--primary)_35%,transparent)]'
+                    : 'text-foreground/70 hover:bg-card/80 hover:text-foreground'
                 }`}
               >
                 {item.label}
               </Link>
             ))}
 
-            <JoinNowModal className="inline-flex items-center justify-center rounded-lg border-2 border-primary bg-primary/10 px-4 py-2 font-mono text-sm font-semibold uppercase tracking-wider text-primary transition-all hover:bg-primary/20 hover:shadow-[0_0_20px_color-mix(in_oklab,var(--primary)_35%,transparent)]">
+            <JoinNowModal className="inline-flex items-center justify-center rounded-full border-2 border-primary bg-primary/15 px-5 py-2 font-mono text-xs font-semibold uppercase tracking-[0.15em] text-primary transition-all hover:scale-[1.02] hover:bg-primary/25 hover:shadow-[0_0_22px_color-mix(in_oklab,var(--primary)_35%,transparent)]">
               Join Now
             </JoinNowModal>
             
             <button
               type="button"
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className="inline-flex items-center justify-center rounded-full border border-border bg-card/60 p-2 text-foreground/70 transition-colors hover:bg-card hover:text-primary"
+              className="inline-flex items-center justify-center rounded-full border border-border bg-card/65 p-2 text-foreground/70 shadow-sm transition-colors hover:bg-card hover:text-primary"
               aria-label="Toggle theme"
             >
               {mounted && isDark ? <Sun size={16} /> : <Moon size={16} />}
@@ -108,7 +108,7 @@ export default function Navigation() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden"
+            className="md:hidden rounded-lg border border-border bg-card/65 p-2 text-foreground/80"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >
@@ -118,15 +118,16 @@ export default function Navigation() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden pb-4 space-y-2">
+          <div className="md:hidden pb-4 pt-2">
+            <div className="space-y-2 rounded-2xl border border-border/80 bg-card/90 p-3 shadow-xl backdrop-blur">
             {navItems.map((item) => (
-              <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)} className={`block px-4 py-3 rounded transition-colors ${pathname === item.href ? 'text-primary font-semibold bg-primary/10' : 'text-foreground/70 hover:text-foreground hover:bg-card/60'}`}>
+              <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)} className={`block rounded-xl px-4 py-3 transition-colors ${pathname === item.href ? 'bg-primary/10 text-primary font-semibold' : 'text-foreground/70 hover:text-foreground hover:bg-background/70'}`}>
                 {item.label}
               </Link>
             ))}
             <div onClick={() => setIsOpen(false)}>
               <JoinNowModal
-                className="mt-2 inline-flex w-full items-center justify-center rounded-xl border-2 border-primary bg-primary/10 px-4 py-3 font-mono text-sm font-semibold uppercase tracking-wider text-primary transition-all hover:bg-primary/20"
+                className="mt-2 inline-flex w-full items-center justify-center rounded-xl border-2 border-primary bg-primary/10 px-4 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-primary transition-all hover:bg-primary/20"
               >
                 Join Now
               </JoinNowModal>
@@ -140,6 +141,7 @@ export default function Navigation() {
               {mounted && isDark ? <Sun size={16} /> : <Moon size={16} />}
               {isDark ? 'Light Mode' : 'Dark Mode'}
             </button>
+            </div>
           </div>
         )}
       </div>

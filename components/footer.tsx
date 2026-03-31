@@ -18,7 +18,8 @@ export default function Footer() {
   const logoSrc = mounted && !isDark ? '/c-square.png' : '/c-square-white.png';
 
   return (
-    <footer className="relative z-10 mt-20 border-t border-border bg-gradient-to-b from-transparent to-background/80">
+    <footer className="relative z-10 mt-20 border-t border-border bg-gradient-to-b from-transparent via-background/80 to-background">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/45 to-transparent" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-1 hidden border-r border-border pr-8 md:col-span-1 md:block">
@@ -27,6 +28,9 @@ export default function Footer() {
             <p className="text-foreground/50 text-sm leading-relaxed pr-4">
               A platform where beginners become coders, coders become competitors, and competitors become builders.
             </p>
+            <div className="mt-6 inline-flex items-center rounded-full border border-primary/35 bg-primary/10 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.15em] text-primary/90">
+              Built by students
+            </div>
           </div>
 
           <div className="md:col-span-1 md:pl-8">
@@ -96,7 +100,7 @@ export default function Footer() {
               <a
                 href="https://www.linkedin.com/company/csquare-club/"
                 target='_blank'
-                className="text-foreground/40 hover:text-[#dc2626] transition-colors"
+                className="rounded-full border border-border p-2 text-foreground/40 transition-colors hover:border-primary/40 hover:text-[#dc2626]"
                 aria-label="LinkedIn"
               >
                 <Linkedin size={20} />
@@ -110,7 +114,7 @@ export default function Footer() {
               </a> */}
               <a
                 href="mailto:csquareclub@cumail.in"
-                className="text-foreground/40 hover:text-[#dc2626] transition-colors"
+                className="rounded-full border border-border p-2 text-foreground/40 transition-colors hover:border-primary/40 hover:text-[#dc2626]"
                 aria-label="Email"
               >
                 <Mail size={20} />
@@ -129,6 +133,9 @@ export default function Footer() {
           
           <p className="text-sm text-foreground/40 text-center md:text-left">
             © {new Date().getFullYear()} C Square Club. All rights reserved.
+          </p>
+          <p className="mt-3 text-xs text-foreground/45 md:mt-0">
+            Crafted with consistency, clarity, and community focus.
           </p>
         </div>
       </div>
