@@ -12,7 +12,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
   try {
     const body = await req.json();
-    const id = Number(params.id);
+    const id = params.id;
 
     const parsed = eventSchema.safeParse(body);
 
