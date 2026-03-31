@@ -6,10 +6,10 @@ export default function GridBackground() {
   const { resolvedTheme } = useTheme();
   const isDarkTheme = resolvedTheme !== 'light';
 
-  const baseBg = isDarkTheme ? '#100c08' : '#faf6f0';
-  const gridLine = isDarkTheme ? 'rgba(251,146,60,0.08)' : 'rgba(194,65,12,0.08)';
-  const overlayMid = isDarkTheme ? 'rgba(23,17,11,0.4)' : 'rgba(245,232,214,0.35)';
-  const overlayEnd = isDarkTheme ? 'rgba(16,12,8,0.93)' : 'rgba(250,246,240,0.94)';
+  const baseBg = isDarkTheme ? '#071815' : '#f3f7f5';
+  const gridLine = isDarkTheme ? 'rgba(82,227,194,0.1)' : 'rgba(15,143,122,0.11)';
+  const overlayMid = isDarkTheme ? 'rgba(10,33,30,0.45)' : 'rgba(211,240,232,0.36)';
+  const overlayEnd = isDarkTheme ? 'rgba(7,24,21,0.94)' : 'rgba(243,247,245,0.95)';
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" style={{ backgroundColor: baseBg }}>
@@ -28,15 +28,15 @@ export default function GridBackground() {
       {/* Ambient glows */}
       <div
         className="absolute -top-28 left-1/2 h-[470px] w-[80%] -translate-x-1/2 rounded-full blur-3xl animate-drift-slow"
-        style={{ background: isDarkTheme ? 'rgba(251,146,60,0.2)' : 'rgba(249,115,22,0.18)' }}
+        style={{ background: isDarkTheme ? 'rgba(82,227,194,0.24)' : 'rgba(15,143,122,0.2)' }}
       />
       <div
         className="absolute bottom-[-60px] right-[-40px] h-[360px] w-[360px] rounded-full blur-3xl animate-orbit-float"
-        style={{ background: isDarkTheme ? 'rgba(220,38,38,0.16)' : 'rgba(234,88,12,0.12)' }}
+        style={{ background: isDarkTheme ? 'rgba(255,143,102,0.2)' : 'rgba(255,107,74,0.17)' }}
       />
       <div
         className="absolute bottom-[20%] left-[-70px] h-[280px] w-[280px] rounded-full blur-3xl animate-drift-slow"
-        style={{ background: isDarkTheme ? 'rgba(180,83,9,0.12)' : 'rgba(194,65,12,0.11)' }}
+        style={{ background: isDarkTheme ? 'rgba(99,163,255,0.14)' : 'rgba(46,109,246,0.1)' }}
       />
 
       <div className="absolute inset-0 opacity-[0.03]" style={{

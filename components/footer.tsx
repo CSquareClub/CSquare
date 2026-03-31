@@ -101,7 +101,7 @@ export default function Footer() {
                 href="https://www.linkedin.com/company/csquare-club/"
                 target='_blank'
                 rel="noopener noreferrer"
-                className="rounded-full border border-border p-2 text-foreground/40 transition-colors hover:border-primary/40 hover:text-[#dc2626]"
+                className="rounded-full border border-border p-2 text-foreground/40 transition-colors hover:border-primary/40 hover:text-primary"
                 aria-label="LinkedIn"
               >
                 <Linkedin size={20} />
@@ -115,7 +115,7 @@ export default function Footer() {
               </a> */}
               <a
                 href="mailto:csquareclub@cumail.in"
-                className="rounded-full border border-border p-2 text-foreground/40 transition-colors hover:border-primary/40 hover:text-[#dc2626]"
+                className="rounded-full border border-border p-2 text-foreground/40 transition-colors hover:border-primary/40 hover:text-primary"
                 aria-label="Email"
               >
                 <Mail size={20} />
