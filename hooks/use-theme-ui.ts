@@ -25,32 +25,32 @@ export function useThemeUI(initialDark = true) {
     () =>
       isDark
         ? {
-            root: "bg-[#0a0a0a] text-neutral-300",
+            root: "bg-[#0a0a0a] text-white",
             panel: "bg-[#111111]",
-            panelSoft: "bg-neutral-900",
-            border: "border-neutral-800",
+            panelSoft: "bg-black",
+            border: "border-white",
             textPrimary: "text-white",
             textSecondary: "text-neutral-400",
-            accent: "text-blue-400",
-            accentMuted: "bg-blue-500/10 text-blue-400",
-            buttonPrimary: "bg-white text-black hover:bg-neutral-200",
+            accent: "text-[#dc2626]",
+            accentMuted: "bg-[#dc2626]/10 text-[#dc2626]",
+            buttonPrimary: "bg-white text-[#dc2626] hover:bg-[#dc2626] hover:text-white",
             buttonOutline:
-              "border border-neutral-800 text-neutral-300 hover:bg-neutral-900",
-            buttonGhost: "text-neutral-400 hover:text-white hover:bg-neutral-900",
+              "border border-white text-white hover:bg-[#dc2626] hover:text-white",
+            buttonGhost: "text-white hover:text-[#dc2626] hover:bg-white/10",
           }
         : {
-            root: "bg-white text-neutral-700",
+            root: "bg-white text-black",
             panel: "bg-white",
             panelSoft: "bg-neutral-50",
-            border: "border-neutral-200",
+            border: "border-black",
             textPrimary: "text-black",
             textSecondary: "text-neutral-500",
-            accent: "text-blue-600",
-            accentMuted: "bg-blue-50 text-blue-600",
-            buttonPrimary: "bg-black text-white hover:bg-neutral-800",
+            accent: "text-[#dc2626]",
+            accentMuted: "bg-[#dc2626]/10 text-[#dc2626]",
+            buttonPrimary: "bg-[#dc2626] text-white hover:bg-black hover:text-white",
             buttonOutline:
-              "border border-neutral-200 text-neutral-600 hover:bg-neutral-50",
-            buttonGhost: "text-neutral-600 hover:text-black hover:bg-neutral-100",
+              "border border-black text-black hover:bg-[#dc2626] hover:text-white",
+            buttonGhost: "text-black hover:text-[#dc2626] hover:bg-black/10",
           },
     [isDark]
   );
