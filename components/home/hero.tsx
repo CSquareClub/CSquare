@@ -34,12 +34,12 @@ export default function Hero() {
           {/* Left Column content */}
           <div className="max-w-2xl">
             {/* Badge */}
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-2 animate-fade-in-up">
+            <div className="mb-8 inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-card/80 px-5 py-2.5 shadow-md animate-fade-in-up">
               <span className="text-sm font-mono text-foreground/80">~ ./start_club.sh</span>
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 tracking-tight animate-fade-in-up md:leading-[1.1]" style={{ animationDelay: '0.1s' }}>
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold mb-8 tracking-tight animate-fade-in-up md:leading-[1.1] text-primary drop-shadow-lg" style={{ animationDelay: '0.1s' }}>
               Learn.{' '}
               <span
                 className={`text-primary inline-block min-w-[6.5ch] transition-all duration-200 ${wordVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1'}`}
@@ -51,19 +51,19 @@ export default function Hero() {
             </h1>
 
             {/* Subheading */}
-            <p className="text-lg md:text-xl text-foreground/60 mb-10 max-w-xl animate-fade-in-up leading-relaxed" style={{ animationDelay: '0.2s' }}>
+            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-xl animate-fade-in-up leading-relaxed" style={{ animationDelay: '0.2s' }}>
               C Square Club is a coding community where students practice DSA, build production-style
               projects, and level up through contests, teamwork, and code reviews.
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              <JoinNowModal className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-medium text-primary-foreground transition-colors duration-200 hover:opacity-90">
+              <JoinNowModal className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-7 py-3 font-semibold text-primary-foreground shadow-lg transition-all duration-200 hover:scale-[1.03] hover:shadow-xl">
                 Join the Club <ArrowRight size={18} />
               </JoinNowModal>
               <Link
                 href="/events"
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card/60 px-6 py-3 font-medium text-foreground transition-all duration-300 hover:bg-card"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-card/80 px-7 py-3 font-semibold text-foreground shadow-md transition-all duration-300 hover:bg-card hover:scale-[1.03] hover:shadow-xl"
               >
                 Explore Events
               </Link>

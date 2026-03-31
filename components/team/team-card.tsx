@@ -26,7 +26,7 @@ export default function TeamCard({
   const [currentImage, setCurrentImage] = useState(image || fallbackImage);
 
   return (
-    <div className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-border bg-card/70 transition-all duration-500 hover:border-[#dc2626]/30 hover:bg-card hover:shadow-[0_0_30px_rgba(220,38,38,0.15)]">
+    <div className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-primary/30 bg-card/80 shadow-md transition-all duration-300 hover:border-primary hover:bg-card hover:shadow-xl">
       {/* Subtle top highlight on hover */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#dc2626]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20" />
 
