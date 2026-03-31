@@ -277,42 +277,42 @@ export default function AdminEventsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Events</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Create and manage events shown on the public Events page.</p>
+    <div className="space-y-10">
+      <div className="flex flex-col gap-2 mb-2">
+        <h1 className="text-4xl font-extrabold tracking-tight text-primary drop-shadow-sm">Events Dashboard</h1>
+        <p className="text-base text-muted-foreground">Create and manage events shown on the public Events page.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid gap-4 rounded-xl border border-border bg-card p-5 md:grid-cols-2">
+      <form onSubmit={handleSubmit} className="grid gap-6 rounded-2xl border border-border bg-card/90 shadow-lg p-8 md:grid-cols-2">
         <input
           placeholder="Event title"
           value={form.title}
           onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition"
         />
         <input
           type="datetime-local"
           value={form.startDate}
           onChange={(e) => setForm((prev) => ({ ...prev, startDate: e.target.value }))}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition"
         />
         <input
           type="datetime-local"
           value={form.endDate}
           onChange={(e) => setForm((prev) => ({ ...prev, endDate: e.target.value }))}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition"
         />
         <input
           placeholder="Location"
           value={form.location}
           onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition"
         />
         <input
           placeholder="Category"
           value={form.category}
           onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition"
         />
         <input
           type="number"
@@ -320,22 +320,22 @@ export default function AdminEventsPage() {
           placeholder="Capacity"
           value={form.attendees}
           onChange={(e) => setForm((prev) => ({ ...prev, attendees: e.target.value }))}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition"
         />
         <input
           placeholder="Image URL"
           value={form.image}
           onChange={(e) => setForm((prev) => ({ ...prev, image: e.target.value }))}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
         />
         <input
           placeholder="Sponsor title (optional)"
           value={form.sponsorTitle}
           onChange={(e) => setForm((prev) => ({ ...prev, sponsorTitle: e.target.value }))}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
         />
         {form.sponsorTitle.trim().toLowerCase() === "devfolio" ? (
-          <p className="text-xs text-foreground/70 md:col-span-2">
+          <p className="text-xs text-primary font-medium md:col-span-2">
             Devfolio sponsor requires: Devfolio logo (light and dark), Apply with Devfolio logo (light and dark), and a registration URL.
           </p>
         ) : null}
@@ -343,25 +343,25 @@ export default function AdminEventsPage() {
           placeholder={form.sponsorTitle.trim().toLowerCase() === "devfolio" ? "Devfolio logo URL (light theme)" : "Sponsor logo URL (light theme)"}
           value={form.sponsorLogoLightUrl}
           onChange={(e) => setForm((prev) => ({ ...prev, sponsorLogoLightUrl: e.target.value }))}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
         />
         <input
           type="file"
           accept="image/*"
           onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "light", "sponsor")}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+          className="rounded-lg border border-border bg-background px-4 py-3 text-base md:col-span-2"
         />
         <input
           placeholder={form.sponsorTitle.trim().toLowerCase() === "devfolio" ? "Devfolio logo URL (dark theme)" : "Sponsor logo URL (dark theme)"}
           value={form.sponsorLogoDarkUrl}
           onChange={(e) => setForm((prev) => ({ ...prev, sponsorLogoDarkUrl: e.target.value }))}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
         />
         <input
           type="file"
           accept="image/*"
           onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "dark", "sponsor")}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+          className="rounded-lg border border-border bg-background px-4 py-3 text-base md:col-span-2"
         />
         {form.sponsorTitle.trim().toLowerCase() === "devfolio" ? (
           <>
@@ -369,25 +369,25 @@ export default function AdminEventsPage() {
               placeholder="Apply with Devfolio logo URL (light theme)"
               value={form.devfolioApplyLogoLightUrl}
               onChange={(e) => setForm((prev) => ({ ...prev, devfolioApplyLogoLightUrl: e.target.value }))}
-              className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+              className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
             />
             <input
               type="file"
               accept="image/*"
               onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "light", "apply")}
-              className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+              className="rounded-lg border border-border bg-background px-4 py-3 text-base md:col-span-2"
             />
             <input
               placeholder="Apply with Devfolio logo URL (dark theme)"
               value={form.devfolioApplyLogoDarkUrl}
               onChange={(e) => setForm((prev) => ({ ...prev, devfolioApplyLogoDarkUrl: e.target.value }))}
-              className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+              className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
             />
             <input
               type="file"
               accept="image/*"
               onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "dark", "apply")}
-              className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+              className="rounded-lg border border-border bg-background px-4 py-3 text-base md:col-span-2"
             />
           </>
         ) : null}
@@ -395,13 +395,13 @@ export default function AdminEventsPage() {
           placeholder="Registration URL (optional)"
           value={form.registrationUrl}
           onChange={(e) => setForm((prev) => ({ ...prev, registrationUrl: e.target.value }))}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
         />
 
         {/* Multiple Sponsors Management */}
         <div className="md:col-span-2">
           <div className="mb-2 flex items-center justify-between">
-            <label className="text-sm font-semibold">Additional Sponsors</label>
+            <label className="text-base font-semibold text-primary">Additional Sponsors</label>
             <button
               type="button"
               onClick={() => {
@@ -420,17 +420,16 @@ export default function AdminEventsPage() {
                   ],
                 }));
               }}
-              className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-xs hover:bg-background/80"
+              className="inline-flex items-center gap-1 rounded-lg border border-primary bg-primary/10 px-3 py-1.5 text-sm text-primary font-medium hover:bg-primary/20 transition"
             >
-              <Plus size={14} />
+              <Plus size={16} />
               Add Sponsor
             </button>
           </div>
-          
           {form.sponsors.length > 0 ? (
-            <div className="space-y-3 rounded-md border border-border bg-background/30 p-3">
+            <div className="space-y-3 rounded-lg border border-border bg-background/50 p-4">
               {form.sponsors.map((sponsor, idx) => (
-                <div key={idx} className="space-y-2 rounded border border-border bg-background p-3">
+                <div key={idx} className="space-y-2 rounded-lg border border-border bg-card p-4 shadow-sm">
                   <div className="flex items-center justify-between gap-2">
                     <input
                       placeholder="Sponsor name"
@@ -440,7 +439,7 @@ export default function AdminEventsPage() {
                         updated[idx].title = e.target.value;
                         setForm((prev) => ({ ...prev, sponsors: updated }));
                       }}
-                      className="flex-1 rounded border border-border bg-card px-2 py-1 text-xs"
+                      className="flex-1 rounded-lg border border-border bg-card px-3 py-2 text-sm"
                     />
                     <button
                       type="button"
@@ -450,12 +449,11 @@ export default function AdminEventsPage() {
                           sponsors: prev.sponsors.filter((_, i) => i !== idx),
                         }));
                       }}
-                      className="rounded border border-red-200 bg-red-50 p-1 text-red-700 hover:bg-red-100"
+                      className="rounded-lg border border-red-200 bg-red-50 p-2 text-red-700 hover:bg-red-100"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={16} />
                     </button>
                   </div>
-                  
                   <input
                     placeholder="Logo Light URL"
                     value={sponsor.logoLightUrl || ""}
@@ -464,9 +462,8 @@ export default function AdminEventsPage() {
                       updated[idx].logoLightUrl = e.target.value || null;
                       setForm((prev) => ({ ...prev, sponsors: updated }));
                     }}
-                    className="w-full rounded border border-border bg-card px-2 py-1 text-xs"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
                   />
-                  
                   <input
                     placeholder="Logo Dark URL"
                     value={sponsor.logoDarkUrl || ""}
@@ -475,7 +472,7 @@ export default function AdminEventsPage() {
                       updated[idx].logoDarkUrl = e.target.value || null;
                       setForm((prev) => ({ ...prev, sponsors: updated }));
                     }}
-                    className="w-full rounded border border-border bg-card px-2 py-1 text-xs"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
                   />
                 </div>
               ))}
@@ -489,10 +486,10 @@ export default function AdminEventsPage() {
           placeholder="Description"
           value={form.description}
           onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-          className="min-h-24 rounded-md border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+          className="min-h-24 rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
         />
 
-        <label className="inline-flex items-center gap-2 text-sm md:col-span-2">
+        <label className="inline-flex items-center gap-2 text-base font-medium md:col-span-2">
           <input
             type="checkbox"
             checked={form.isPublished}
@@ -501,11 +498,11 @@ export default function AdminEventsPage() {
           Publish this event
         </label>
 
-        <div className="flex items-center gap-3 md:col-span-2">
+        <div className="flex items-center gap-4 md:col-span-2 mt-2">
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
+            className="rounded-lg bg-primary px-6 py-2.5 text-base font-semibold text-white shadow-md hover:bg-primary/90 transition disabled:opacity-60"
           >
             {submitting ? "Saving..." : isEditing ? "Update Event" : "Create Event"}
           </button>
@@ -513,7 +510,7 @@ export default function AdminEventsPage() {
             <button
               type="button"
               onClick={resetForm}
-              className="rounded-md border border-border px-4 py-2 text-sm"
+              className="rounded-lg border border-border px-6 py-2.5 text-base font-semibold text-foreground bg-background hover:bg-muted/40 transition"
             >
               Cancel Edit
             </button>
@@ -524,43 +521,43 @@ export default function AdminEventsPage() {
       {status && <p className="text-sm text-green-600">{status}</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <div className="rounded-xl border border-border bg-card">
-        <div className="border-b border-border px-5 py-3">
-          <h2 className="text-lg font-semibold">All Events</h2>
+      <div className="rounded-2xl border border-border bg-card/90 shadow-lg mt-8">
+        <div className="border-b border-border px-8 py-5 flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-primary">All Events</h2>
         </div>
         {loading ? (
-          <p className="px-5 py-4 text-sm text-muted-foreground">Loading events...</p>
+          <p className="px-8 py-6 text-base text-muted-foreground">Loading events...</p>
         ) : events.length === 0 ? (
-          <p className="px-5 py-4 text-sm text-muted-foreground">No events created yet.</p>
+          <p className="px-8 py-6 text-base text-muted-foreground">No events created yet.</p>
         ) : (
           <div className="divide-y divide-border">
             {events.map((event) => (
-              <div key={event.id} className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-start md:justify-between">
-                <div>
-                  <p className="font-semibold">{event.title || "Untitled Event"}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+              <div key={event.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-8 py-6 bg-card hover:bg-muted/30 transition rounded-xl my-2 shadow-sm">
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-lg text-foreground truncate">{event.title || "Untitled Event"}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
                     {event.startDate || event.date ? formatEventDateTime(event.startDate || event.date || "") : "No start date"}
                     {event.endDate ? ` - ${formatEventDateTime(event.endDate)}` : ""}
                     {event.location ? ` • ${event.location}` : ""}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     {event.category || "Uncategorized"}
                     {typeof event.attendees === "number" ? ` • Capacity: ${event.attendees}` : ""}
                     {` • ${event.isPublished ? "Published" : "Draft"}`}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 flex-shrink-0">
                   <button
                     type="button"
                     onClick={() => startEdit(event)}
-                    className="rounded-md border border-border px-3 py-1.5 text-xs"
+                    className="rounded-lg border border-primary text-primary px-5 py-2 text-base font-semibold bg-primary/10 hover:bg-primary/20 transition"
                   >
                     Edit
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDelete(event.id)}
-                    className="rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-xs text-red-700"
+                    className="rounded-lg border border-red-200 bg-red-50 px-5 py-2 text-base font-semibold text-red-700 hover:bg-red-100 transition"
                   >
                     Delete
                   </button>
