@@ -47,6 +47,10 @@ export default async function Home() {
       return endEpoch === null || endEpoch >= now;
     })
     .slice(0, 3);
+  const recentPublishedEvents = [...allEvents]
+    .sort((a, b) => (toEpoch(b.startDate || b.date) ?? 0) - (toEpoch(a.startDate || a.date) ?? 0))
+    .slice(0, 3);
+  const homeEvents = currentEvents.length > 0 ? currentEvents : recentPublishedEvents;
 
   return (
     <div className="relative isolate min-h-screen bg-background">
@@ -62,17 +66,19 @@ export default async function Home() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-8 flex items-end justify-between gap-3">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Current Events</h2>
-                <p className="mt-2 text-sm text-foreground/65">Happening now and coming up next.</p>
+                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Published Events</h2>
+                <p className="mt-2 text-sm text-foreground/65">
+                  {currentEvents.length > 0 ? "Happening now and coming up next." : "Latest published events from the club."}
+                </p>
               </div>
               <Link href="/events" className="text-sm font-medium text-primary hover:underline">
                 View all events
               </Link>
             </div>
 
-            {currentEvents.length ? (
+            {homeEvents.length ? (
               <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {currentEvents.map((event) => (
+                {homeEvents.map((event) => (
                   <EventCard
                     key={event.id}
                     {...event}
@@ -83,7 +89,7 @@ export default async function Home() {
               </div>
             ) : (
               <div className="rounded-xl border border-border bg-card/60 p-6 text-sm text-foreground/65">
-                No current events right now. Please check back soon.
+                No published events right now. Please check back soon.
               </div>
             )}
           </div>
