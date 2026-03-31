@@ -151,14 +151,17 @@ export async function setEventStatusAction(id: string, status: "draft" | "publis
   await ensureAdmin();
 
   try {
+    const successMessage = status === "published" ? "Event published" : "Event set to draft";
+
     if (id.startsWith("legacy-")) {
       const legacyId = Number(id.replace("legacy-", ""));
       if (!Number.isNaN(legacyId)) {
         await updateLegacyEvent(legacyId, { isPublished: status === "published" });
 
         revalidatePath("/admin/events");
+        revalidatePath(`/admin/events/${id}`);
         revalidatePath("/events");
-        return { ok: true, message: `Event ${status}ed` };
+        return { ok: true, message: successMessage };
       }
     }
 
@@ -187,8 +190,12 @@ export async function setEventStatusAction(id: string, status: "draft" | "publis
     }
 
     revalidatePath("/admin/events");
+    revalidatePath(`/admin/events/${id}`);
     revalidatePath("/events");
-    return { ok: true, message: `Event ${status}ed` };
+    if (prismaEvent) {
+      revalidatePath(`/events/${prismaEvent.slug}`);
+    }
+    return { ok: true, message: successMessage };
   } catch (error) {
     return { ok: false, message: error instanceof Error ? error.message : "Failed to update event status" };
   }
