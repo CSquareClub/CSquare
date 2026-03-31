@@ -1,92 +1,121 @@
-import Navigation from "@/components/navigation";
-import Footer from "@/components/footer";
-import GridBackground from "@/components/grid-background";
-import EventCard from "@/components/events/event-card";
-import { listPublishedEventsFromDb } from "@/lib/event-service";
-import { getDevfolioApplyLogos, parseEventSponsors } from "@/lib/event-sponsors";
+import Navigation from '@/components/navigation';
+import Footer from '@/components/footer';
+import GridBackground from '@/components/grid-background';
+import EventCard from '@/components/events/event-card';
+import GalleryGrid from '@/components/events/gallery-grid';
+import { listPublicEvents } from '@/lib/events-store';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
-function formatDate(value: Date): string {
-  return value.toLocaleDateString();
+function toEpoch(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? null : timestamp;
 }
 
-function formatTime(start: Date, end: Date): string {
-  const startLabel = start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  const endLabel = end.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  return `${startLabel} - ${endLabel}`;
+function formatEventDate(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString();
 }
 
 export default async function EventsPage() {
-  const events = await listPublishedEventsFromDb();
+  const allEvents = await listPublicEvents();
+  const now = Date.now();
+  const upcomingEvents = allEvents.filter((event) => {
+    const endEpoch = toEpoch(event.endDate || event.date);
+    return endEpoch === null || endEpoch >= now;
+  });
+  const pastHighlights = allEvents.filter((event) => {
+    const endEpoch = toEpoch(event.endDate || event.date);
+    return endEpoch !== null && endEpoch < now;
+  });
 
   return (
     <div className="relative isolate min-h-screen bg-background">
       <GridBackground />
       <Navigation />
 
-      <main className="relative z-10 py-16 md:py-20">
-        <section className="mb-12">
-          <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+      <main className="relative z-10">
+        <section className="py-16 md:py-20">
+          <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
             <p className="mb-4 inline-flex items-center rounded-full border border-border bg-card/70 px-4 py-2 text-xs font-medium uppercase tracking-[0.22em] text-foreground/70">
               Events
             </p>
-            <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">Upcoming & Live Events</h1>
+            <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
+              Learn, Build, Ship
+            </h1>
             <p className="text-lg text-foreground/65">
-              Explore club events and register via external links.
+              Join C Square events to sharpen your skills through workshops, hack nights, and real build experiences.
             </p>
           </div>
         </section>
 
-        <section>
+        <section className="pb-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            {events.length === 0 ? (
-              <div className="rounded-xl border border-border bg-card/60 p-6 text-sm text-foreground/65">
-                No published events right now.
+            <div className="mb-8 flex items-end justify-between gap-3">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Upcoming Events</h2>
+                <p className="mt-2 text-sm text-foreground/65">Register early to reserve your slot.</p>
+              </div>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {upcomingEvents.length ? (
+                upcomingEvents.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    {...event}
+                    date={formatEventDate(event.startDate || event.date)}
+                  />
+                ))
+              ) : (
+                <div className="rounded-xl border border-border bg-card/60 p-6 text-sm text-foreground/65">
+                  No upcoming events right now. Check back soon.
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="pb-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-8 flex items-end justify-between gap-3">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Past Highlights</h2>
+                <p className="mt-2 text-sm text-foreground/65">Moments that shaped our technical community.</p>
+              </div>
+            </div>
+
+            {pastHighlights.length ? (
+              <div className="grid gap-6 md:grid-cols-2">
+                {pastHighlights.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    {...event}
+                    date={formatEventDate(event.startDate || event.date)}
+                  />
+                ))}
               </div>
             ) : (
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {events.map((event) => {
-                  const parsedSponsors = parseEventSponsors(event.sponsors);
-                  const sponsorRows = parsedSponsors.map((sponsor, index) => ({
-                    id: index + 1,
-                    eventId: 0,
-                    title: sponsor.title,
-                    logoUrl: sponsor.logoUrl,
-                    logoLightUrl: sponsor.logoLightUrl,
-                    logoDarkUrl: sponsor.logoDarkUrl,
-                    devfolioApplyLogoLightUrl: sponsor.devfolioApplyLogoLightUrl,
-                    devfolioApplyLogoDarkUrl: sponsor.devfolioApplyLogoDarkUrl,
-                  }));
-                  const devfolioApplyLogos = getDevfolioApplyLogos(parsedSponsors);
-
-                  return (
-                    <EventCard
-                      key={event.id}
-                      id={event.id}
-                      slug={event.slug}
-                      title={event.title}
-                      description={event.description}
-                      date={formatDate(event.startDateTime)}
-                      time={formatTime(event.startDateTime, event.endDateTime)}
-                      location={event.venueName || event.city}
-                      attendees={null}
-                      category={event.category}
-                      image={event.bannerImage}
-                      sponsors={sponsorRows}
-                      sponsorTitle={sponsorRows[0]?.title || null}
-                      sponsorLogoUrl={sponsorRows[0]?.logoUrl || null}
-                      sponsorLogoLightUrl={sponsorRows[0]?.logoLightUrl || null}
-                      sponsorLogoDarkUrl={sponsorRows[0]?.logoDarkUrl || null}
-                      devfolioApplyLogoLightUrl={devfolioApplyLogos.light}
-                      devfolioApplyLogoDarkUrl={devfolioApplyLogos.dark}
-                      registrationUrl={event.registrationLink}
-                      isRegistrationOpen={event.endDateTime > new Date()}
-                    />
-                  );
-                })}
+              <div className="rounded-xl border border-border bg-card/60 p-6 text-sm text-foreground/65">
+                Past highlights will appear here once events conclude.
               </div>
             )}
+          </div>
+        </section>
+
+        <section className="pb-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-8 flex items-end justify-between gap-3">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">C Square Moments</h2>
+                <p className="mt-2 text-sm text-foreground/65">Captured moments from our workshops, hackathons, and community meetups.</p>
+              </div>
+            </div>
+
+            <GalleryGrid />
           </div>
         </section>
       </main>
