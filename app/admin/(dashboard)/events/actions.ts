@@ -135,16 +135,36 @@ export async function updateEventAction(id: string, payload: EventFormInput): Pr
         ...input,
       },
     });
-
-    revalidatePath("/admin/events");
-    revalidatePath(`/admin/events/${id}`);
-    revalidatePath("/events");
-    revalidatePath(`/events/${input.slug}`);
-
-    return { ok: true, message: "Event updated" };
   } catch {
     return { ok: false, message: "Failed to update event" };
   }
+
+  // Keep matching legacy rows in sync so syncLegacyEventsToPrisma cannot
+  // overwrite the status that was just saved.
+  try {
+    const legacyEvents = await listAdminEvents();
+    const matchingLegacyIds = legacyEvents
+      .filter((event) => normalizeSlug(event.title || "") === input.slug)
+      .map((event) => event.id);
+
+    if (matchingLegacyIds.length > 0) {
+      await Promise.all(
+        matchingLegacyIds.map((legacyId) =>
+          updateLegacyEvent(legacyId, { isPublished: input.status === "published" })
+        )
+      );
+    }
+  } catch (syncError) {
+    // Legacy sync failure is non-fatal; the Prisma update already succeeded.
+    console.error("Failed to sync legacy event status after update", syncError);
+  }
+
+  revalidatePath("/admin/events");
+  revalidatePath(`/admin/events/${id}`);
+  revalidatePath("/events");
+  revalidatePath(`/events/${input.slug}`);
+
+  return { ok: true, message: "Event updated" };
 }
 
 export async function setEventStatusAction(id: string, status: "draft" | "published"): Promise<EventActionResult> {
