@@ -43,6 +43,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
     return NextResponse.json(updated, { status: 200 });
   } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      return NextResponse.json({ error: "Failed to update event", details: String(error), stack: error?.stack }, { status: 500 });
+    }
     console.error("Failed to update event", error);
     return NextResponse.json({ error: "Failed to update event" }, { status: 500 });
   }
