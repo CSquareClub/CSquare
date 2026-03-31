@@ -147,46 +147,51 @@ export async function updateEventAction(id: string, payload: EventFormInput): Pr
   }
 }
 
-export async function setEventStatusAction(id: string, status: "draft" | "published"): Promise<void> {
+export async function setEventStatusAction(id: string, status: "draft" | "published"): Promise<EventActionResult> {
   await ensureAdmin();
 
-  if (id.startsWith("legacy-")) {
-    const legacyId = Number(id.replace("legacy-", ""));
-    if (!Number.isNaN(legacyId)) {
-      await updateLegacyEvent(legacyId, { isPublished: status === "published" });
+  try {
+    if (id.startsWith("legacy-")) {
+      const legacyId = Number(id.replace("legacy-", ""));
+      if (!Number.isNaN(legacyId)) {
+        await updateLegacyEvent(legacyId, { isPublished: status === "published" });
 
-      revalidatePath("/admin/events");
-      revalidatePath("/events");
-      return;
+        revalidatePath("/admin/events");
+        revalidatePath("/events");
+        return { ok: true, message: `Event ${status}ed` };
+      }
     }
-  }
 
-  await prisma.event.update({
-    where: { id },
-    data: { status },
-  });
+    await prisma.event.update({
+      where: { id },
+      data: { status },
+    });
 
-  // Keep legacy rows aligned so sync cannot overwrite the new status.
-  const prismaEvent = await prisma.event.findUnique({
-    where: { id },
-    select: { slug: true },
-  });
+    // Keep legacy rows aligned so sync cannot overwrite the new status.
+    const prismaEvent = await prisma.event.findUnique({
+      where: { id },
+      select: { slug: true },
+    });
 
-  if (prismaEvent) {
-    const legacyEvents = await listAdminEvents();
-    const matchingLegacyIds = legacyEvents
-      .filter((event) => normalizeSlug(event.title || "") === prismaEvent.slug)
-      .map((event) => event.id);
+    if (prismaEvent) {
+      const legacyEvents = await listAdminEvents();
+      const matchingLegacyIds = legacyEvents
+        .filter((event) => normalizeSlug(event.title || "") === prismaEvent.slug)
+        .map((event) => event.id);
 
-    if (matchingLegacyIds.length > 0) {
-      await Promise.all(
-        matchingLegacyIds.map((legacyId) => updateLegacyEvent(legacyId, { isPublished: status === "published" }))
-      );
+      if (matchingLegacyIds.length > 0) {
+        await Promise.all(
+          matchingLegacyIds.map((legacyId) => updateLegacyEvent(legacyId, { isPublished: status === "published" }))
+        );
+      }
     }
-  }
 
-  revalidatePath("/admin/events");
-  revalidatePath("/events");
+    revalidatePath("/admin/events");
+    revalidatePath("/events");
+    return { ok: true, message: `Event ${status}ed` };
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : "Failed to update event status" };
+  }
 }
 
 export async function deleteEventAction(id: string, slug: string): Promise<EventActionResult> {

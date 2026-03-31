@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 import { DeleteEventButton } from "@/app/admin/(dashboard)/events/_components/delete-event-button";
+import { PublishEventButton } from "@/app/admin/(dashboard)/events/_components/publish-event-button";
 import { Button } from "@/components/ui/button";
 import { listAdminEventsFromDb } from "@/lib/event-service";
-import { setEventStatusAction } from "@/app/admin/(dashboard)/events/actions";
 
 function formatDate(date: Date): string {
   return date.toLocaleString();
@@ -52,11 +52,7 @@ export default async function AdminEventsPage() {
           <p className="px-5 py-4 text-sm text-muted-foreground">No events yet.</p>
         ) : (
           <div className="divide-y divide-border">
-            {events.map((event) => {
-              const nextStatus = event.status === "published" ? "draft" : "published";
-              const actionLabel = event.status === "published" ? "Unpublish" : "Publish";
-
-              return (
+            {events.map((event) => (
                 <div key={event.id} className="flex flex-col gap-4 px-5 py-4 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0">
                     <p className="font-semibold text-foreground">{event.title}</p>
@@ -73,16 +69,11 @@ export default async function AdminEventsPage() {
                     <Button asChild variant="outline" size="sm">
                       <Link href={`/admin/events/${event.id}`}>Edit</Link>
                     </Button>
-                    <form action={setEventStatusAction.bind(null, event.id, nextStatus)}>
-                      <Button type="submit" size="sm" variant={event.status === "published" ? "secondary" : "default"}>
-                        {actionLabel}
-                      </Button>
-                    </form>
+                    <PublishEventButton eventId={event.id} currentStatus={event.status as "draft" | "published"} />
                     <DeleteEventButton eventId={event.id} eventSlug={event.slug} eventTitle={event.title} />
                   </div>
                 </div>
-              );
-            })}
+              ))}
           </div>
         )}
       </div>
