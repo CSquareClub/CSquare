@@ -70,15 +70,20 @@ function formatEventDateTime(value: string | null | undefined): string {
   if (!value) return 'TBD';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return 'TBD';
-  return date.toLocaleString('en-IN', {
-    timeZone: EVENT_TIMEZONE,
+  // Format as dd/mm/yyyy, hh:mm AM/PM in IST
+  const dateStr = date.toLocaleDateString('en-GB', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: '2-digit',
     year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
+  });
+  const timeStr = date.toLocaleTimeString('en-US', {
+    timeZone: 'Asia/Kolkata',
+    hour: '2-digit',
     minute: '2-digit',
     hour12: true,
   });
+  return `${dateStr}, ${timeStr}`;
 }
 
 type EventDetailsPageProps = {
