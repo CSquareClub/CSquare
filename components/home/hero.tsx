@@ -52,8 +52,8 @@ export default function Hero() {
 
             {/* Subheading */}
             <p className="text-lg md:text-xl text-foreground/60 mb-10 max-w-xl animate-fade-in-up leading-relaxed" style={{ animationDelay: '0.2s' }}>
-              C Square Club is a student-driven technical community focused on building strong coding
-              culture, real problem-solving ability, and industry-ready skills.
+              C Square Club is a coding community where students practice DSA, build production-style
+              projects, and level up through contests, teamwork, and code reviews.
             </p>
 
             {/* CTA Buttons */}

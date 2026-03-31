@@ -45,7 +45,7 @@ export default function ClubDescription() {
     <section className="pb-20 md:pb-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 rounded-2xl border border-border bg-card/60 p-8 md:p-10">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#dc2626]">Our Vision</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Our Vision</p>
           <p className="text-lg text-foreground/75 leading-relaxed">
             To create a community of skilled developers who can solve real-world problems,
             excel in competitive programming, and build impactful technology.
@@ -64,7 +64,7 @@ export default function ClubDescription() {
               <ul className="space-y-2 text-sm text-foreground/65">
                 {section.items.map((item) => (
                   <li key={item} className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#dc2626]" aria-hidden="true" />
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -79,7 +79,7 @@ export default function ClubDescription() {
             <ul className="space-y-2 text-sm text-foreground/65">
               {impacts.map((item) => (
                 <li key={item} className="flex gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#dc2626]" aria-hidden="true" />
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
                   <span>{item}</span>
                 </li>
               ))}
@@ -89,8 +89,8 @@ export default function ClubDescription() {
           <article className="rounded-2xl border border-border bg-card/65 p-6">
             <h4 className="mb-3 text-lg font-semibold text-foreground/90">Our Community</h4>
             <p className="text-sm leading-relaxed text-foreground/65">
-              C Square Club is a supportive space where students collaborate, grow together,
-              and push each other toward excellence in technology.
+              C Square Club is a builder-first coding community where students ship projects,
+              review code, and grow through collaborative engineering.
             </p>
             <p className="mt-4 rounded-lg border border-border bg-background/60 p-3 text-sm font-medium text-foreground/80">
               C Square Club is a platform where beginners become coders, coders become competitors,
