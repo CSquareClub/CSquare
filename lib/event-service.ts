@@ -146,7 +146,6 @@ async function syncLegacyEventsToPrisma(): Promise<void> {
         bannerImage: true,
         sponsors: true,
         registrationLink: true,
-        status: true,
       },
     });
 
@@ -163,7 +162,6 @@ async function syncLegacyEventsToPrisma(): Promise<void> {
           bannerImage?: string | null;
           sponsors?: string | null;
           registrationLink?: string;
-          status?: string;
         } = {};
 
         if (!existingEvent.bannerImage && data.bannerImage) {
@@ -176,10 +174,6 @@ async function syncLegacyEventsToPrisma(): Promise<void> {
 
         if (shouldUseLegacyRegistrationLink(existingEvent.registrationLink) && data.registrationLink) {
           patch.registrationLink = data.registrationLink;
-        }
-
-        if (existingEvent.status !== data.status) {
-          patch.status = data.status;
         }
 
         if (Object.keys(patch).length > 0) {
@@ -200,7 +194,7 @@ async function syncLegacyEventsToPrisma(): Promise<void> {
         await prisma.event.create({ data });
         const created = await prisma.event.findUnique({
           where: { slug: data.slug },
-          select: { id: true, slug: true, bannerImage: true, sponsors: true, registrationLink: true, status: true },
+          select: { id: true, slug: true, bannerImage: true, sponsors: true, registrationLink: true },
         });
 
         if (created) {
