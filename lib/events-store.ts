@@ -43,7 +43,10 @@ type EventRow = {
   description: string | null;
   startDateTime: Date | string | null;
   endDateTime: Date | string | null;
+  start_at?: Date | string | null;
+  end_at?: Date | string | null;
   venueName: string | null;
+  location?: string | null;
   city: string | null;
   onlineLink: string | null;
   category: string | null;
@@ -59,8 +62,13 @@ type EventRow = {
   schedule: string | null;
   sponsors: string | null;
   status: string;
+  is_published?: boolean | null;
   createdAt: Date | string | null;
   updatedAt: Date | string | null;
+  bannerImage?: string | null;
+  image_url?: string | null;
+  registrationLink?: string | null;
+  registration_url?: string | null;
 };
 
 let tableReady = false;
@@ -147,8 +155,16 @@ function formatTimeRange(startDate: Date, endDate: Date): string {
 }
 
 function rowToEvent(row: EventRow, sponsors: Sponsor[] = []): ClubEvent {
-  const startDate = row.startDateTime ? new Date(row.startDateTime) : null;
-  const endDate = row.endDateTime ? new Date(row.endDateTime) : null;
+  const rawStartDate = row.startDateTime ?? row.start_at ?? null;
+  const rawEndDate = row.endDateTime ?? row.end_at ?? null;
+  const startDate = rawStartDate ? new Date(rawStartDate) : null;
+  const endDate = rawEndDate ? new Date(rawEndDate) : null;
+  const status =
+    row.status ??
+    (typeof row.is_published === "boolean" ? (row.is_published ? "published" : "draft") : "draft");
+  const bannerImage = row.bannerImage ?? row.image_url ?? null;
+  const registrationLink = row.registrationLink ?? row.registration_url ?? null;
+  const venueName = row.venueName ?? row.location ?? null;
   const isRegistrationOpen = !endDate || endDate > new Date();
   return {
     id: row.id,
@@ -158,10 +174,10 @@ function rowToEvent(row: EventRow, sponsors: Sponsor[] = []): ClubEvent {
     endDate: endDate ? endDate.toISOString() : null,
     date: startDate ? startDate.toISOString() : null,
     time: null, // You can add time formatting if needed
-    location: row.venueName || row.city || row.onlineLink,
+    location: venueName || row.city || row.onlineLink,
     attendees: null, // Add if you have this field
     category: row.category,
-    image: row.bannerImage,
+    image: bannerImage,
     sponsors,
     sponsorTitle: null,
     sponsorLogoUrl: null,
@@ -169,10 +185,10 @@ function rowToEvent(row: EventRow, sponsors: Sponsor[] = []): ClubEvent {
     sponsorLogoDarkUrl: null,
     devfolioApplyLogoLightUrl: null,
     devfolioApplyLogoDarkUrl: null,
-    status: row.status,
-    isPublished: row.status === "published",
-    registrationUrl: row.registrationLink,
-    registrationLink: row.registrationLink,
+    status,
+    isPublished: status === "published",
+    registrationUrl: registrationLink,
+    registrationLink,
     isRegistrationOpen,
   };
 }
