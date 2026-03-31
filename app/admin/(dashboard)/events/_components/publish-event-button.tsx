@@ -17,7 +17,10 @@ export function PublishEventButton({ eventId, currentStatus }: PublishEventButto
   function handleToggle() {
     startTransition(async () => {
       try {
-        await setEventStatusAction(eventId, nextStatus);
+        const result = await setEventStatusAction(eventId, nextStatus);
+        if (!result.ok) {
+          window.alert(`Failed to ${nextStatus}: ${result.message}`);
+        }
       } catch (err) {
         window.alert(`Failed to ${nextStatus}: ${err instanceof Error ? err.message : "Unknown error"}`);
       }
