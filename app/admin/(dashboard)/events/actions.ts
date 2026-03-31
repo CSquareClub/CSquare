@@ -166,6 +166,25 @@ export async function setEventStatusAction(id: string, status: "draft" | "publis
     data: { status },
   });
 
+  // Keep legacy rows aligned so sync cannot overwrite the new status.
+  const prismaEvent = await prisma.event.findUnique({
+    where: { id },
+    select: { slug: true },
+  });
+
+  if (prismaEvent) {
+    const legacyEvents = await listAdminEvents();
+    const matchingLegacyIds = legacyEvents
+      .filter((event) => normalizeSlug(event.title || "") === prismaEvent.slug)
+      .map((event) => event.id);
+
+    if (matchingLegacyIds.length > 0) {
+      await Promise.all(
+        matchingLegacyIds.map((legacyId) => updateLegacyEvent(legacyId, { isPublished: status === "published" }))
+      );
+    }
+  }
+
   revalidatePath("/admin/events");
   revalidatePath("/events");
 }
