@@ -1,8 +1,10 @@
 "use client";
 
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { setEventStatusAction } from "@/app/admin/(dashboard)/events/actions";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 
 type PublishEventButtonProps = {
   eventId: string;
@@ -11,6 +13,7 @@ type PublishEventButtonProps = {
 
 export function PublishEventButton({ eventId, currentStatus }: PublishEventButtonProps) {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   const nextStatus = currentStatus === "published" ? "draft" : "published";
   const label = currentStatus === "published" ? "Unpublish" : "Publish";
 
@@ -19,10 +22,24 @@ export function PublishEventButton({ eventId, currentStatus }: PublishEventButto
       try {
         const result = await setEventStatusAction(eventId, nextStatus);
         if (!result.ok) {
-          window.alert(`Failed to ${nextStatus}: ${result.message}`);
+          toast({
+            title: `Failed to ${nextStatus}`,
+            description: result.message,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: `Event ${nextStatus === "published" ? "published" : "set to draft"}`,
+            description: result.message,
+          });
+          router.refresh();
         }
       } catch (err) {
-        window.alert(`Failed to ${nextStatus}: ${err instanceof Error ? err.message : "Unknown error"}`);
+        toast({
+          title: `Failed to ${nextStatus}`,
+          description: err instanceof Error ? err.message : "Unknown error",
+          variant: "destructive",
+        });
       }
     });
   }
