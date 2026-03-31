@@ -8,6 +8,7 @@ import GalleryGrid from '@/components/events/gallery-grid';
 import EventCard from '@/components/events/event-card';
 import { listPublicEvents } from '@/lib/events-store';
 import Link from 'next/link';
+const EVENT_TIMEZONE = 'Asia/Kolkata';
 
 function toEpoch(value: Date | string | null | undefined): number | null {
   if (!value) return null;
@@ -19,7 +20,12 @@ function formatEventDate(value: Date | string | null | undefined): string | null
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString();
+  return date.toLocaleDateString('en-IN', {
+    timeZone: EVENT_TIMEZONE,
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 function formatEventTime(startValue: Date | string | null | undefined, endValue: Date | string | null | undefined): string | null {
@@ -28,13 +34,23 @@ function formatEventTime(startValue: Date | string | null | undefined, endValue:
   const start = new Date(startValue);
   if (Number.isNaN(start.getTime())) return null;
 
-  const startLabel = start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const startLabel = start.toLocaleTimeString('en-IN', {
+    timeZone: EVENT_TIMEZONE,
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
   if (!endValue) return startLabel;
 
   const end = new Date(endValue);
   if (Number.isNaN(end.getTime())) return startLabel;
 
-  const endLabel = end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const endLabel = end.toLocaleTimeString('en-IN', {
+    timeZone: EVENT_TIMEZONE,
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
   return `${startLabel} - ${endLabel}`;
 }
 

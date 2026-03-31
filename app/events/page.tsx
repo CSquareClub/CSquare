@@ -6,6 +6,7 @@ import GalleryGrid from '@/components/events/gallery-grid';
 import { listPublicEvents } from '@/lib/events-store';
 
 export const dynamic = 'force-dynamic';
+const EVENT_TIMEZONE = 'Asia/Kolkata';
 
 function toEpoch(value: string | null | undefined): number | null {
   if (!value) return null;
@@ -17,7 +18,12 @@ function formatEventDate(value: string | null | undefined): string | null {
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString();
+  return date.toLocaleDateString('en-IN', {
+    timeZone: EVENT_TIMEZONE,
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 export default async function EventsPage() {

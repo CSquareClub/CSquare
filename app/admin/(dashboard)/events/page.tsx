@@ -75,6 +75,23 @@ const defaultForm: EventFormState = {
   registrationUrl: "",
 };
 
+const EVENT_TIMEZONE = "Asia/Kolkata";
+
+function formatEventDateTime(value: string | null | undefined): string {
+  if (!value) return "TBD";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "TBD";
+  return date.toLocaleString("en-IN", {
+    timeZone: EVENT_TIMEZONE,
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 function toInputDateValue(isoDate: string) {
   const date = new Date(isoDate);
   if (Number.isNaN(date.getTime())) return "";
@@ -522,8 +539,8 @@ export default function AdminEventsPage() {
                 <div>
                   <p className="font-semibold">{event.title || "Untitled Event"}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {event.startDate || event.date ? new Date(event.startDate || event.date || "").toLocaleString() : "No start date"}
-                    {event.endDate ? ` - ${new Date(event.endDate).toLocaleString()}` : ""}
+                    {event.startDate || event.date ? formatEventDateTime(event.startDate || event.date || "") : "No start date"}
+                    {event.endDate ? ` - ${formatEventDateTime(event.endDate)}` : ""}
                     {event.location ? ` • ${event.location}` : ""}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">

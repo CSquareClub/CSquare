@@ -9,6 +9,7 @@ import { getPublicEventById, listPublicEvents } from '@/lib/events-store';
 import { listGalleryItemsByEventId } from '@/lib/gallery-store';
 
 export const dynamic = 'force-dynamic';
+const EVENT_TIMEZONE = 'Asia/Kolkata';
 
 function normalizeEventImageUrl(url: string | undefined | null): string {
   if (!url) return '';
@@ -63,6 +64,21 @@ function isDevfolioLink(url: string | null | undefined): boolean {
 
 function isDevfolioSponsor(title: string | null | undefined): boolean {
   return title?.trim().toLowerCase() === 'devfolio';
+}
+
+function formatEventDateTime(value: string | null | undefined): string {
+  if (!value) return 'TBD';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'TBD';
+  return date.toLocaleString('en-IN', {
+    timeZone: EVENT_TIMEZONE,
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
 }
 
 type EventDetailsPageProps = {
@@ -153,8 +169,8 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                     <div className="flex items-center gap-2">
                       <Calendar size={16} className="text-[#dc2626]" />
                       <span>
-                        {event.startDate ? new Date(event.startDate).toLocaleString() : 'Start TBD'}
-                        {event.endDate ? ` - ${new Date(event.endDate).toLocaleString()}` : ''}
+                        {formatEventDateTime(event.startDate)}
+                        {event.endDate ? ` - ${formatEventDateTime(event.endDate)}` : ''}
                       </span>
                     </div>
                   ) : null}
