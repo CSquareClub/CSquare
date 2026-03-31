@@ -6,17 +6,13 @@ import { listPublicTeam } from '@/lib/team-store';
 
 export const dynamic = 'force-dynamic';
 
-
-// Client component for interactive team list
-import TeamClient from './TeamClient';
-
 export default async function TeamPage() {
   const members = await listPublicTeam();
   return (
     <div className="relative isolate min-h-screen bg-background">
       <GridBackground />
       <Navigation />
-      <TeamClient members={members} />
+      {/* TeamClient removed due to missing file. Add TeamCard or other components here if needed. */}
       <Footer />
     </div>
   );

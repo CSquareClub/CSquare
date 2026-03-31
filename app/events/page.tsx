@@ -16,27 +16,7 @@ export default async function EventsPage() {
     </div>
   );
 }
-                  <EventCard
-                    key={event.id}
-                    {...event}
-                    date={formatEventDate(event.startDate || event.date)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-xl border border-border bg-card/60 p-6 text-sm text-foreground/65">
-                Past highlights will appear here once events conclude.
-              </div>
-            )}
-            {pastHighlights.length > PAST_LIMIT && !showAllPast && (
-              <div className="flex justify-center mt-6">
-                <button className="rounded-full bg-blue-600 text-white px-6 py-2 font-semibold shadow hover:bg-blue-700 transition" onClick={() => setShowAllPast(true)}>
-                  Show More
-                </button>
-              </div>
-            )}
-          </div>
-        </section>
+// ...existing code...
 
         <section className="pb-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
