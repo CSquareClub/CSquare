@@ -11,7 +11,7 @@ function formatDate(date: Date): string {
 
 export default async function AdminEventsPage() {
   const events = await listAdminEventsFromDb();
-  const publishedCount = events.filter((event) => event.status === "published").length;
+  const publishedCount = events.filter((event) => event.isPublished).length;
   const draftCount = events.length - publishedCount;
 
   return (
@@ -58,10 +58,7 @@ export default async function AdminEventsPage() {
                     <p className="font-semibold text-foreground">{event.title}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {event.category} • {event.eventType} •
-                      <span className={event.status === "published" ? "text-green-600" : "text-amber-600"}>
-                        {" "}
-                        {event.status === "published" ? "published" : "draft"}
-                      </span>
+                      <span className={event.isPublished ? "text-green-600" : "text-amber-600"}> {event.isPublished ? "published" : "draft"}</span>
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       Starts: {formatDate(event.startDateTime)}
