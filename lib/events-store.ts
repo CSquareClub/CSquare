@@ -12,7 +12,7 @@ export type Sponsor = {
 };
 
 export type ClubEvent = {
-  id: string;
+  id: number;
   title: string | null;
   description: string | null;
   startDate: string | null;
@@ -30,7 +30,6 @@ export type ClubEvent = {
   sponsorLogoDarkUrl: string | null; // Legacy single sponsor
   devfolioApplyLogoLightUrl: string | null; // Legacy single sponsor
   devfolioApplyLogoDarkUrl: string | null; // Legacy single sponsor
-  status: string;
   isPublished: boolean;
   registrationUrl: string | null;
   registrationLink: string | null;
@@ -38,29 +37,25 @@ export type ClubEvent = {
 };
 
 type EventRow = {
-  id: string;
+  id: number;
   title: string | null;
   description: string | null;
-  startDateTime: Date | string | null;
-  endDateTime: Date | string | null;
-  venueName: string | null;
-  city: string | null;
-  onlineLink: string | null;
+  start_at: Date | string | null;
+  end_at: Date | string | null;
+  event_date: Date | string | null;
+  time_text: string | null;
+  location: string | null;
+  attendees: number | null;
   category: string | null;
-  eventType: string | null;
-  tags: string[] | null;
-  organizerName: string | null;
-  contactEmail: string | null;
-  registrationLink: string | null;
-  registrationDeadline: Date | string | null;
-  bannerImage: string | null;
-  prizes: string | null;
-  rules: string | null;
-  schedule: string | null;
-  sponsors: string | null;
-  status: string;
-  createdAt: Date | string | null;
-  updatedAt: Date | string | null;
+  image_url: string | null;
+  sponsor_title: string | null;
+  sponsor_logo_url: string | null;
+  sponsor_logo_light_url: string | null;
+  sponsor_logo_dark_url: string | null;
+  devfolio_apply_logo_light_url: string | null;
+  devfolio_apply_logo_dark_url: string | null;
+  is_published: boolean;
+  registration_url: string | null;
 };
 
 let tableReady = false;
@@ -147,9 +142,17 @@ function formatTimeRange(startDate: Date, endDate: Date): string {
 }
 
 function rowToEvent(row: EventRow, sponsors: Sponsor[] = []): ClubEvent {
-  const startDate = row.startDateTime ? new Date(row.startDateTime) : null;
-  const endDate = row.endDateTime ? new Date(row.endDateTime) : null;
+  const legacyDate = row.event_date ? (row.event_date instanceof Date ? row.event_date : new Date(row.event_date)) : null;
+  const startDateRaw = row.start_at ?? legacyDate;
+  const endDateRaw = row.end_at ?? startDateRaw;
+  const startDate = startDateRaw ? (startDateRaw instanceof Date ? startDateRaw : new Date(startDateRaw)) : null;
+  const endDate = endDateRaw ? (endDateRaw instanceof Date ? endDateRaw : new Date(endDateRaw)) : null;
+  const sponsorLogoLightUrl = row.sponsor_logo_light_url ?? row.sponsor_logo_url;
+  const sponsorLogoDarkUrl = row.sponsor_logo_dark_url ?? sponsorLogoLightUrl;
+  
+  // Check if registration should be open (event hasn't ended yet)
   const isRegistrationOpen = !endDate || endDate > new Date();
+
   return {
     id: row.id,
     title: row.title,
@@ -157,22 +160,21 @@ function rowToEvent(row: EventRow, sponsors: Sponsor[] = []): ClubEvent {
     startDate: startDate ? startDate.toISOString() : null,
     endDate: endDate ? endDate.toISOString() : null,
     date: startDate ? startDate.toISOString() : null,
-    time: null, // You can add time formatting if needed
-    location: row.venueName || row.city || row.onlineLink,
-    attendees: null, // Add if you have this field
+    time: row.time_text || (startDate && endDate ? formatTimeRange(startDate, endDate) : null),
+    location: row.location,
+    attendees: row.attendees,
     category: row.category,
-    image: row.bannerImage,
+    image: row.image_url,
     sponsors,
-    sponsorTitle: null,
-    sponsorLogoUrl: null,
-    sponsorLogoLightUrl: null,
-    sponsorLogoDarkUrl: null,
-    devfolioApplyLogoLightUrl: null,
-    devfolioApplyLogoDarkUrl: null,
-    status: row.status,
-    isPublished: row.status === "published",
-    registrationUrl: row.registrationLink,
-    registrationLink: row.registrationLink,
+    sponsorTitle: row.sponsor_title,
+    sponsorLogoUrl: row.sponsor_logo_url,
+    sponsorLogoLightUrl,
+    sponsorLogoDarkUrl,
+    devfolioApplyLogoLightUrl: row.devfolio_apply_logo_light_url,
+    devfolioApplyLogoDarkUrl: row.devfolio_apply_logo_dark_url,
+    isPublished: row.is_published,
+    registrationUrl: isRegistrationOpen ? row.registration_url : null,
+    registrationLink: isRegistrationOpen ? row.registration_url : null,
     isRegistrationOpen,
   };
 }
