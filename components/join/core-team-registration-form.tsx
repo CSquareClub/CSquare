@@ -92,8 +92,6 @@ export default function CoreTeamRegistrationForm() {
   const [outsideForm, setOutsideForm] = useState<OutsideFormState>(initialOutsideForm);
   const [membershipState, setMembershipState] = useState<MembershipCheckState>('idle');
   const [membershipMessage, setMembershipMessage] = useState<string | null>(null);
-  const [uploadingResume, setUploadingResume] = useState(false);
-  const [resumeUploadError, setResumeUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (step !== 'outside-campus-form') return;
@@ -197,41 +195,10 @@ export default function CoreTeamRegistrationForm() {
     };
   }, [step, coreForm.membershipId]);
 
-  async function uploadResumeFile(file: File) {
-    setResumeUploadError(null);
-    setUploadingResume(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('resume', file);
-
-      const response = await fetch('/api/upload/resume', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || !payload?.url) {
-        throw new Error(payload?.error || 'Resume upload failed');
-      }
-
-      setCoreForm((prev) => ({ ...prev, resumeLink: payload.url }));
-    } catch (err) {
-      setResumeUploadError(err instanceof Error ? err.message : 'Resume upload failed');
-      setCoreForm((prev) => ({ ...prev, resumeLink: '' }));
-    } finally {
-      setUploadingResume(false);
-    }
-  }
-
   async function submitCoreTeamForm(e: React.FormEvent) {
     e.preventDefault();
     if (membershipState !== 'valid') {
       setError('Please verify a valid Membership ID before submitting');
-      return;
-    }
-    if (!coreForm.resumeLink) {
-      setError('Please upload your resume before submitting');
       return;
     }
 
@@ -538,26 +505,14 @@ export default function CoreTeamRegistrationForm() {
             onChange={(e) => setCoreForm((prev) => ({ ...prev, rolesInterested: e.target.value }))}
             className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
           />
-          <div className="space-y-2 rounded-lg border border-border bg-card p-3">
-            <p className="text-sm font-medium text-foreground">Resume Upload (PDF, DOC, DOCX) *</p>
-            <input
-              required
-              type="file"
-              accept=".pdf,.doc,.docx"
-              onChange={(e) => {
-                const selectedFile = e.target.files?.[0];
-                if (selectedFile) {
-                  uploadResumeFile(selectedFile);
-                }
-              }}
-              className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
-            />
-            {uploadingResume ? <p className="text-xs text-foreground/60">Uploading resume...</p> : null}
-            {coreForm.resumeLink && !uploadingResume ? (
-              <p className="text-xs text-green-500">Resume uploaded successfully</p>
-            ) : null}
-            {resumeUploadError ? <p className="text-xs text-red-500">{resumeUploadError}</p> : null}
-          </div>
+          <input
+            required
+            type="url"
+            placeholder="Resume PDF Link (viewer access)"
+            value={coreForm.resumeLink}
+            onChange={(e) => setCoreForm((prev) => ({ ...prev, resumeLink: e.target.value }))}
+            className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
+          />
           <input
             required
             type="text"
@@ -589,7 +544,6 @@ export default function CoreTeamRegistrationForm() {
             type="submit"
             disabled={
               submitting ||
-              uploadingResume ||
               membershipState === 'checking' ||
               membershipState === 'invalid'
             }

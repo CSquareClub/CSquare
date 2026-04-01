@@ -40,11 +40,7 @@ function isValidUrl(value: string): boolean {
   }
 }
 
-function isValidResumeReference(value: string): boolean {
-  if (!value) return false;
-  if (value.startsWith('/uploads/resumes/')) return true;
-  return isValidUrl(value);
-}
+
 
 export async function GET(req: Request) {
   try {
@@ -116,8 +112,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Please select a valid department' }, { status: 400 });
     }
 
-    if (!isValidResumeReference(resumeLink)) {
-      return NextResponse.json({ error: 'Resume is required. Upload your file and try again.' }, { status: 400 });
+    if (!isValidUrl(resumeLink)) {
+      return NextResponse.json({ error: 'Resume link must be a valid URL with viewer access' }, { status: 400 });
     }
 
     if (!isValidUrl(linkedinUrl)) {
