@@ -15,6 +15,10 @@ type Sponsor = {
   logoDarkUrl: string | null;
   devfolioApplyLogoLightUrl: string | null;
   devfolioApplyLogoDarkUrl: string | null;
+  instagramUrl: string | null;
+  linkedinUrl: string | null;
+  instagramUrl: string | null;
+  linkedinUrl: string | null;
 };
 
 type FormState = {
@@ -236,6 +240,16 @@ export default function CreateEventPage() {
         rules: form.rules.trim() || null,
         schedule: form.schedule.trim() || null,
         sponsors: form.sponsors.filter(s => s.title.trim()),
+        sponsors: form.sponsors.filter(s => s.title.trim()).map((s) => ({
+          title: s.title.trim(),
+          logoUrl: s.logoUrl?.trim() || null,
+          logoLightUrl: s.logoLightUrl?.trim() || null,
+          logoDarkUrl: s.logoDarkUrl?.trim() || null,
+          devfolioApplyLogoLightUrl: s.devfolioApplyLogoLightUrl?.trim() || null,
+          devfolioApplyLogoDarkUrl: s.devfolioApplyLogoDarkUrl?.trim() || null,
+          instagramUrl: s.instagramUrl?.trim() || null,
+          linkedinUrl: s.linkedinUrl?.trim() || null,
+        })),
         communityPartners: form.communityPartners.filter((partner) => partner.name.trim()).map((partner) => ({
           name: partner.name.trim(),
           logoUrl: partner.logoUrl?.trim() || null,
@@ -426,6 +440,8 @@ export default function CreateEventPage() {
                     logoDarkUrl: null,
                     devfolioApplyLogoLightUrl: null,
                     devfolioApplyLogoDarkUrl: null,
+                    instagramUrl: null,
+                    linkedinUrl: null,
                   },
                 ],
               }));
@@ -510,6 +526,38 @@ export default function CreateEventPage() {
                           />
                         </div>
                       )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-foreground/80">Instagram URL</label>
+                      <input
+                        type="url"
+                        placeholder="https://instagram.com/..."
+                        value={sponsor.instagramUrl ?? ""}
+                        onChange={(e) => {
+                          const updated = [...form.sponsors];
+                          updated[idx].instagramUrl = e.target.value;
+                          update("sponsors", updated);
+                        }}
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-foreground/80">LinkedIn URL</label>
+                      <input
+                        type="url"
+                        placeholder="https://linkedin.com/company/..."
+                        value={sponsor.linkedinUrl ?? ""}
+                        onChange={(e) => {
+                          const updated = [...form.sponsors];
+                          updated[idx].linkedinUrl = e.target.value;
+                          update("sponsors", updated);
+                        }}
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                      />
                     </div>
                   </div>
                 </div>

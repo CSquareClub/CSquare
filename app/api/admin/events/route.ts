@@ -35,6 +35,8 @@ export async function POST(req: Request) {
       logoDarkUrl: sponsor.logoDarkUrl || null,
       devfolioApplyLogoLightUrl: sponsor.devfolioApplyLogoLightUrl || null,
       devfolioApplyLogoDarkUrl: sponsor.devfolioApplyLogoDarkUrl || null,
+      instagramUrl: sponsor.instagramUrl || null,
+      linkedinUrl: sponsor.linkedinUrl || null,
 
     })) : [];
 

@@ -31,6 +31,8 @@ export async function PATCH(req: Request, context: RouteContext) {
       logoDarkUrl: sponsor.logoDarkUrl || null,
       devfolioApplyLogoLightUrl: sponsor.devfolioApplyLogoLightUrl || null,
       devfolioApplyLogoDarkUrl: sponsor.devfolioApplyLogoDarkUrl || null,
+      instagramUrl: sponsor.instagramUrl || null,
+      linkedinUrl: sponsor.linkedinUrl || null,
 
     })) : undefined;
 

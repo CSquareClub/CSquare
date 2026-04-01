@@ -223,7 +223,66 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                 </div>
               ) : null}
 
-              {lightSponsorLogo || darkSponsorLogo ? (
+              {event.sponsors && event.sponsors.length > 0 ? (
+                <div className="rounded-xl border border-border bg-background/50 p-4">
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-foreground/65">
+                    Sponsors
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {event.sponsors.map((sponsor) => (
+                      <div key={sponsor.id} className="rounded-lg border border-border bg-card/70 p-3">
+                        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground/55">
+                          {sponsor.title}
+                        </p>
+                        <div className="flex h-12 items-center justify-center">
+                          {sponsor.logoLightUrl ? (
+                            <img
+                              src={normalizeEventImageUrl(sponsor.logoLightUrl)}
+                              alt={sponsor.title}
+                              className="max-h-12 w-auto object-contain dark:hidden"
+                              loading="lazy"
+                            />
+                          ) : null}
+                          {sponsor.logoDarkUrl ? (
+                            <img
+                              src={normalizeEventImageUrl(sponsor.logoDarkUrl)}
+                              alt={sponsor.title}
+                              className="hidden max-h-12 w-auto object-contain dark:block"
+                              loading="lazy"
+                            />
+                          ) : null}
+                        </div>
+                        {(sponsor.instagramUrl || sponsor.linkedinUrl) ? (
+                          <div className="mt-3 flex items-center justify-center gap-2">
+                            {sponsor.instagramUrl ? (
+                              <a
+                                href={sponsor.instagramUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                aria-label={`${sponsor.title} Instagram`}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground/70 transition hover:border-[#dc2626] hover:text-[#dc2626]"
+                              >
+                                <Instagram size={14} />
+                              </a>
+                            ) : null}
+                            {sponsor.linkedinUrl ? (
+                              <a
+                                href={sponsor.linkedinUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                aria-label={`${sponsor.title} LinkedIn`}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground/70 transition hover:border-[#dc2626] hover:text-[#dc2626]"
+                              >
+                                <Linkedin size={14} />
+                              </a>
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : lightSponsorLogo || darkSponsorLogo ? (
                 <div className="rounded-xl border border-border bg-background/50 p-4">
                   <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-foreground/65">
                     Sponsored by {event.sponsorTitle?.trim() || "Our Partner"}
