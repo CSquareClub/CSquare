@@ -41,7 +41,9 @@ export default function AdminSidebar({ mobileOpen, onClose }: AdminSidebarProps)
   const source = searchParams.get("source") || "";
   const registrationsRootActive = pathname.startsWith("/admin/registrations");
   const cusocActive = registrationsRootActive && (source === "" || source.startsWith("cusoc"));
+  const outsideRegistrationsActive = registrationsRootActive && source === "outside-all";
   const ambassadorActive = registrationsRootActive && source.includes("outside-ambassadors");
+  const coreTeamActive = registrationsRootActive && source === "core-team";
 
   return (
     <>
@@ -95,7 +97,7 @@ export default function AdminSidebar({ mobileOpen, onClose }: AdminSidebarProps)
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         <div className="mb-2">
           <Link
-            href="/admin/registrations?source=cusoc-2026"
+            href="/admin/registrations?source=outside-all"
             onClick={onClose}
             className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
               registrationsRootActive
@@ -129,6 +131,18 @@ export default function AdminSidebar({ mobileOpen, onClose }: AdminSidebarProps)
                 CUSoC Registrations
               </Link>
               <Link
+                href="/admin/registrations?source=outside-all"
+                onClick={onClose}
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+                  outsideRegistrationsActive
+                    ? "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
+                    : "text-black/50 hover:bg-black/5 hover:text-black/80 dark:text-white/35 dark:hover:bg-white/[0.03] dark:hover:text-white/70"
+                }`}
+              >
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-current" />
+                Outside Registrations
+              </Link>
+              <Link
                 href="/admin/registrations?source=outside-ambassadors"
                 onClick={onClose}
                 className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
@@ -139,6 +153,18 @@ export default function AdminSidebar({ mobileOpen, onClose }: AdminSidebarProps)
               >
                 <UserRoundCheck className="h-3.5 w-3.5" />
                 Campus Ambassadors
+              </Link>
+              <Link
+                href="/admin/registrations?source=core-team"
+                onClick={onClose}
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+                  coreTeamActive
+                    ? "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
+                    : "text-black/50 hover:bg-black/5 hover:text-black/80 dark:text-white/35 dark:hover:bg-white/[0.03] dark:hover:text-white/70"
+                }`}
+              >
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-current" />
+                Core Team Applications
               </Link>
             </div>
           )}
