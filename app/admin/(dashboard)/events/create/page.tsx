@@ -174,6 +174,27 @@ export default function CreateEventPage() {
     reader.readAsDataURL(file);
   }
 
+  function handleSponsorLogoFile(file: File | null, sponsorIdx: number, mode: "light" | "dark") {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      if (typeof result === "string") {
+        setForm((prev) => {
+          const updated = [...prev.sponsors];
+          if (mode === "light") {
+            updated[sponsorIdx].logoLightUrl = result;
+          } else {
+            updated[sponsorIdx].logoDarkUrl = result;
+          }
+          return { ...prev, sponsors: updated };
+        });
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSuccessMessage(null);
@@ -432,26 +453,54 @@ export default function CreateEventPage() {
                       <Trash2 size={16} />
                     </button>
                   </div>
-                  <input
-                    placeholder="Logo Light URL (Light mode)"
-                    value={sponsor.logoLightUrl || ""}
-                    onChange={(e) => {
-                      const updated = [...form.sponsors];
-                      updated[idx].logoLightUrl = e.target.value || null;
-                      setForm((prev) => ({ ...prev, sponsors: updated }));
-                    }}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                  />
-                  <input
-                    placeholder="Logo Dark URL (Dark mode)"
-                    value={sponsor.logoDarkUrl || ""}
-                    onChange={(e) => {
-                      const updated = [...form.sponsors];
-                      updated[idx].logoDarkUrl = e.target.value || null;
-                      setForm((prev) => ({ ...prev, sponsors: updated }));
-                    }}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                  />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {/* Light Logo */}
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-foreground/80">Logo Light (Light mode)</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleSponsorLogoFile(e.target.files?.[0] || null, idx, "light")}
+                        className="block w-full text-xs text-foreground/60
+                          file:mr-3 file:px-3 file:py-1.5 file:rounded file:border-0
+                          file:text-xs file:font-medium file:bg-primary/20 file:text-primary
+                          hover:file:bg-primary/30 cursor-pointer"
+                      />
+                      {sponsor.logoLightUrl && (
+                        <div className="mt-2 p-2 bg-white rounded border border-border">
+                          <img
+                            src={sponsor.logoLightUrl}
+                            alt="Light logo preview"
+                            className="max-h-12 max-w-full object-contain"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Dark Logo */}
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-foreground/80">Logo Dark (Dark mode)</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleSponsorLogoFile(e.target.files?.[0] || null, idx, "dark")}
+                        className="block w-full text-xs text-foreground/60
+                          file:mr-3 file:px-3 file:py-1.5 file:rounded file:border-0
+                          file:text-xs file:font-medium file:bg-primary/20 file:text-primary
+                          hover:file:bg-primary/30 cursor-pointer"
+                      />
+                      {sponsor.logoDarkUrl && (
+                        <div className="mt-2 p-2 bg-gray-900 rounded border border-border">
+                          <img
+                            src={sponsor.logoDarkUrl}
+                            alt="Dark logo preview"
+                            className="max-h-12 max-w-full object-contain"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
