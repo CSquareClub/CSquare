@@ -71,6 +71,33 @@ function isValidUrl(value: string): boolean {
   }
 }
 
+function isValidLinkedInUrl(value: string): boolean {
+  if (!isValidUrl(value)) return false;
+
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname.toLowerCase();
+    return hostname === 'linkedin.com' || hostname === 'www.linkedin.com';
+  } catch {
+    return false;
+  }
+}
+
+function isValidGoogleDriveUrl(value: string): boolean {
+  if (!isValidUrl(value)) return false;
+
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname.toLowerCase();
+    return (
+      hostname === 'drive.google.com' ||
+      hostname === 'docs.google.com'
+    );
+  } catch {
+    return false;
+  }
+}
+
 function hashOtp(otp: string): string {
   return createHash('sha256').update(otp).digest('hex');
 }
@@ -382,8 +409,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Please select a valid department' }, { status: 400 });
     }
 
-    if (!isValidUrl(resumeLink)) {
-      return NextResponse.json({ error: 'Resume link must be a valid URL with viewer access' }, { status: 400 });
+    if (!isValidGoogleDriveUrl(resumeLink)) {
+      return NextResponse.json({ error: 'Resume link must be a valid Google Drive URL with viewer access' }, { status: 400 });
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(personalEmail)) {
@@ -394,8 +421,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'CU college email must be derived from UID and end with @cuchd.in' }, { status: 400 });
     }
 
-    if (!isValidUrl(linkedinUrl)) {
-      return NextResponse.json({ error: 'LinkedIn URL must be valid' }, { status: 400 });
+    if (!isValidLinkedInUrl(linkedinUrl)) {
+      return NextResponse.json({ error: 'LinkedIn URL must be a valid linkedin.com link' }, { status: 400 });
     }
 
     if (!isValidUrl(portfolioUrl)) {

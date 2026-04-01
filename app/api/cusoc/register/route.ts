@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { z } from "zod";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import {
+  getCusocOtpSentAt,
+  isCusocOtpVerified,
+  markCusocOtpUsed,
+  upsertCusocOtp,
+  verifyCusocOtp,
+} from "@/lib/cusoc-otp-store";
+import { createHash, randomInt } from "crypto";
 
 const ses = new SESClient({
   region: process.env.AWS_REGION || "us-east-1",
@@ -22,6 +30,24 @@ const preferenceLabelMap: Record<string, string> = {
 
 const CUSOC_2026_CLOSED_MESSAGE =
   "CUSoC 2026 (GSoC) registrations are now closed. Please register for the CUSoC 2027-28 cohort program.";
+const OTP_REGEX = /^\d{6}$/;
+const OTP_EXPIRY_MINUTES = 10;
+const OTP_COOLDOWN_SECONDS = 60;
+
+function deriveCollegeEmail(uid: string): string {
+  const trimmed = uid.trim().toLowerCase();
+  if (!trimmed) return "";
+  if (/@cuchd\.in$/i.test(trimmed)) return trimmed;
+  return `${trimmed}@cuchd.in`;
+}
+
+function hashOtp(otp: string): string {
+  return createHash("sha256").update(otp).digest("hex");
+}
+
+function generateOtp(): string {
+  return String(randomInt(100000, 1000000));
+}
 
 function normalizePreferenceString(value: string): string {
   return value
@@ -30,6 +56,27 @@ function normalizePreferenceString(value: string): string {
     .filter(Boolean)
     .map((token) => preferenceLabelMap[token] ?? token)
     .join(", ");
+}
+
+async function sendOtpEmail(collegeEmail: string, otp: string, fullName?: string) {
+  const sourceEmail = process.env.AWS_SES_FROM_EMAIL || "csquareclub@cumail.in";
+  if (!collegeEmail || !collegeEmail.includes("@")) return;
+
+  const greeting = fullName?.trim() ? `Hi ${fullName.trim()},` : "Hi,";
+  const command = new SendEmailCommand({
+    Source: sourceEmail,
+    Destination: { ToAddresses: [collegeEmail] },
+    Message: {
+      Subject: { Data: "CUSoC OTP Verification" },
+      Body: {
+        Text: {
+          Data: `${greeting}\n\nYour OTP for CUSoC registration is: ${otp}\nThis OTP is valid for ${OTP_EXPIRY_MINUTES} minutes.\n\nIf you did not request this, you can ignore this email.\n\nCUSoC Team`,
+        },
+      },
+    },
+  });
+
+  await ses.send(command);
 }
 
 async function sendWelcomeEmail(emails: string[], fullName: string, track: string, uid:string) {
@@ -269,6 +316,84 @@ const schema2027 = z.object({
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const action = String(body?.action || "").trim().toLowerCase();
+
+    if (action === "send-otp") {
+      const uid = String(body.uid || body.rollNumber || "").trim().toUpperCase();
+      const fullName = String(body.fullName || "").trim();
+      const collegeEmail = deriveCollegeEmail(uid);
+
+      if (!uid) {
+        return NextResponse.json({ error: "UID is required to send OTP" }, { status: 400 });
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(collegeEmail) || !/@cuchd\.in$/i.test(collegeEmail)) {
+        return NextResponse.json({ error: "Valid CUCHD email could not be derived from UID" }, { status: 400 });
+      }
+
+      const sentAt = await getCusocOtpSentAt(uid);
+      if (sentAt) {
+        const elapsed = Math.floor((Date.now() - sentAt.getTime()) / 1000);
+        if (elapsed < OTP_COOLDOWN_SECONDS) {
+          return NextResponse.json(
+            { error: `Please wait ${OTP_COOLDOWN_SECONDS - elapsed}s before requesting another OTP` },
+            { status: 429 }
+          );
+        }
+      }
+
+      const otp = generateOtp();
+      const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+      await upsertCusocOtp({
+        uid,
+        collegeEmail,
+        otpHash: hashOtp(otp),
+        expiresAt,
+      });
+
+      try {
+        await sendOtpEmail(collegeEmail, otp, fullName);
+      } catch (err) {
+        console.error("Failed to send CUSoC OTP email", err);
+        return NextResponse.json({ error: "Could not send OTP email right now" }, { status: 500 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `OTP sent to ${collegeEmail}`,
+        cooldownSeconds: OTP_COOLDOWN_SECONDS,
+      });
+    }
+
+    if (action === "verify-otp") {
+      const uid = String(body.uid || body.rollNumber || "").trim().toUpperCase();
+      const otp = String(body.otp || "").trim();
+
+      if (!uid || !otp) {
+        return NextResponse.json({ error: "UID and OTP are required" }, { status: 400 });
+      }
+
+      if (!OTP_REGEX.test(otp)) {
+        return NextResponse.json({ error: "OTP must be 6 digits" }, { status: 400 });
+      }
+
+      const result = await verifyCusocOtp({ uid, otpHash: hashOtp(otp) });
+      if (!result.verified) {
+        if (result.reason === "missing") {
+          return NextResponse.json({ error: "Request OTP first" }, { status: 400 });
+        }
+        if (result.reason === "expired") {
+          return NextResponse.json({ error: "OTP expired. Request a new OTP" }, { status: 400 });
+        }
+        if (result.reason === "max-attempts") {
+          return NextResponse.json({ error: "Too many invalid attempts. Request a new OTP" }, { status: 429 });
+        }
+        return NextResponse.json({ error: "Invalid OTP" }, { status: 400 });
+      }
+
+      return NextResponse.json({ success: true, verified: true });
+    }
+
     const track = body?.track;
 
     if (track === "2026") {
@@ -276,12 +401,23 @@ export async function POST(req: NextRequest) {
     }
 
     if (track === "2027") {
-      const data = schema2027.parse(body);
+      const normalizedBody = {
+        ...body,
+        rollNumber: String(body.rollNumber || "").trim().toUpperCase(),
+      };
+      normalizedBody.cuEmail = deriveCollegeEmail(normalizedBody.rollNumber);
+
+      const data = schema2027.parse(normalizedBody);
       const { track: _, ...fields } = data;
       const normalizedFields = {
         ...fields,
         interestArea: normalizePreferenceString(fields.interestArea),
       };
+
+      const otpVerified = await isCusocOtpVerified(normalizedFields.rollNumber);
+      if (!otpVerified) {
+        return NextResponse.json({ error: "Please verify OTP sent to your CUCHD email before submitting" }, { status: 400 });
+      }
 
       const existing = await prisma.cusocRegistration2027.findFirst({
         where: {
@@ -308,6 +444,7 @@ export async function POST(req: NextRequest) {
         "2027-28",
         normalizedFields.rollNumber
       );
+      await markCusocOtpUsed(normalizedFields.rollNumber);
 
       return NextResponse.json({ success: true });
     }

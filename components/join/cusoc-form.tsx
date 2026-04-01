@@ -34,6 +34,14 @@ type Track = '2026' | '2027' | null;
 
 const CUSOC_2026_CLOSED_MESSAGE =
   'CUSoC 2026 (GSoC) registrations are closed. Please register for the CUSoC 2027-28 cohort program.';
+const OTP_REGEX = /^\d{6}$/;
+
+function deriveCollegeEmail(uid: string): string {
+  const trimmed = String(uid || '').trim().toLowerCase();
+  if (!trimmed) return '';
+  if (/@cuchd\.in$/i.test(trimmed)) return trimmed;
+  return `${trimmed}@cuchd.in`;
+}
 
 /* ─── STEP DEFINITIONS ───────────────────────────────────── */
 
@@ -181,6 +189,13 @@ export default function CusocForm() {
   const [error, setError] = useState<string | null>(null);
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
   const [checkingDuplicate, setCheckingDuplicate] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpMessage, setOtpMessage] = useState<string | null>(null);
+  const [otpError, setOtpError] = useState<string | null>(null);
+  const [otpCooldown, setOtpCooldown] = useState(0);
 
   const initialFormState: Record<string, any> = {
     languages: [] as string[],
@@ -234,7 +249,7 @@ export default function CusocForm() {
       return;
     }
 
-    const cuEmail = String(f.cuEmail || '').trim().toLowerCase();
+    const cuEmail = deriveCollegeEmail(String(f.rollNumber || '').trim());
     if (!/@cuchd\.in$/i.test(cuEmail)) {
       setDuplicateError(null);
       setCheckingDuplicate(false);
@@ -277,12 +292,38 @@ export default function CusocForm() {
       controller.abort();
       clearTimeout(timer);
     };
-  }, [track, step, f.cuEmail]);
+  }, [track, step, f.rollNumber]);
+
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const timer = window.setTimeout(() => setOtpCooldown((prev) => prev - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [otpCooldown]);
+
+  useEffect(() => {
+    setOtp('');
+    setOtpSent(false);
+    setOtpVerified(false);
+    setOtpMessage(null);
+    setOtpError(null);
+    setOtpCooldown(0);
+  }, [f.rollNumber]);
 
   const set = (key: string, value: any) => {
     const nextValue = key === 'rollNumber' ? String(value || '').toUpperCase() : value;
-    setF((prev) => ({ ...prev, [key]: nextValue }));
+    setF((prev) => ({
+      ...prev,
+      [key]: nextValue,
+      ...(key === 'rollNumber' ? { cuEmail: deriveCollegeEmail(nextValue) } : {}),
+    }));
   };
+
+  useEffect(() => {
+    const derived = deriveCollegeEmail(String(f.rollNumber || ''));
+    if (derived && f.cuEmail !== derived) {
+      setF((prev) => ({ ...prev, cuEmail: derived }));
+    }
+  }, [f.rollNumber, f.cuEmail]);
   const toggleArr = (key: string, val: string) => {
     const arr: string[] = f[key] || [];
     set(key, arr.includes(val) ? arr.filter((v: string) => v !== val) : [...arr, val]);
@@ -314,7 +355,7 @@ export default function CusocForm() {
         case 0:
           if (!f.fullName?.trim()) return 'Full Name is required';
           if (!isValidRoll(f.rollNumber)) return 'Valid CU Roll Number is required (letters/numbers, 6-20 chars)';
-          if (!f.cuEmail?.trim() || !/@cuchd\.in$/i.test(f.cuEmail)) return 'Valid @cuchd.in email is required';
+          if (!/@cuchd\.in$/i.test(deriveCollegeEmail(String(f.rollNumber || '')))) return 'Valid @cuchd.in email is required';
           if (!f.personalEmail?.trim() || !f.personalEmail.includes('@')) return 'Valid personal email is required';
           if (!f.phone?.trim() || !/^[0-9]{10,15}$/.test(f.phone)) return 'Valid phone number is required';
           if (!f.department) return 'Please select department';
@@ -363,7 +404,7 @@ export default function CusocForm() {
         case 0:
           if (!f.fullName?.trim()) return 'Full Name is required';
           if (!isValidRoll(f.rollNumber)) return 'Valid CU Roll Number is required (letters/numbers, 6-20 chars)';
-          if (!f.cuEmail?.trim() || !/@cuchd\.in$/i.test(f.cuEmail)) return 'Valid @cuchd.in email is required';
+          if (!/@cuchd\.in$/i.test(deriveCollegeEmail(String(f.rollNumber || '')))) return 'Valid @cuchd.in email is required';
           if (!f.personalEmail?.trim() || !f.personalEmail.includes('@')) return 'Valid personal email is required';
           if (!f.phone?.trim() || !/^[0-9]{10,15}$/.test(f.phone)) return 'Valid phone number is required';
           if (!f.department) return 'Please select department';
@@ -399,6 +440,11 @@ export default function CusocForm() {
       return;
     }
 
+    if (track === '2027' && step === 0 && !otpVerified) {
+      setError('Please verify OTP sent to your CUCHD email before continuing');
+      return;
+    }
+
     const err = validate();
     if (err) { setError(err); return; }
     setError(null);
@@ -417,11 +463,16 @@ export default function CusocForm() {
 
     const err = validate();
     if (err) { setError(err); return; }
+    if (track === '2027' && !otpVerified) {
+      setError('Please verify OTP sent to your CUCHD email before submitting');
+      return;
+    }
     setError(null);
     setIsLoading(true);
     try {
       const body: Record<string, any> = { track, ...f };
       body.rollNumber = String(body.rollNumber || '').trim().toUpperCase();
+      body.cuEmail = deriveCollegeEmail(body.rollNumber);
 
       const normalizeUrl = (value: string) => {
         const trimmed = String(value || '').trim();
@@ -480,7 +531,96 @@ export default function CusocForm() {
     setError(null);
     setDuplicateError(null);
     setCheckingDuplicate(false);
+    setOtp('');
+    setOtpSent(false);
+    setOtpVerified(false);
+    setOtpMessage(null);
+    setOtpError(null);
+    setOtpCooldown(0);
     localStorage.removeItem('cusoc_form_2026');
+  };
+
+  const sendOtp = async () => {
+    const uid = String(f.rollNumber || '').trim().toUpperCase();
+    if (!uid) {
+      setOtpError('Enter UID first to receive OTP');
+      return;
+    }
+
+    setOtpLoading(true);
+    setOtpError(null);
+    setOtpMessage(null);
+
+    try {
+      const response = await fetch('/api/cusoc/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send-otp',
+          uid,
+          fullName: String(f.fullName || '').trim(),
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Failed to send OTP');
+      }
+
+      setOtpSent(true);
+      setOtpVerified(false);
+      setOtp('');
+      setOtpMessage(payload?.message || 'OTP sent to your CUCHD email');
+      setOtpCooldown(Number(payload?.cooldownSeconds || 60));
+    } catch (err) {
+      setOtpError(err instanceof Error ? err.message : 'Failed to send OTP');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const verifyOtp = async () => {
+    const uid = String(f.rollNumber || '').trim().toUpperCase();
+    const otpValue = otp.trim();
+
+    if (!uid || !otpValue) {
+      setOtpError('Enter UID and OTP to verify');
+      return;
+    }
+
+    if (!OTP_REGEX.test(otpValue)) {
+      setOtpError('OTP must be 6 digits');
+      return;
+    }
+
+    setOtpLoading(true);
+    setOtpError(null);
+    setOtpMessage(null);
+
+    try {
+      const response = await fetch('/api/cusoc/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'verify-otp',
+          uid,
+          otp: otpValue,
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload?.error || 'OTP verification failed');
+      }
+
+      setOtpVerified(true);
+      setOtpMessage('OTP verified successfully');
+    } catch (err) {
+      setOtpVerified(false);
+      setOtpError(err instanceof Error ? err.message : 'OTP verification failed');
+    } finally {
+      setOtpLoading(false);
+    }
   };
 
   /* ═══════════════════════════════════════════════════════ */
@@ -591,8 +731,18 @@ export default function CusocForm() {
           return (
             <div className="grid gap-4 md:grid-cols-2">
               <Input id="fullName" label="Full Name *" placeholder="Enter your full name" />
-              <Input id="rollNumber" label="CU Roll Number *" placeholder="e.g. 24BCS12345" />
-              <Input id="cuEmail" label="CU Email ID *" placeholder="name@cuchd.in" type="email" />
+              <Input id="rollNumber" label="UID *" placeholder="e.g. 24BCS12345" />
+              <div>
+                <label htmlFor="cuEmailAuto2026" className={labelCls}>CU Email ID (Auto-filled from UID)</label>
+                <input
+                  id="cuEmailAuto2026"
+                  type="email"
+                  value={deriveCollegeEmail(String(f.rollNumber || ''))}
+                  readOnly
+                  placeholder="uid@cuchd.in"
+                  className={`${getCardCls(dk)} cursor-not-allowed opacity-80`}
+                />
+              </div>
               <Input id="personalEmail" label="Personal Email ID *" placeholder="name@gmail.com" type="email" />
               <Input id="phone" label="Phone Number *" placeholder="Enter 10-15 digit number" type="tel" />
               <div>
@@ -813,8 +963,18 @@ export default function CusocForm() {
           return (
             <div className="grid gap-4 md:grid-cols-2">
               <Input id="fullName" label="Full Name" placeholder="Your full name" />
-              <Input id="rollNumber" label="CU Roll Number" placeholder="22BCS12345" />
-              <Input id="cuEmail" label="CU Email ID" placeholder="name@cuchd.in" type="email" />
+              <Input id="rollNumber" label="UID" placeholder="22BCS12345" />
+              <div>
+                <label htmlFor="cuEmailAuto" className={labelCls}>CU Email ID (Auto-filled from UID)</label>
+                <input
+                  id="cuEmailAuto"
+                  type="email"
+                  value={deriveCollegeEmail(String(f.rollNumber || ''))}
+                  readOnly
+                  placeholder="uid@cuchd.in"
+                  className={`${getCardCls(dk)} cursor-not-allowed opacity-80`}
+                />
+              </div>
               <Input id="personalEmail" label="Personal Email ID (for GSoC)" placeholder="name@gmail.com" type="email" />
               <Input id="phone" label="Phone Number" placeholder="9876543210" type="tel" />
               <div>
@@ -826,6 +986,47 @@ export default function CusocForm() {
                 )}
               </div>
               <Select id="year" label="Year" options={years.map((y) => ({ value: y, label: `${y} Year` }))} />
+
+              <div className={`md:col-span-2 rounded-xl border p-4 ${dk ? 'border-white/10 bg-black/25' : 'border-[#fecaca] bg-white'}`}>
+                <p className="mb-2 text-sm font-medium text-foreground">OTP Verification (Required)</p>
+                <p className="mb-3 text-xs text-foreground/65">
+                  OTP will be sent to <strong>{deriveCollegeEmail(String(f.rollNumber || '')) || 'your UID-based CUCHD email'}</strong>
+                </p>
+
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={sendOtp}
+                    disabled={otpLoading || otpCooldown > 0 || !String(f.rollNumber || '').trim()}
+                    className="inline-flex items-center justify-center rounded-lg border border-primary bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+                  >
+                    {otpLoading ? 'Sending...' : otpCooldown > 0 ? `Resend OTP in ${otpCooldown}s` : otpSent ? 'Resend OTP' : 'Send OTP'}
+                  </button>
+
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="Enter 6-digit OTP"
+                    className={getCardCls(dk)}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={verifyOtp}
+                    disabled={otpLoading || otp.length !== 6}
+                    className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground disabled:opacity-60"
+                  >
+                    {otpLoading ? 'Verifying...' : 'Verify OTP'}
+                  </button>
+                </div>
+
+                {otpMessage ? <p className="mt-2 text-xs text-emerald-400">{otpMessage}</p> : null}
+                {otpError ? <p className="mt-2 text-xs text-red-400">{otpError}</p> : null}
+                {otpVerified ? <p className="mt-2 text-xs text-emerald-400">OTP verified. You can continue.</p> : null}
+              </div>
             </div>
           );
 

@@ -93,6 +93,26 @@ function deriveCollegeEmail(uid: string): string {
   return `${trimmed}@cuchd.in`;
 }
 
+function isValidLinkedInUrl(value: string): boolean {
+  try {
+    const url = new URL(normalizeUrl(value));
+    const hostname = url.hostname.toLowerCase();
+    return hostname === 'linkedin.com' || hostname === 'www.linkedin.com';
+  } catch {
+    return false;
+  }
+}
+
+function isValidGoogleDriveUrl(value: string): boolean {
+  try {
+    const url = new URL(value.trim());
+    const hostname = url.hostname.toLowerCase();
+    return hostname === 'drive.google.com' || hostname === 'docs.google.com';
+  } catch {
+    return false;
+  }
+}
+
 export default function CoreTeamRegistrationForm() {
   const [step, setStep] = useState<Step>('choose-student');
   const [submitting, setSubmitting] = useState(false);
@@ -314,6 +334,16 @@ export default function CoreTeamRegistrationForm() {
 
     if (!otpVerified) {
       setError('Please verify OTP sent to your CUCHD email before submitting');
+      return;
+    }
+
+    if (!isValidLinkedInUrl(coreForm.linkedinUrl)) {
+      setError('Please enter a valid LinkedIn profile URL (linkedin.com)');
+      return;
+    }
+
+    if (!isValidGoogleDriveUrl(coreForm.resumeLink)) {
+      setError('Resume link must be a valid Google Drive URL');
       return;
     }
 
@@ -679,18 +709,22 @@ export default function CoreTeamRegistrationForm() {
           <input
             required
             type="url"
-            placeholder="Resume PDF Link (viewer access)"
+            placeholder="Resume Google Drive Link (viewer access)"
             value={coreForm.resumeLink}
             onChange={(e) => setCoreForm((prev) => ({ ...prev, resumeLink: e.target.value }))}
+            pattern="https?://(drive|docs)\.google\.com/.*"
+            title="Use a Google Drive or Google Docs URL"
             className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
           />
           <input
             required
             type="text"
-            placeholder="LinkedIn URL"
+            placeholder="LinkedIn Profile URL"
             value={coreForm.linkedinUrl}
             onChange={(e) => setCoreForm((prev) => ({ ...prev, linkedinUrl: e.target.value }))}
             onBlur={(e) => setCoreForm((prev) => ({ ...prev, linkedinUrl: normalizeUrl(e.target.value) }))}
+            pattern="https?://(www\.)?linkedin\.com/.*"
+            title="Use a valid linkedin.com URL"
             className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
           />
           <input
