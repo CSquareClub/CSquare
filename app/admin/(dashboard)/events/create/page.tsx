@@ -248,7 +248,14 @@ export default function CreateEventPage() {
 
         <div className="md:col-span-2">
           <label className="mb-1 block text-sm font-medium">Description *</label>
-          <textarea value={form.description} onChange={(e) => update("description", e.target.value)} className="min-h-24 w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
+          <textarea
+            value={form.description}
+            onChange={(e) => update("description", e.target.value)}
+            className="min-h-56 w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm leading-relaxed"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Supports multi-line text and bold using **double asterisks**.
+          </p>
           {errors.description ? <p className="mt-1 text-xs text-red-600">{errors.description}</p> : null}
         </div>
 
@@ -335,22 +342,39 @@ export default function CreateEventPage() {
 
         <div className="md:col-span-2">
           <label className="mb-1 block text-sm font-medium">Prizes</label>
-          <textarea value={form.prizes} onChange={(e) => update("prizes", e.target.value)} className="min-h-20 w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
+          <textarea
+            value={form.prizes}
+            onChange={(e) => update("prizes", e.target.value)}
+            className="min-h-36 w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm leading-relaxed"
+            placeholder="Example:\nTotal Prize Pool: ₹50,000\n1st Prize: ₹7,000\n2nd Prize: ₹5,000"
+          />
         </div>
 
         <div className="md:col-span-2">
           <label className="mb-1 block text-sm font-medium">Rules</label>
-          <textarea value={form.rules} onChange={(e) => update("rules", e.target.value)} className="min-h-20 w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
+          <textarea
+            value={form.rules}
+            onChange={(e) => update("rules", e.target.value)}
+            className="min-h-32 w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm leading-relaxed"
+          />
         </div>
 
         <div className="md:col-span-2">
           <label className="mb-1 block text-sm font-medium">Schedule</label>
-          <textarea value={form.schedule} onChange={(e) => update("schedule", e.target.value)} className="min-h-20 w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
+          <textarea
+            value={form.schedule}
+            onChange={(e) => update("schedule", e.target.value)}
+            className="min-h-32 w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm leading-relaxed"
+          />
         </div>
 
         <div className="md:col-span-2">
           <label className="mb-1 block text-sm font-medium">Sponsors</label>
-          <textarea value={form.sponsors} onChange={(e) => update("sponsors", e.target.value)} className="min-h-20 w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
+          <textarea
+            value={form.sponsors}
+            onChange={(e) => update("sponsors", e.target.value)}
+            className="min-h-28 w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm leading-relaxed"
+          />
         </div>
 
         <div>

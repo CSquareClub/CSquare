@@ -12,6 +12,30 @@ import { getEventPageOverride } from '@/lib/event-page-overrides';
 export const dynamic = 'force-dynamic';
 const EVENT_TIMEZONE = 'Asia/Kolkata';
 
+function renderInlineBold(text: string): Array<string | JSX.Element> {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+      return <strong key={`b-${index}`}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+}
+
+function renderFormattedDescription(text: string): JSX.Element[] {
+  return text.split('\n').map((line, index) => {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      return <div key={`sp-${index}`} className="h-2" />;
+    }
+
+    return (
+      <p key={`ln-${index}`} className="leading-relaxed">
+        {renderInlineBold(line)}
+      </p>
+    );
+  });
+}
+
 function normalizeEventImageUrl(url: string | undefined | null): string {
   if (!url) return '';
 
@@ -168,9 +192,7 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
               <header className="space-y-3">
                 <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{safeTitle}</h1>
                 {event.description ? (
-                  <p className="whitespace-pre-line text-foreground/70 leading-relaxed">
-                    {event.description}
-                  </p>
+                  <div className="text-foreground/70">{renderFormattedDescription(event.description)}</div>
                 ) : null}
               </header>
 

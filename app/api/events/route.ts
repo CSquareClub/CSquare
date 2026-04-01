@@ -84,18 +84,20 @@ export async function POST(req: Request) {
     const location = input.eventType === "Online" ? input.onlineLink || "Online" : buildLocation(input.venueName, input.city);
 
     const detailLines = [
-      input.tagline ? `Tagline: ${input.tagline}` : null,
-      `Event Type: ${input.eventType}`,
-      input.tags?.length ? `Tags: ${input.tags.join(", ")}` : null,
-      `Slug: ${input.slug}`,
-      input.registrationDeadline ? `Registration Deadline: ${input.registrationDeadline.toISOString()}` : null,
-      input.onlineLink ? `Online Link: ${input.onlineLink}` : null,
-      `Organizer: ${input.organizerName}`,
-      `Contact Email: ${input.contactEmail}`,
-      input.prizes ? `Prizes: ${input.prizes}` : null,
-      input.rules ? `Rules: ${input.rules}` : null,
-      input.schedule ? `Schedule: ${input.schedule}` : null,
-      input.sponsors ? `Sponsors: ${input.sponsors}` : null,
+      input.tagline ? `**Tagline**\n${input.tagline}` : null,
+      `**Event Type**\n${input.eventType}`,
+      input.tags?.length ? `**Tags**\n${input.tags.join(", ")}` : null,
+      `**Slug**\n${input.slug}`,
+      input.registrationDeadline
+        ? `**Registration Deadline**\n${input.registrationDeadline.toISOString()}`
+        : null,
+      input.onlineLink ? `**Online Link**\n${input.onlineLink}` : null,
+      `**Organizer**\n${input.organizerName}`,
+      `**Contact Email**\n${input.contactEmail}`,
+      input.prizes ? `**Prizes & Benefits**\n${input.prizes}` : null,
+      input.rules ? `**Rules**\n${input.rules}` : null,
+      input.schedule ? `**Timeline / Schedule**\n${input.schedule}` : null,
+      input.sponsors ? `**Sponsors**\n${input.sponsors}` : null,
     ].filter(Boolean);
 
     const fullDescription = detailLines.length
