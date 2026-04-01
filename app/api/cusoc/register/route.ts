@@ -20,6 +20,9 @@ const preferenceLabelMap: Record<string, string> = {
   dsa: "DSA",
 };
 
+const CUSOC_2026_CLOSED_MESSAGE =
+  "CUSoC 2026 (GSoC) registrations are now closed. Please register for the CUSoC 2027-28 cohort program.";
+
 function normalizePreferenceString(value: string): string {
   return value
     .split(",")
@@ -269,42 +272,7 @@ export async function POST(req: NextRequest) {
     const track = body?.track;
 
     if (track === "2026") {
-      const data = schema2026.parse(body);
-
-      const { track: _, ...fields } = data;
-      const normalizedFields = {
-        ...fields,
-        domainOrder: normalizePreferenceString(fields.domainOrder),
-      };
-
-      // Check duplicate by CU email, personal email, phone, or roll number.
-      const existing = await prisma.cusocRegistration2026.findFirst({
-        where: {
-          OR: [
-            { cuEmail: normalizedFields.cuEmail },
-            { personalEmail: normalizedFields.personalEmail },
-            { phone: normalizedFields.phone },
-            { rollNumber: normalizedFields.rollNumber },
-          ],
-        },
-      });
-      if (existing) {
-        return NextResponse.json(
-          { error: "This student is already registered for CUSoC 2026." },
-          { status: 409 }
-        );
-      }
-
-      await prisma.cusocRegistration2026.create({ data: normalizedFields });
-      // Send Welcome Email
-      await sendWelcomeEmail(
-        [normalizedFields.cuEmail, normalizedFields.personalEmail],
-        normalizedFields.fullName,
-        "2026",
-        normalizedFields.rollNumber
-      );
-
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ error: CUSOC_2026_CLOSED_MESSAGE }, { status: 410 });
     }
 
     if (track === "2027") {
@@ -377,13 +345,9 @@ export async function GET(req: NextRequest) {
     }
 
     if (track === "2026") {
-      const existing = await prisma.cusocRegistration2026.findUnique({
-        where: { cuEmail },
-      });
-
       return NextResponse.json({
-        duplicate: Boolean(existing),
-        error: existing ? "This CU email is already registered for CUSoC 2026." : undefined,
+        duplicate: true,
+        error: CUSOC_2026_CLOSED_MESSAGE,
       });
     }
 

@@ -33,6 +33,9 @@ import {
 
 type Track = '2026' | '2027' | null;
 
+const CUSOC_2026_CLOSED_MESSAGE =
+  'CUSoC 2026 (GSoC) registrations are closed. Please register for the CUSoC 2027-28 cohort program.';
+
 /* ─── STEP DEFINITIONS ───────────────────────────────────── */
 
 const steps2026 = [
@@ -209,7 +212,7 @@ export default function CusocForm() {
            setF(data.f);
         }
         if (data.step !== undefined) setStep(data.step);
-        if (data.track) setTrack(data.track);
+        if (data.track === '2027') setTrack('2027');
       }
     } catch(e) {}
   }, []);
@@ -222,6 +225,12 @@ export default function CusocForm() {
 
   useEffect(() => {
     if (!track || step !== 0) {
+      setCheckingDuplicate(false);
+      return;
+    }
+
+    if (track === '2026') {
+      setDuplicateError(CUSOC_2026_CLOSED_MESSAGE);
       setCheckingDuplicate(false);
       return;
     }
@@ -513,28 +522,31 @@ export default function CusocForm() {
             Select Your CUSoC Batch
           </h2>
           <p className="mt-2 text-sm text-foreground/65">Pick the track that matches your current level and goals.</p>
+          <p className={`mt-3 rounded-xl border px-3 py-2 text-xs font-medium ${dk ? 'border-amber-400/30 bg-amber-500/10 text-amber-200' : 'border-amber-300 bg-amber-50 text-amber-800'}`}>
+            CUSoC 2026 registration is closed. Please choose the CUSoC 2027-28 cohort program.
+          </p>
         </div>
 
         <div className="relative grid gap-5 sm:grid-cols-2">
           {/* 2026 Card */}
           <button
             type="button"
-            onClick={() => { setTrack('2026'); setStep(0); }}
-            className={`group relative rounded-2xl border p-6 text-left transition-all duration-300 hover:scale-[1.02] ${dk ? 'border-emerald-400/20 bg-emerald-400/[0.03] hover:border-emerald-400/40 hover:bg-emerald-400/[0.06]' : 'border-emerald-300 bg-emerald-50 hover:border-emerald-400 hover:bg-emerald-100/70'}`}
+            disabled
+            className={`group relative rounded-2xl border p-6 text-left transition-all duration-300 opacity-60 cursor-not-allowed ${dk ? 'border-emerald-400/20 bg-emerald-400/[0.03]' : 'border-emerald-300 bg-emerald-50'}`}
           >
             <div className="mb-4 flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 text-lg">🟢</span>
               <div>
                 <h3 className="text-lg font-bold text-foreground">CUSoC 2026</h3>
-                <p className={`text-xs ${dk ? 'text-emerald-300/60' : 'text-emerald-700'}`}>Current Batch</p>
+                <p className={`text-xs ${dk ? 'text-emerald-300/60' : 'text-emerald-700'}`}>Current Batch (Closed)</p>
               </div>
             </div>
             <ul className={`space-y-1.5 text-sm ${dk ? 'text-foreground/60' : 'text-foreground/70'}`}>
               <li>• Screening question / SOP</li>
               <li>• For GSoC-ready students</li>
             </ul>
-            <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-emerald-500 group-hover:text-emerald-400">
-              Start Application <ChevronRight className="h-3.5 w-3.5" />
+            <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-rose-500">
+              Registrations Closed
             </div>
           </button>
 
