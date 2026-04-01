@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Calendar, MapPin, Users, ArrowRight, AlertCircle } from 'lucide-react';
 
 interface Sponsor {
@@ -125,7 +125,7 @@ export default function EventCard({
     []
   );
   const [currentImage, setCurrentImage] = useState(normalizedImage || fallbackImage);
-  const [imageError, setImageError] = useState(!normalizedImage);
+  const [imageError, setImageError] = useState(false);
   const lightSponsorLogo = sponsorLogoLightUrl || sponsorLogoUrl || null;
   const darkSponsorLogo = sponsorLogoDarkUrl || sponsorLogoLightUrl || sponsorLogoUrl || null;
   const isDevfolio = isDevfolioSponsor(sponsorTitle);
@@ -136,6 +136,11 @@ export default function EventCard({
   const hasDevfolioApplyLogos = Boolean(isDevfolio && registrationUrl && applyLogoLight && applyLogoDark);
   const hasMultiplesponsors = sponsors && sponsors.length > 0;
   const legacySponsor = lightSponsorLogo || darkSponsorLogo;
+
+  useEffect(() => {
+    setCurrentImage(normalizedImage || fallbackImage);
+    setImageError(false);
+  }, [normalizedImage, fallbackImage]);
 
   const openEventInNewTab = () => {
     window.open(eventHref, '_blank', 'noopener,noreferrer');
@@ -177,7 +182,7 @@ export default function EventCard({
       
       {/* Image Banner */}
       <div className="relative min-h-52 w-full flex-shrink-0 overflow-hidden bg-card/80 p-3 flex items-center justify-center">
-        {imageError || !normalizedImage ? (
+        {imageError ? (
           <div className="flex flex-col items-center justify-center w-full h-full text-foreground/50">
             <AlertCircle size={48} className="mb-2 text-foreground/40" />
             <p className="text-sm font-medium">No media available</p>
@@ -189,8 +194,11 @@ export default function EventCard({
               className="h-full max-h-72 w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
               alt={safeTitle}
               onError={() => {
-                setCurrentImage(fallbackImage);
-                setImageError(true);
+                if (currentImage !== fallbackImage) {
+                  setCurrentImage(fallbackImage);
+                } else {
+                  setImageError(true);
+                }
               }}
             />
             {/* Gradient Overlay for Text Polish */}
