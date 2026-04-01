@@ -94,6 +94,8 @@ export async function listOutsideRegistrations(): Promise<OutsideRegistration[]>
   const rows = await prisma.$queryRawUnsafe<OutsideRegistrationRow[]>(
     `SELECT id, created_at, full_name, institute_name, roll_number, personal_email, college_email, campus_ambassador
      FROM outside_registrations
+     WHERE LOWER(personal_email) NOT LIKE '%@cuchd.in'
+       AND LOWER(college_email) NOT LIKE '%@cuchd.in'
       ORDER BY created_at ASC;`
   );
 
@@ -107,6 +109,8 @@ export async function listCampusAmbassadors(): Promise<OutsideRegistration[]> {
     `SELECT id, created_at, full_name, institute_name, roll_number, personal_email, college_email, campus_ambassador
      FROM outside_registrations
      WHERE campus_ambassador = TRUE
+       AND LOWER(personal_email) NOT LIKE '%@cuchd.in'
+       AND LOWER(college_email) NOT LIKE '%@cuchd.in'
       ORDER BY created_at ASC;`
   );
 
@@ -117,10 +121,17 @@ export async function getOutsideRegistrationCounts(): Promise<{ total: number; a
   await ensureOutsideRegistrationsTable();
 
   const totalRows = await prisma.$queryRawUnsafe<Array<{ count: bigint | number }>>(
-    `SELECT COUNT(*)::bigint AS count FROM outside_registrations;`
+    `SELECT COUNT(*)::bigint AS count
+     FROM outside_registrations
+     WHERE LOWER(personal_email) NOT LIKE '%@cuchd.in'
+       AND LOWER(college_email) NOT LIKE '%@cuchd.in';`
   );
   const ambassadorRows = await prisma.$queryRawUnsafe<Array<{ count: bigint | number }>>(
-    `SELECT COUNT(*)::bigint AS count FROM outside_registrations WHERE campus_ambassador = TRUE;`
+    `SELECT COUNT(*)::bigint AS count
+     FROM outside_registrations
+     WHERE campus_ambassador = TRUE
+       AND LOWER(personal_email) NOT LIKE '%@cuchd.in'
+       AND LOWER(college_email) NOT LIKE '%@cuchd.in';`
   );
 
   return {

@@ -52,6 +52,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Please provide valid email addresses" }, { status: 400 });
     }
 
+    if (/@cuchd\.in$/i.test(personalEmail) || /@cuchd\.in$/i.test(collegeEmail)) {
+      return NextResponse.json(
+        { error: "CU students should use the CUSoC/Core Team CU flow, not Outside registration." },
+        { status: 400 }
+      );
+    }
+
     const isDuplicate = await checkDuplicateRegistration(
       rollNumber,
       personalEmail,
