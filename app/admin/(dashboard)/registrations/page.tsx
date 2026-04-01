@@ -10,9 +10,12 @@ import {
   Search,
   RefreshCw,
   Trash2,
+  ExternalLink,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { useSearchParams } from "next/navigation";
+
+const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1S6OQd0lXUxpPQc7DQrP6mx2Ic-W3YI14aNhlYw-c15c/edit";
 
 type CusocTrack = "2026" | "2027";
 type RegistrationSource =
@@ -511,6 +514,14 @@ export default function CusocRegistrationsPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => window.open(GOOGLE_SHEET_URL, "_blank")}
+              className="flex items-center gap-2 rounded-xl border border-blue-300 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition-all hover:bg-blue-100 dark:border-blue-500/30 dark:bg-blue-500/15 dark:text-blue-300 dark:hover:bg-blue-500/25"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Open Google Sheet
+            </button>
+
             <button
               onClick={syncToGoogleSheet}
               disabled={!data.length || exporting}
