@@ -1,4 +1,5 @@
 import prisma from "@/lib/db";
+import { formatTimeRangeFromDates } from "@/lib/event-time-utils";
 
 export type Sponsor = {
   id: number;
@@ -133,12 +134,7 @@ async function ensureEventsTable() {
 }
 
 function formatTimeRange(startDate: Date, endDate: Date): string {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-
-  return `${formatter.format(startDate)} - ${formatter.format(endDate)}`;
+  return formatTimeRangeFromDates(startDate, endDate);
 }
 
 function rowToEvent(row: EventRow, sponsors: Sponsor[] = []): ClubEvent {

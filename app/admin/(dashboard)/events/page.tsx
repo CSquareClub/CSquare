@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Trash2, Plus } from "lucide-react";
+import { formatEventDateTime } from "@/lib/event-time-utils";
 
 type Sponsor = {
   id?: number;
@@ -74,23 +75,6 @@ const defaultForm: EventFormState = {
   isPublished: true,
   registrationUrl: "",
 };
-
-const EVENT_TIMEZONE = "Asia/Kolkata";
-
-function formatEventDateTime(value: string | null | undefined): string {
-  if (!value) return "TBD";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "TBD";
-  return date.toLocaleString("en-IN", {
-    timeZone: EVENT_TIMEZONE,
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
 
 function toInputDateValue(isoDate: string) {
   const date = new Date(isoDate);

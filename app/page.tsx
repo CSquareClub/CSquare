@@ -7,66 +7,8 @@ import ClubDescription from '@/components/home/club-description';
 import GalleryGrid from '@/components/events/gallery-grid';
 import EventCard from '@/components/events/event-card';
 import { listPublicEvents } from '@/lib/events-store';
+import { toEpoch, formatEventDate, formatEventTime } from '@/lib/event-time-utils';
 import Link from 'next/link';
-const EVENT_TIMEZONE = 'Asia/Kolkata';
-
-function toEpoch(value: Date | string | null | undefined): number | null {
-  if (!value) return null;
-  const timestamp = new Date(value).getTime();
-  return Number.isNaN(timestamp) ? null : timestamp;
-}
-
-function formatEventDate(value: Date | string | null | undefined): string | null {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  // Format as dd/mm/yyyy in IST
-  return date.toLocaleDateString('en-GB', {
-    timeZone: 'Asia/Kolkata',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
-}
-
-function formatEventTime(startValue: Date | string | null | undefined, endValue: Date | string | null | undefined): string | null {
-  if (!startValue) return null;
-  const start = new Date(startValue);
-  if (Number.isNaN(start.getTime())) return null;
-  const startLabel = start.toLocaleTimeString('en-US', {
-    timeZone: 'Asia/Kolkata',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-  if (!endValue) return startLabel;
-  const end = new Date(endValue);
-  if (Number.isNaN(end.getTime())) return startLabel;
-  // If same day, show only time range
-  if (
-    start.getDate() === end.getDate() &&
-    start.getMonth() === end.getMonth() &&
-    start.getFullYear() === end.getFullYear()
-  ) {
-    const endLabel = end.toLocaleTimeString('en-US', {
-      timeZone: 'Asia/Kolkata',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
-    return `${startLabel} - ${endLabel}`;
-  }
-  // If different days, show both dates and times
-  const startDate = start.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata', day: '2-digit', month: '2-digit', year: 'numeric' });
-  const endDate = end.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata', day: '2-digit', month: '2-digit', year: 'numeric' });
-  const endLabel = end.toLocaleTimeString('en-US', {
-    timeZone: 'Asia/Kolkata',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-  return `${startLabel}, ${startDate} - ${endLabel}, ${endDate}`;
-}
 
 export default async function Home() {
   const allEvents = await listPublicEvents();
