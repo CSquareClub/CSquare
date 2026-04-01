@@ -232,8 +232,6 @@ export default function EventCard({
           </Link>
         </h3>
 
-        {description ? <p className="text-foreground/60 text-sm mb-6 leading-relaxed flex-grow">{description}</p> : null}
-
         {/* Multiple Sponsors */}
         {hasMultiplesponsors ? (
           <div className="mb-6">
