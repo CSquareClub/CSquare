@@ -167,7 +167,11 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
             <div className="space-y-6 p-6 md:p-8">
               <header className="space-y-3">
                 <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{safeTitle}</h1>
-                {event.description ? <p className="text-foreground/70">{event.description}</p> : null}
+                {event.description ? (
+                  <p className="whitespace-pre-line text-foreground/70 leading-relaxed">
+                    {event.description}
+                  </p>
+                ) : null}
               </header>
 
               {event.startDate || event.endDate || event.location || typeof event.attendees === 'number' ? (
