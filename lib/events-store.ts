@@ -27,6 +27,7 @@ export type CommunityPartner = {
 
 export type ClubEvent = {
   id: number;
+  slug: string | null;
   title: string | null;
   description: string | null;
   startDate: string | null;
@@ -193,6 +194,22 @@ function formatTimeRange(startDate: Date, endDate: Date): string {
   return formatTimeRangeFromDates(startDate, endDate);
 }
 
+function slugifyTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+function extractSlugFromDescription(description: string | null): string | null {
+  if (!description) return null;
+
+  const slugMatch = description.match(/\*\*Slug\*\*\s*\n\s*([a-z0-9]+(?:-[a-z0-9]+)*)/i);
+  return slugMatch?.[1]?.toLowerCase() ?? null;
+}
+
 function rowToEvent(
   row: EventRow,
   sponsors: Sponsor[] = [],
@@ -211,6 +228,7 @@ function rowToEvent(
 
   return {
     id: row.id,
+    slug: extractSlugFromDescription(row.description) ?? slugifyTitle(row.title || `event-${row.id}`),
     title: row.title,
     description: row.description,
     startDate: startDate ? startDate.toISOString() : null,
@@ -332,7 +350,8 @@ export async function countActiveEvents(): Promise<number> {
 export type CreateSponsorInput = Omit<Sponsor, "id" | "eventId">;
 export type CreateCommunityPartnerInput = Omit<CommunityPartner, "id" | "eventId">;
 
-export type CreateEventInput = Omit<ClubEvent, "id" | "date" | "time" | "sponsors" | "communityPartners" | "isRegistrationOpen" | "registrationLink"> & {
+export type CreateEventInput = Omit<ClubEvent, "id" | "slug" | "date" | "time" | "sponsors" | "communityPartners" | "isRegistrationOpen" | "registrationLink"> & {
+  slug?: string | null;
   date?: string;
   time?: string;
   sponsors?: CreateSponsorInput[];

@@ -29,6 +29,15 @@ async function ensureFile(filePath: string, content: string): Promise<boolean> {
   }
 }
 
+async function dirExists(dirPath: string): Promise<boolean> {
+  try {
+    const stat = await fs.stat(dirPath);
+    return stat.isDirectory();
+  } catch {
+    return false;
+  }
+}
+
 function parseSlugsFromArgs(): string[] {
   const slugsArg = process.argv.find((arg) => arg.startsWith('--slugs='));
   if (!slugsArg) return [];
@@ -55,6 +64,8 @@ async function main(): Promise<void> {
 
   let eventSlugs: string[] = [];
   let modeLabel = 'manual';
+  let renamedCount = 0;
+  let renameConflictCount = 0;
 
   if (slugsFromArgs.length > 0) {
     eventSlugs = slugsFromArgs;
@@ -62,8 +73,44 @@ async function main(): Promise<void> {
   } else {
     try {
       const events = includeAllEvents ? await listAdminEvents() : await listPublicEvents();
+
+      for (const event of events) {
+        const preferredSlug = event.slug?.trim();
+        if (!preferredSlug) continue;
+
+        const preferredDir = path.join(root, preferredSlug);
+        const preferredExists = await dirExists(preferredDir);
+        const titleSlug = slugifyTitle((event.title || '').trim() || `event-${event.id}`);
+        const legacyCandidates = [`published-event-${event.id}`, `event-${event.id}`, titleSlug]
+          .map((candidate) => candidate.trim())
+          .filter((candidate) => candidate && candidate !== preferredSlug);
+
+        const legacyDir = await (async () => {
+          for (const candidate of legacyCandidates) {
+            const candidateDir = path.join(root, candidate);
+            if (await dirExists(candidateDir)) return candidateDir;
+          }
+          return null;
+        })();
+
+        if (!legacyDir) continue;
+
+        if (preferredExists) {
+          renameConflictCount += 1;
+          console.warn(`Skipped rename due to existing target folder: ${preferredSlug}`);
+          continue;
+        }
+
+        await fs.rename(legacyDir, preferredDir);
+        renamedCount += 1;
+      }
+
       eventSlugs = events
-        .map((event) => slugifyTitle((event.title || '').trim() || `event-${event.id}`))
+        .map((event) => {
+          const preferredSlug = event.slug?.trim();
+          if (preferredSlug) return preferredSlug;
+          return slugifyTitle((event.title || '').trim() || `event-${event.id}`);
+        })
         .filter(Boolean);
       modeLabel = includeAllEvents ? 'all-events' : 'published-only';
     } catch (error) {
@@ -126,6 +173,8 @@ async function main(): Promise<void> {
 
   console.log(`Sync mode: ${modeLabel}`);
   console.log(`Events resolved: ${uniqueSlugs.length}`);
+  console.log(`Legacy folders renamed: ${renamedCount}`);
+  console.log(`Rename conflicts skipped: ${renameConflictCount}`);
   console.log(`New override folders initialized: ${createdCount}`);
 }
 

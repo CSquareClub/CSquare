@@ -136,7 +136,10 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
 
   if (!event) {
     const events = await listPublicEvents();
-    event = events.find((entry) => slugifyTitle(entry.title || `event-${entry.id}`) === slug) ?? null;
+    event =
+      events.find((entry) => entry.slug === slug) ??
+      events.find((entry) => slugifyTitle(entry.title || `event-${entry.id}`) === slug) ??
+      null;
   }
 
   if (!event) {
