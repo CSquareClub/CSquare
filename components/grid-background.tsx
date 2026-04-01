@@ -15,7 +15,7 @@ export default function GridBackground() {
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" style={{ backgroundColor: baseBg }}>
       {/* Lightweight grid pattern */}
       <div
-        className="absolute inset-0 opacity-[0.52] animate-grid"
+        className="absolute inset-0 opacity-[0.38] animate-grid"
         style={{
           backgroundImage: `
             linear-gradient(to right, ${gridLine} 1px, transparent 1px),
@@ -27,19 +27,19 @@ export default function GridBackground() {
 
       {/* Ambient glows */}
       <div
-        className="absolute -top-28 left-1/2 h-[470px] w-[80%] -translate-x-1/2 rounded-full blur-3xl animate-drift-slow"
-        style={{ background: isDarkTheme ? 'rgba(251,146,60,0.2)' : 'rgba(249,115,22,0.18)' }}
+        className="absolute -top-24 left-1/2 h-[390px] w-[75%] -translate-x-1/2 rounded-full blur-3xl animate-drift-slow"
+        style={{ background: isDarkTheme ? 'rgba(251,146,60,0.14)' : 'rgba(249,115,22,0.13)' }}
       />
       <div
-        className="absolute bottom-[-60px] right-[-40px] h-[360px] w-[360px] rounded-full blur-3xl animate-orbit-float"
-        style={{ background: isDarkTheme ? 'rgba(220,38,38,0.16)' : 'rgba(234,88,12,0.12)' }}
+        className="absolute bottom-[-50px] right-[-30px] h-[300px] w-[300px] rounded-full blur-3xl animate-orbit-float"
+        style={{ background: isDarkTheme ? 'rgba(220,38,38,0.12)' : 'rgba(234,88,12,0.1)' }}
       />
       <div
-        className="absolute bottom-[20%] left-[-70px] h-[280px] w-[280px] rounded-full blur-3xl animate-drift-slow"
-        style={{ background: isDarkTheme ? 'rgba(180,83,9,0.12)' : 'rgba(194,65,12,0.11)' }}
+        className="absolute bottom-[20%] left-[-50px] h-[220px] w-[220px] rounded-full blur-3xl animate-drift-slow"
+        style={{ background: isDarkTheme ? 'rgba(180,83,9,0.09)' : 'rgba(194,65,12,0.08)' }}
       />
 
-      <div className="absolute inset-0 opacity-[0.03]" style={{
+      <div className="absolute inset-0 opacity-[0.02]" style={{
         backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
         backgroundSize: '18px 18px',
       }} />

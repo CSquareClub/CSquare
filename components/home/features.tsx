@@ -42,12 +42,12 @@ export default function Features() {
             return (
               <div
                 key={index}
-                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border bg-card/65 p-6 transition-all duration-500 hover:border-primary/45 hover:bg-card hover:shadow-[0_0_30px_color-mix(in_oklab,var(--primary)_28%,transparent)]"
+                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border bg-card/65 p-6 transition-all duration-500 hover:border-primary/40 hover:bg-card hover:shadow-[0_0_18px_color-mix(in_oklab,var(--primary)_18%,transparent)]"
               >
                 {/* Subtle top highlight on hover */}
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
-                <Icon className="w-10 h-10 text-primary mb-5 group-hover:scale-110 transition-transform duration-500" />
+                <Icon className="w-10 h-10 text-primary mb-5 group-hover:scale-105 transition-transform duration-500" />
                 <h3 className="text-lg font-semibold mb-2 text-foreground/90">{feature.title}</h3>
                 <p className="text-foreground/50 text-sm leading-relaxed">{feature.description}</p>
               </div>

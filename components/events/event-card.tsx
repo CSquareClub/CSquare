@@ -132,7 +132,7 @@ export default function EventCard({
 
   return (
     <div
-      className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-primary/30 bg-card/80 shadow-md transition-all duration-300 hover:border-primary hover:bg-card hover:shadow-xl"
+      className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-primary/30 bg-card/80 shadow-md transition-all duration-300 hover:border-primary hover:bg-card hover:shadow-lg"
       role="link"
       tabIndex={0}
       onClick={handleCardClick}
@@ -153,7 +153,7 @@ export default function EventCard({
           <>
             <img
               src={currentImage}
-              className="h-full max-h-72 w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
+              className="h-full max-h-72 w-full object-contain transition-transform duration-500 group-hover:scale-[1.01]"
               alt={safeTitle}
               onError={() => {
                 if (currentImage !== fallbackImage) {
@@ -223,7 +223,7 @@ export default function EventCard({
               href={registrationUrl}
               target="_blank"
               rel="noreferrer"
-              className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition-all duration-300 hover:border-[#dc2626] hover:bg-[#dc2626] hover:text-white group-hover:shadow-[0_0_15px_rgba(220,38,38,0.3)]"
+              className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition-all duration-300 hover:border-[#dc2626] hover:bg-[#dc2626] hover:text-white group-hover:shadow-[0_0_10px_rgba(220,38,38,0.22)]"
             >
               {registrationButtonLabel}
             </Link>
@@ -247,9 +247,9 @@ export default function EventCard({
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`Open ${safeTitle} details`}
-            className="rounded-md p-1 text-[#dc2626] transition-transform hover:translate-x-1"
+            className="rounded-md p-1 text-[#dc2626] transition-transform hover:translate-x-0.5"
           >
-            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
       </div>

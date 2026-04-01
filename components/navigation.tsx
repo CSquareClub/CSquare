@@ -70,7 +70,7 @@ export default function Navigation() {
       </div>
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-3 transition-all hover:opacity-95 hover:scale-[1.01]">
+          <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-95">
             <Image src={logoSrc} alt="C Square Club" width={160} height={36} className="h-9 w-auto object-contain" priority />
             <span className="font-mono text-lg font-bold tracking-tight text-foreground/90">&lt;C_Square/&gt;</span>
           </Link>
@@ -91,7 +91,7 @@ export default function Navigation() {
               </Link>
             ))}
 
-            <JoinNowModal className="inline-flex items-center justify-center rounded-full border-2 border-primary bg-primary/15 px-5 py-2 font-mono text-xs font-semibold uppercase tracking-[0.15em] text-primary transition-all hover:scale-[1.02] hover:bg-primary/25 hover:shadow-[0_0_22px_color-mix(in_oklab,var(--primary)_35%,transparent)]">
+            <JoinNowModal className="inline-flex items-center justify-center rounded-full border-2 border-primary bg-primary/15 px-5 py-2 font-mono text-xs font-semibold uppercase tracking-[0.15em] text-primary transition-all hover:scale-[1.005] hover:bg-primary/25 hover:shadow-[0_0_14px_color-mix(in_oklab,var(--primary)_24%,transparent)]">
               Join Now
             </JoinNowModal>
             
