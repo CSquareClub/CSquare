@@ -13,7 +13,6 @@ export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [nowLabel, setNowLabel] = useState("");
   const { resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme !== 'light';
 
@@ -27,25 +26,12 @@ export default function Navigation() {
       setScrollProgress(progress);
     };
 
-    const updateNowLabel = () => {
-      const now = new Date();
-      setNowLabel(
-        now.toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-        })
-      );
-    };
-
     updateScrollProgress();
-    updateNowLabel();
 
     window.addEventListener('scroll', updateScrollProgress, { passive: true });
-    const timer = window.setInterval(updateNowLabel, 30000);
 
     return () => {
       window.removeEventListener('scroll', updateScrollProgress);
-      window.clearInterval(timer);
     };
   }, []);
 
@@ -91,9 +77,6 @@ export default function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-4 lg:gap-5">
-            <span className="rounded-full border border-border bg-card/70 px-3 py-1 font-mono text-xs text-foreground/70 shadow-sm">
-              LIVE {nowLabel || '--:--'}
-            </span>
             {navItems.map((item) => (
               <Link
                 key={item.href}
