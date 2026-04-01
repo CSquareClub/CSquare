@@ -37,6 +37,8 @@ export async function POST(req: Request) {
       !semester ||
       !rolesInterested ||
       !resumeLink ||
+      !linkedinUrl ||
+      !portfolioUrl ||
       !whyJoin
     ) {
       return NextResponse.json({ error: 'Please fill all required fields' }, { status: 400 });
@@ -46,11 +48,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Resume link must be a valid URL' }, { status: 400 });
     }
 
-    if (linkedinUrl && !isValidUrl(linkedinUrl)) {
+    if (!isValidUrl(linkedinUrl)) {
       return NextResponse.json({ error: 'LinkedIn URL must be valid' }, { status: 400 });
     }
 
-    if (portfolioUrl && !isValidUrl(portfolioUrl)) {
+    if (!isValidUrl(portfolioUrl)) {
       return NextResponse.json({ error: 'Portfolio URL must be valid' }, { status: 400 });
     }
 
@@ -72,8 +74,8 @@ export async function POST(req: Request) {
       semester,
       rolesInterested,
       resumeLink,
-      linkedinUrl: linkedinUrl || null,
-      portfolioUrl: portfolioUrl || null,
+      linkedinUrl,
+      portfolioUrl,
       whyJoin,
     });
 

@@ -436,6 +436,7 @@ export default function CoreTeamRegistrationForm() {
             className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
           />
           <input
+            required
             type="url"
             placeholder="LinkedIn URL"
             value={coreForm.linkedinUrl}
@@ -443,8 +444,9 @@ export default function CoreTeamRegistrationForm() {
             className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
           />
           <input
+            required
             type="url"
-            placeholder="Portfolio URL (if available)"
+            placeholder="Portfolio URL"
             value={coreForm.portfolioUrl}
             onChange={(e) => setCoreForm((prev) => ({ ...prev, portfolioUrl: e.target.value }))}
             className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
