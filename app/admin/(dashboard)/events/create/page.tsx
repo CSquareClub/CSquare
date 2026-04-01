@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import CommunityPartnersEditor, { type CommunityPartnerDraft } from "@/components/admin/community-partners-editor";
 
 type EventType = "Online" | "Offline" | "Hybrid";
 type EventCategory = "Hackathon" | "Workshop" | "Fest" | "Meetup";
@@ -37,6 +38,7 @@ type FormState = {
   rules: string;
   schedule: string;
   sponsors: Sponsor[];
+  communityPartners: CommunityPartnerDraft[];
   status: EventStatus;
   slug: string;
 };
@@ -64,6 +66,7 @@ const initialForm: FormState = {
   rules: "",
   schedule: "",
   sponsors: [],
+  communityPartners: [],
   status: "draft",
   slug: "",
 };
@@ -233,6 +236,7 @@ export default function CreateEventPage() {
         rules: form.rules.trim() || null,
         schedule: form.schedule.trim() || null,
         sponsors: form.sponsors.filter(s => s.title.trim()),
+        communityPartners: form.communityPartners.filter((partner) => partner.name.trim()),
         status: form.status,
         slug: form.slug.trim(),
       };
@@ -508,6 +512,11 @@ export default function CreateEventPage() {
             <p className="text-xs text-foreground/50">No sponsors added yet</p>
           )}
         </div>
+
+        <CommunityPartnersEditor
+          items={form.communityPartners}
+          onChange={(items) => setForm((prev) => ({ ...prev, communityPartners: items }))}
+        />
 
         <div>
           <label className="mb-1 block text-sm font-medium">Status</label>

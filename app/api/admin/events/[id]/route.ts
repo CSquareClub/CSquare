@@ -31,6 +31,15 @@ export async function PATCH(req: Request, context: RouteContext) {
       logoDarkUrl: sponsor.logoDarkUrl || null,
       devfolioApplyLogoLightUrl: sponsor.devfolioApplyLogoLightUrl || null,
       devfolioApplyLogoDarkUrl: sponsor.devfolioApplyLogoDarkUrl || null,
+
+    })) : undefined;
+
+    // Process community partners array if provided
+    const communityPartners = body.communityPartners !== undefined ? body.communityPartners.map((partner: any) => ({
+      name: partner.name,
+      logoUrl: partner.logoUrl || null,
+      logoLightUrl: partner.logoLightUrl || null,
+      logoDarkUrl: partner.logoDarkUrl || null,
     })) : undefined;
 
     const updated = await updateEvent(eventId, {
@@ -62,6 +71,7 @@ export async function PATCH(req: Request, context: RouteContext) {
       isPublished: typeof body.isPublished !== "undefined" ? Boolean(body.isPublished) : undefined,
       registrationUrl: typeof body.registrationUrl !== "undefined" ? body.registrationUrl || null : undefined,
       sponsors,
+      communityPartners,
     });
 
     if (!updated) {

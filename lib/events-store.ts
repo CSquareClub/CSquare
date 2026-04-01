@@ -12,6 +12,15 @@ export type Sponsor = {
   devfolioApplyLogoDarkUrl: string | null;
 };
 
+export type CommunityPartner = {
+  id: number;
+  eventId: number;
+  name: string;
+  logoUrl: string | null;
+  logoLightUrl: string | null;
+  logoDarkUrl: string | null;
+};
+
 export type ClubEvent = {
   id: number;
   title: string | null;
@@ -25,16 +34,17 @@ export type ClubEvent = {
   category: string | null;
   image: string | null;
   sponsors: Sponsor[];
-  sponsorTitle: string | null; // Legacy single sponsor
-  sponsorLogoUrl: string | null; // Legacy single sponsor
-  sponsorLogoLightUrl: string | null; // Legacy single sponsor
-  sponsorLogoDarkUrl: string | null; // Legacy single sponsor
-  devfolioApplyLogoLightUrl: string | null; // Legacy single sponsor
-  devfolioApplyLogoDarkUrl: string | null; // Legacy single sponsor
+  communityPartners: CommunityPartner[];
+  sponsorTitle: string | null;
+  sponsorLogoUrl: string | null;
+  sponsorLogoLightUrl: string | null;
+  sponsorLogoDarkUrl: string | null;
+  devfolioApplyLogoLightUrl: string | null;
+  devfolioApplyLogoDarkUrl: string | null;
   isPublished: boolean;
   registrationUrl: string | null;
   registrationLink: string | null;
-  isRegistrationOpen: boolean; // True if event hasn't ended
+  isRegistrationOpen: boolean;
 };
 
 type EventRow = {
@@ -90,7 +100,6 @@ async function ensureEventsTable() {
     );
   `);
 
-  // Create sponsors table for multiple sponsors per event
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS event_sponsors (
       id SERIAL PRIMARY KEY,
@@ -105,12 +114,26 @@ async function ensureEventsTable() {
     );
   `);
 
-  // Add index for faster queries
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS event_community_partners (
+      id SERIAL PRIMARY KEY,
+      event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      logo_url TEXT,
+      logo_light_url TEXT,
+      logo_dark_url TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
   await prisma.$executeRawUnsafe(`
     CREATE INDEX IF NOT EXISTS idx_event_sponsors_event_id ON event_sponsors(event_id);
   `);
 
-  // Add start/end timestamps for older deployments that already have the events table.
+  await prisma.$executeRawUnsafe(`
+    CREATE INDEX IF NOT EXISTS idx_event_community_partners_event_id ON event_community_partners(event_id);
+  `);
+
   await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS start_at TIMESTAMPTZ;`);
   await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS end_at TIMESTAMPTZ;`);
   await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_title TEXT;`);
@@ -137,7 +160,11 @@ function formatTimeRange(startDate: Date, endDate: Date): string {
   return formatTimeRangeFromDates(startDate, endDate);
 }
 
-function rowToEvent(row: EventRow, sponsors: Sponsor[] = []): ClubEvent {
+function rowToEvent(
+  row: EventRow,
+  sponsors: Sponsor[] = [],
+  communityPartners: CommunityPartner[] = []
+): ClubEvent {
   const legacyDate = row.event_date ? (row.event_date instanceof Date ? row.event_date : new Date(row.event_date)) : null;
   const startDateRaw = row.start_at ?? legacyDate;
   const endDateRaw = row.end_at ?? startDateRaw;
@@ -145,8 +172,7 @@ function rowToEvent(row: EventRow, sponsors: Sponsor[] = []): ClubEvent {
   const endDate = endDateRaw ? (endDateRaw instanceof Date ? endDateRaw : new Date(endDateRaw)) : null;
   const sponsorLogoLightUrl = row.sponsor_logo_light_url ?? row.sponsor_logo_url;
   const sponsorLogoDarkUrl = row.sponsor_logo_dark_url ?? sponsorLogoLightUrl;
-  
-  // Registration stays open only until event end; if end date is missing, use start date.
+
   const registrationCutoff = endDate ?? startDate;
   const isRegistrationOpen = !registrationCutoff || registrationCutoff > new Date();
 
@@ -163,6 +189,7 @@ function rowToEvent(row: EventRow, sponsors: Sponsor[] = []): ClubEvent {
     category: row.category,
     image: row.image_url,
     sponsors,
+    communityPartners,
     sponsorTitle: row.sponsor_title,
     sponsorLogoUrl: row.sponsor_logo_url,
     sponsorLogoLightUrl,
@@ -192,6 +219,22 @@ async function getEventSponsors(eventId: number): Promise<Sponsor[]> {
   }
 }
 
+async function getEventCommunityPartners(eventId: number): Promise<CommunityPartner[]> {
+  try {
+    const partners = await prisma.$queryRawUnsafe<CommunityPartner[]>(
+      `SELECT id, event_id as "eventId", name, logo_url as "logoUrl", logo_light_url as "logoLightUrl", logo_dark_url as "logoDarkUrl"
+       FROM event_community_partners
+       WHERE event_id = $1
+       ORDER BY created_at ASC;`,
+      eventId
+    );
+    return partners;
+  } catch (error) {
+    console.error("Failed to fetch community partners for event", eventId, error);
+    return [];
+  }
+}
+
 export async function listPublicEvents(): Promise<ClubEvent[]> {
   await ensureEventsTable();
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
@@ -203,7 +246,8 @@ export async function listPublicEvents(): Promise<ClubEvent[]> {
 
   return Promise.all(rows.map(async (row) => {
     const sponsors = await getEventSponsors(row.id);
-    return rowToEvent(row, sponsors);
+    const communityPartners = await getEventCommunityPartners(row.id);
+    return rowToEvent(row, sponsors, communityPartners);
   }));
 }
 
@@ -220,7 +264,8 @@ export async function getPublicEventById(id: number): Promise<ClubEvent | null> 
 
   if (!rows.length) return null;
   const sponsors = await getEventSponsors(rows[0].id);
-  return rowToEvent(rows[0], sponsors);
+  const communityPartners = await getEventCommunityPartners(rows[0].id);
+  return rowToEvent(rows[0], sponsors, communityPartners);
 }
 
 export async function listAdminEvents(): Promise<ClubEvent[]> {
@@ -233,7 +278,8 @@ export async function listAdminEvents(): Promise<ClubEvent[]> {
 
   return Promise.all(rows.map(async (row) => {
     const sponsors = await getEventSponsors(row.id);
-    return rowToEvent(row, sponsors);
+    const communityPartners = await getEventCommunityPartners(row.id);
+    return rowToEvent(row, sponsors, communityPartners);
   }));
 }
 
@@ -250,10 +296,14 @@ export async function countActiveEvents(): Promise<number> {
   return Number(rows[0]?.count ?? 0);
 }
 
-export type CreateEventInput = Omit<ClubEvent, "id" | "date" | "time" | "sponsors" | "isRegistrationOpen" | "registrationLink"> & {
+export type CreateSponsorInput = Omit<Sponsor, "id" | "eventId">;
+export type CreateCommunityPartnerInput = Omit<CommunityPartner, "id" | "eventId">;
+
+export type CreateEventInput = Omit<ClubEvent, "id" | "date" | "time" | "sponsors" | "communityPartners" | "isRegistrationOpen" | "registrationLink"> & {
   date?: string;
   time?: string;
   sponsors?: CreateSponsorInput[];
+  communityPartners?: CreateCommunityPartnerInput[];
 };
 
 export async function createEvent(input: CreateEventInput): Promise<ClubEvent> {
@@ -296,12 +346,18 @@ export async function createEvent(input: CreateEventInput): Promise<ClubEvent> {
 
   const event = rowToEvent(rows[0]);
 
-  // Add multiple sponsors if provided
   if (input.sponsors && input.sponsors.length > 0) {
     const sponsors = await Promise.all(
       input.sponsors.map((sponsor) => addSponsor(event.id, sponsor))
     );
     event.sponsors = sponsors.filter((s) => s !== null) as Sponsor[];
+  }
+
+  if (input.communityPartners && input.communityPartners.length > 0) {
+    const partners = await Promise.all(
+      input.communityPartners.map((partner) => addCommunityPartner(event.id, partner))
+    );
+    event.communityPartners = partners.filter((p) => p !== null) as CommunityPartner[];
   }
 
   return event;
@@ -383,7 +439,6 @@ export async function updateEvent(id: number, input: UpdateEventInput): Promise<
 
   const event = rowToEvent(rows[0]);
 
-  // Handle sponsors if provided
   if (input.sponsors !== undefined) {
     await deleteEventSponsors(id);
     if (input.sponsors.length > 0) {
@@ -393,8 +448,19 @@ export async function updateEvent(id: number, input: UpdateEventInput): Promise<
       event.sponsors = sponsors.filter((s) => s !== null) as Sponsor[];
     }
   } else {
-    // Fetch existing sponsors if not updating them
     event.sponsors = await getEventSponsors(id);
+  }
+
+  if (input.communityPartners !== undefined) {
+    await deleteEventCommunityPartners(id);
+    if (input.communityPartners.length > 0) {
+      const partners = await Promise.all(
+        input.communityPartners.map((partner) => addCommunityPartner(id, partner))
+      );
+      event.communityPartners = partners.filter((p) => p !== null) as CommunityPartner[];
+    }
+  } else {
+    event.communityPartners = await getEventCommunityPartners(id);
   }
 
   return event;
@@ -406,11 +472,9 @@ export async function deleteEvent(id: number): Promise<boolean> {
   return result > 0;
 }
 
-export type CreateSponsorInput = Omit<Sponsor, "id">;
-
 export async function addSponsor(eventId: number, sponsor: CreateSponsorInput): Promise<Sponsor | null> {
   await ensureEventsTable();
-  
+
   const rows = await prisma.$queryRawUnsafe<Sponsor[]>(
     `INSERT INTO event_sponsors (event_id, title, logo_url, logo_light_url, logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url)
      VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -436,5 +500,37 @@ export async function deleteSponsor(sponsorId: number): Promise<boolean> {
 export async function deleteEventSponsors(eventId: number): Promise<boolean> {
   await ensureEventsTable();
   const result = await prisma.$executeRawUnsafe(`DELETE FROM event_sponsors WHERE event_id = $1;`, eventId);
+  return result > 0;
+}
+
+export async function addCommunityPartner(
+  eventId: number,
+  partner: CreateCommunityPartnerInput
+): Promise<CommunityPartner | null> {
+  await ensureEventsTable();
+
+  const rows = await prisma.$queryRawUnsafe<CommunityPartner[]>(
+    `INSERT INTO event_community_partners (event_id, name, logo_url, logo_light_url, logo_dark_url)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING id, event_id as "eventId", name, logo_url as "logoUrl", logo_light_url as "logoLightUrl", logo_dark_url as "logoDarkUrl";`,
+    eventId,
+    partner.name,
+    partner.logoUrl,
+    partner.logoLightUrl,
+    partner.logoDarkUrl
+  );
+
+  return rows.length ? rows[0] : null;
+}
+
+export async function deleteCommunityPartner(partnerId: number): Promise<boolean> {
+  await ensureEventsTable();
+  const result = await prisma.$executeRawUnsafe(`DELETE FROM event_community_partners WHERE id = $1;`, partnerId);
+  return result > 0;
+}
+
+export async function deleteEventCommunityPartners(eventId: number): Promise<boolean> {
+  await ensureEventsTable();
+  const result = await prisma.$executeRawUnsafe(`DELETE FROM event_community_partners WHERE event_id = $1;`, eventId);
   return result > 0;
 }

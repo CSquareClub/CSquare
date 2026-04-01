@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Trash2, Plus } from "lucide-react";
 import { formatEventDateTime } from "@/lib/event-time-utils";
+import CommunityPartnersEditor, { type CommunityPartnerDraft } from "@/components/admin/community-partners-editor";
 
 type Sponsor = {
   id?: number;
@@ -27,6 +28,7 @@ type EventItem = {
   category: string | null;
   image: string | null;
   sponsors?: Sponsor[];
+  communityPartners?: CommunityPartnerDraft[];
   sponsorTitle: string | null;
   sponsorLogoUrl: string | null;
   sponsorLogoLightUrl: string | null;
@@ -48,6 +50,7 @@ type EventFormState = {
   category: string;
   image: string;
   sponsors: Sponsor[];
+  communityPartners: CommunityPartnerDraft[];
   sponsorTitle: string;
   sponsorLogoLightUrl: string;
   sponsorLogoDarkUrl: string;
@@ -67,6 +70,7 @@ const defaultForm: EventFormState = {
   category: "",
   image: "",
   sponsors: [],
+  communityPartners: [],
   sponsorTitle: "",
   sponsorLogoLightUrl: "",
   sponsorLogoDarkUrl: "",
@@ -140,7 +144,7 @@ export default function AdminEventsPage() {
               setForm((prev) => ({ ...prev, sponsorLogoDarkUrl: result }));
             }
           }
-        } else {
+        } else if (variant === "apply") {
           if (mode === "light") {
             setForm((prev) => ({ ...prev, devfolioApplyLogoLightUrl: result }));
           } else {
@@ -201,6 +205,11 @@ export default function AdminEventsPage() {
         devfolioApplyLogoLightUrl: s.devfolioApplyLogoLightUrl?.trim() || null,
         devfolioApplyLogoDarkUrl: s.devfolioApplyLogoDarkUrl?.trim() || null,
       })),
+      communityPartners: form.communityPartners.filter((partner) => partner.name.trim()).map((partner) => ({
+        name: partner.name.trim(),
+        logoLightUrl: partner.logoLightUrl?.trim() || null,
+        logoDarkUrl: partner.logoDarkUrl?.trim() || null,
+      })),
       sponsorTitle: form.sponsorTitle || null,
       sponsorLogoLightUrl: form.sponsorLogoLightUrl || null,
       sponsorLogoDarkUrl: form.sponsorLogoDarkUrl || null,
@@ -244,6 +253,7 @@ export default function AdminEventsPage() {
       category: event.category || "",
       image: event.image || "",
       sponsors: event.sponsors || [],
+      communityPartners: event.communityPartners || [],
       sponsorTitle: event.sponsorTitle || "",
       sponsorLogoLightUrl: event.sponsorLogoLightUrl || event.sponsorLogoUrl || "",
       sponsorLogoDarkUrl: event.sponsorLogoDarkUrl || event.sponsorLogoUrl || "",
@@ -507,6 +517,11 @@ export default function AdminEventsPage() {
             <p className="text-xs text-foreground/50">No sponsors added yet</p>
           )}
         </div>
+
+        <CommunityPartnersEditor
+          items={form.communityPartners}
+          onChange={(items) => setForm((prev) => ({ ...prev, communityPartners: items }))}
+        />
 
         <textarea
           placeholder="Description"

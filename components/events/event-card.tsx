@@ -3,17 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { Calendar, MapPin, Users, ArrowRight, AlertCircle } from 'lucide-react';
-
-interface Sponsor {
-  id: number;
-  eventId: number;
-  title: string;
-  logoUrl: string | null;
-  logoLightUrl: string | null;
-  logoDarkUrl: string | null;
-  devfolioApplyLogoLightUrl: string | null;
-  devfolioApplyLogoDarkUrl: string | null;
-}
+import type { CommunityPartner, Sponsor } from '@/lib/events-store';
 
 interface EventCardProps {
   id: string | number;
@@ -27,6 +17,7 @@ interface EventCardProps {
   category: string | null;
   image: string | null;
   sponsors?: Sponsor[];
+  communityPartners?: CommunityPartner[];
   sponsorTitle?: string | null;
   sponsorLogoUrl?: string | null;
   sponsorLogoLightUrl?: string | null;
@@ -104,6 +95,7 @@ export default function EventCard({
   category,
   image,
   sponsors = [],
+  communityPartners = [],
   sponsorTitle,
   sponsorLogoUrl,
   sponsorLogoLightUrl,
@@ -135,6 +127,7 @@ export default function EventCard({
   const applyLogoDark = devfolioApplyLogoDarkUrl || applyLogoLight;
   const hasDevfolioApplyLogos = Boolean(isDevfolio && registrationUrl && applyLogoLight && applyLogoDark);
   const hasMultiplesponsors = sponsors && sponsors.length > 0;
+  const hasCommunityPartners = communityPartners && communityPartners.length > 0;
   const legacySponsor = lightSponsorLogo || darkSponsorLogo;
 
   useEffect(() => {
@@ -287,6 +280,41 @@ export default function EventCard({
                 loading="lazy"
               />
             ) : null}
+          </div>
+        ) : null}
+
+        {hasCommunityPartners ? (
+          <div className="mb-6">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/60">
+              Community Partners
+            </p>
+            <div className="space-y-3">
+              {communityPartners.map((partner) => (
+                <div key={partner.id} className="rounded-lg border border-border bg-background/60 p-3">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground/50">
+                    {partner.name}
+                  </p>
+                  <div className="flex items-center justify-center h-10">
+                    {partner.logoLightUrl ? (
+                      <img
+                        src={normalizeEventImageUrl(partner.logoLightUrl)}
+                        alt={partner.name}
+                        className="max-h-10 w-auto object-contain dark:hidden"
+                        loading="lazy"
+                      />
+                    ) : null}
+                    {partner.logoDarkUrl ? (
+                      <img
+                        src={normalizeEventImageUrl(partner.logoDarkUrl)}
+                        alt={partner.name}
+                        className="hidden max-h-10 w-auto object-contain dark:block"
+                        loading="lazy"
+                      />
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : null}
 

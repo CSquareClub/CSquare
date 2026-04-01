@@ -246,6 +246,41 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                 </div>
               ) : null}
 
+              {event.communityPartners && event.communityPartners.length > 0 ? (
+                <div className="rounded-xl border border-border bg-background/50 p-4">
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-foreground/65">
+                    Community Partners
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {event.communityPartners.map((partner) => (
+                      <div key={partner.id} className="rounded-lg border border-border bg-card/70 p-3">
+                        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground/55">
+                          {partner.name}
+                        </p>
+                        <div className="flex h-12 items-center justify-center">
+                          {partner.logoLightUrl ? (
+                            <img
+                              src={normalizeEventImageUrl(partner.logoLightUrl)}
+                              alt={partner.name}
+                              className="max-h-12 w-auto object-contain dark:hidden"
+                              loading="lazy"
+                            />
+                          ) : null}
+                          {partner.logoDarkUrl ? (
+                            <img
+                              src={normalizeEventImageUrl(partner.logoDarkUrl)}
+                              alt={partner.name}
+                              className="hidden max-h-12 w-auto object-contain dark:block"
+                              loading="lazy"
+                            />
+                          ) : null}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
               {hasDevfolioApplyLogos ? (
                 <Link
                   href={event.registrationLink || '#'}

@@ -35,6 +35,15 @@ export async function POST(req: Request) {
       logoDarkUrl: sponsor.logoDarkUrl || null,
       devfolioApplyLogoLightUrl: sponsor.devfolioApplyLogoLightUrl || null,
       devfolioApplyLogoDarkUrl: sponsor.devfolioApplyLogoDarkUrl || null,
+
+    })) : [];
+
+    // Process community partners array if provided
+    const communityPartners = body.communityPartners ? body.communityPartners.map((partner: any) => ({
+      name: partner.name,
+      logoUrl: partner.logoUrl || null,
+      logoLightUrl: partner.logoLightUrl || null,
+      logoDarkUrl: partner.logoDarkUrl || null,
     })) : [];
 
     const event = await createEvent({
@@ -62,6 +71,7 @@ export async function POST(req: Request) {
       isPublished: Boolean(body.isPublished),
       registrationUrl: body.registrationUrl || null,
       sponsors,
+      communityPartners,
     });
 
     return NextResponse.json(event, { status: 201 });
