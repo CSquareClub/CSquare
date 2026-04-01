@@ -225,8 +225,6 @@ export default function CusocRegistrationsPage() {
   };
 
   const syncToGoogleSheet = async () => {
-    if (!data.length) return;
-
     setExporting(true);
     setExportStatus("");
     setExportError(false);
@@ -524,7 +522,7 @@ export default function CusocRegistrationsPage() {
 
             <button
               onClick={syncToGoogleSheet}
-              disabled={!data.length || exporting}
+              disabled={exporting}
               className="flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-all hover:bg-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25"
             >
               <RefreshCw className={`w-4 h-4 ${exporting ? "animate-spin" : ""}`} />
