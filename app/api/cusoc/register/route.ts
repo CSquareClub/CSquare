@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { z } from "zod";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
 
 const ses = new SESClient({
   region: process.env.AWS_REGION || "us-east-1",
@@ -199,7 +201,7 @@ async function sendWelcomeEmail(emails: string[], fullName: string, track: strin
 const schema2026 = z.object({
   track: z.literal("2026"),
   fullName: z.string().min(2),
-  rollNumber: z.string().min(2),
+  rollNumber: z.string().trim().regex(/^[A-Za-z0-9-]{6,20}$/),
   cuEmail: z.string().email().regex(/@cuchd\.in$/i, "Must be a @cuchd.in email"),
   personalEmail: z.string().email(),
   phone: z.string().regex(/^[0-9]{10,15}$/),
@@ -238,7 +240,7 @@ const schema2026 = z.object({
 const schema2027 = z.object({
   track: z.literal("2027"),
   fullName: z.string().min(2),
-  rollNumber: z.string().min(2),
+  rollNumber: z.string().trim().regex(/^[A-Za-z0-9-]{6,20}$/),
   cuEmail: z.string().email().regex(/@cuchd\.in$/i, "Must be a @cuchd.in email"),
   personalEmail: z.string().email(),
   phone: z.string().regex(/^[0-9]{10,15}$/),
@@ -265,6 +267,11 @@ const schema2027 = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Please login to submit CUSoC registration." }, { status: 401 });
+    }
+
     const body = await req.json();
     const track = body?.track;
 
@@ -277,13 +284,20 @@ export async function POST(req: NextRequest) {
         domainOrder: normalizePreferenceString(fields.domainOrder),
       };
 
-      // Check duplicate
-      const existing = await prisma.cusocRegistration2026.findUnique({
-        where: { cuEmail: normalizedFields.cuEmail },
+      // Check duplicate by CU email, personal email, phone, or roll number.
+      const existing = await prisma.cusocRegistration2026.findFirst({
+        where: {
+          OR: [
+            { cuEmail: normalizedFields.cuEmail },
+            { personalEmail: normalizedFields.personalEmail },
+            { phone: normalizedFields.phone },
+            { rollNumber: normalizedFields.rollNumber },
+          ],
+        },
       });
       if (existing) {
         return NextResponse.json(
-          { error: "This CU email is already registered for CUSoC 2026." },
+          { error: "This student is already registered for CUSoC 2026." },
           { status: 409 }
         );
       }
@@ -308,12 +322,19 @@ export async function POST(req: NextRequest) {
         interestArea: normalizePreferenceString(fields.interestArea),
       };
 
-      const existing = await prisma.cusocRegistration2027.findUnique({
-        where: { cuEmail: normalizedFields.cuEmail },
+      const existing = await prisma.cusocRegistration2027.findFirst({
+        where: {
+          OR: [
+            { cuEmail: normalizedFields.cuEmail },
+            { personalEmail: normalizedFields.personalEmail },
+            { phone: normalizedFields.phone },
+            { rollNumber: normalizedFields.rollNumber },
+          ],
+        },
       });
       if (existing) {
         return NextResponse.json(
-          { error: "This CU email is already registered for CUSoC 2027-28." },
+          { error: "This student is already registered for CUSoC 2027-28." },
           { status: 409 }
         );
       }

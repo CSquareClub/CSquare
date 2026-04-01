@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import {
   CheckCircle2,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   AlertCircle,
@@ -103,12 +104,18 @@ function Input({ id, label, placeholder, type = 'text' }: { id: string; label: s
 function Select({ id, label, options }: { id: string; label: string; options: { value: string; label: string }[] }) {
   const { dk, f, set } = useContext(FormContext);
   return (
-    <div>
+    <div className="relative">
       <label htmlFor={id} className={labelCls}>{label}</label>
-      <select id={id} value={f[id] || ''} onChange={(e) => set(id, e.target.value)} className={getCardCls(dk)}>
+      <select
+        id={id}
+        value={f[id] || ''}
+        onChange={(e) => set(id, e.target.value)}
+        className={`${getCardCls(dk)} appearance-none pr-10`}
+      >
         <option value="" disabled>Select</option>
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
+      <ChevronDown className="pointer-events-none absolute right-3 top-[42px] h-4 w-4 text-foreground/60" />
     </div>
   );
 }
@@ -172,7 +179,6 @@ export default function CusocForm() {
   const [error, setError] = useState<string | null>(null);
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
   const [checkingDuplicate, setCheckingDuplicate] = useState(false);
-  const [alreadyRegisteredOnBrowser, setAlreadyRegisteredOnBrowser] = useState(false);
 
   const initialFormState: Record<string, any> = {
     languages: [] as string[],
@@ -213,16 +219,6 @@ export default function CusocForm() {
       localStorage.setItem('cusoc_form_2026', JSON.stringify({ f, step, track }));
     }
   }, [f, step, track]);
-
-  useEffect(() => {
-    if (!track) {
-      setAlreadyRegisteredOnBrowser(false);
-      return;
-    }
-
-    const browserFlag = localStorage.getItem(`cusoc_registered_${track}`);
-    setAlreadyRegisteredOnBrowser(browserFlag === 'true');
-  }, [track]);
 
   useEffect(() => {
     if (!track || step !== 0) {
@@ -275,7 +271,10 @@ export default function CusocForm() {
     };
   }, [track, step, f.cuEmail]);
 
-  const set = (key: string, value: any) => setF((prev) => ({ ...prev, [key]: value }));
+  const set = (key: string, value: any) => {
+    const nextValue = key === 'rollNumber' ? String(value || '').toUpperCase() : value;
+    setF((prev) => ({ ...prev, [key]: nextValue }));
+  };
   const toggleArr = (key: string, val: string) => {
     const arr: string[] = f[key] || [];
     set(key, arr.includes(val) ? arr.filter((v: string) => v !== val) : [...arr, val]);
@@ -290,15 +289,23 @@ export default function CusocForm() {
   /* ── Per-step validation ───────────────────────────────── */
 
   const validate = (): string | null => {
-    const isValidUrl = (str: string) => {
-      try { new URL(str); return true; } catch { return false; }
+    const normalizeUrl = (str: string) => {
+      const trimmed = String(str || '').trim();
+      if (!trimmed) return '';
+      return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
     };
+
+    const isValidUrl = (str: string) => {
+      try { new URL(normalizeUrl(str)); return true; } catch { return false; }
+    };
+
+    const isValidRoll = (value: string) => /^[A-Za-z0-9-]{6,20}$/.test(String(value || '').trim());
 
     if (track === '2026') {
       switch (step) {
         case 0:
           if (!f.fullName?.trim()) return 'Full Name is required';
-          if (!f.rollNumber?.trim()) return 'CU Roll Number is required';
+          if (!isValidRoll(f.rollNumber)) return 'Valid CU Roll Number is required (letters/numbers, 6-20 chars)';
           if (!f.cuEmail?.trim() || !/@cuchd\.in$/i.test(f.cuEmail)) return 'Valid @cuchd.in email is required';
           if (!f.personalEmail?.trim() || !f.personalEmail.includes('@')) return 'Valid personal email is required';
           if (!f.phone?.trim() || !/^[0-9]{10,15}$/.test(f.phone)) return 'Valid phone number is required';
@@ -326,7 +333,6 @@ export default function CusocForm() {
         case 4:
           if (!f.targetOrgs?.trim()) return 'Target organization is required';
           if (!f.exploredRepo) return 'Explored repo question is required';
-          if (f.exploredRepo === 'yes' && (!f.orgRepoLink?.trim() || !isValidUrl(f.orgRepoLink))) return 'Valid repo link is required';
           break;
         case 5:
           if (!f.goals?.length) return 'Select at least one goal';
@@ -348,7 +354,7 @@ export default function CusocForm() {
       switch (step) {
         case 0:
           if (!f.fullName?.trim()) return 'Full Name is required';
-          if (!f.rollNumber?.trim()) return 'CU Roll Number is required';
+          if (!isValidRoll(f.rollNumber)) return 'Valid CU Roll Number is required (letters/numbers, 6-20 chars)';
           if (!f.cuEmail?.trim() || !/@cuchd\.in$/i.test(f.cuEmail)) return 'Valid @cuchd.in email is required';
           if (!f.personalEmail?.trim() || !f.personalEmail.includes('@')) return 'Valid personal email is required';
           if (!f.phone?.trim() || !/^[0-9]{10,15}$/.test(f.phone)) return 'Valid phone number is required';
@@ -407,6 +413,14 @@ export default function CusocForm() {
     setIsLoading(true);
     try {
       const body: Record<string, any> = { track, ...f };
+      body.rollNumber = String(body.rollNumber || '').trim().toUpperCase();
+
+      const normalizeUrl = (value: string) => {
+        const trimmed = String(value || '').trim();
+        if (!trimmed) return '';
+        return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+      };
+
       // Override "Other" selections with user's custom input
       if (body.department === 'Other' && body.departmentOther) body.department = body.departmentOther;
 
@@ -423,6 +437,12 @@ export default function CusocForm() {
       if (Array.isArray(body.goals)) body.goals = body.goals.join(', ');
       if (Array.isArray(body.interestArea)) body.interestArea = body.interestArea.join(', ');
 
+      body.githubProfile = normalizeUrl(body.githubProfile);
+      body.bestProjectLink = normalizeUrl(body.bestProjectLink);
+      body.openSourceLink = normalizeUrl(body.openSourceLink);
+      body.orgRepoLink = normalizeUrl(body.orgRepoLink);
+      body.proposalFileUrl = normalizeUrl(body.proposalFileUrl);
+
       const res = await fetch('/api/cusoc/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -438,9 +458,6 @@ export default function CusocForm() {
         throw new Error(json.error || 'Registration failed');
       }
       localStorage.removeItem('cusoc_form_2026');
-      if (track) {
-        localStorage.setItem(`cusoc_registered_${track}`, 'true');
-      }
       setSubmitted(true);
     } catch (e: any) {
       setError(e.message || 'Something went wrong');
@@ -547,46 +564,6 @@ export default function CusocForm() {
     );
   }
 
-  if (alreadyRegisteredOnBrowser) {
-    return (
-      <div className={`rounded-[34px] p-10 text-center backdrop-blur-xl ${dk ? 'border border-blue-400/20 bg-white/[0.04] shadow-[0_0_80px_rgba(59,130,246,0.12)]' : 'border border-blue-200 bg-white/95 shadow-[0_18px_50px_rgba(15,23,42,0.08)]'}`}>
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-blue-400/30 bg-blue-500/10">
-          <AlertCircle className="h-8 w-8 text-blue-400" />
-        </div>
-        <h3 className="mb-2 text-3xl font-bold tracking-tight text-foreground">Already Registered</h3>
-        <p className="mx-auto max-w-lg text-foreground/70">
-          This browser has already submitted a CUSoC {track === '2026' ? '2026' : '2027-28'} registration. Check the registered email for updates.
-        </p>
-        <div className="mt-5 flex flex-wrap justify-center gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              localStorage.removeItem(`cusoc_registered_${track}`);
-              setAlreadyRegisteredOnBrowser(false);
-              setError(null);
-              setDuplicateError(null);
-            }}
-            className="rounded-lg border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
-          >
-            Not You? Reset
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setTrack(null);
-              setStep(0);
-              setError(null);
-              setDuplicateError(null);
-            }}
-            className={`rounded-lg border px-4 py-2 text-sm font-medium ${dk ? 'border-white/10 bg-white/[0.03] text-foreground/70 hover:text-foreground' : 'border-[#fecaca] bg-white text-foreground/70 hover:text-foreground'}`}
-          >
-            Change Track
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   /* ── Wizard ────────────────────────────────────────────── */
 
   const isLast = step === totalSteps - 1;
@@ -602,20 +579,20 @@ export default function CusocForm() {
         case 0:
           return (
             <div className="grid gap-4 md:grid-cols-2">
-              <Input id="fullName" label="Full Name" placeholder="Your full name" />
-              <Input id="rollNumber" label="CU Roll Number" placeholder="22BCS12345" />
-              <Input id="cuEmail" label="CU Email ID" placeholder="name@cuchd.in" type="email" />
-              <Input id="personalEmail" label="Personal Email ID (for GSoC)" placeholder="name@gmail.com" type="email" />
-              <Input id="phone" label="Phone Number" placeholder="9876543210" type="tel" />
+              <Input id="fullName" label="Full Name *" placeholder="Enter your full name" />
+              <Input id="rollNumber" label="CU Roll Number *" placeholder="e.g. 24BCS12345" />
+              <Input id="cuEmail" label="CU Email ID *" placeholder="name@cuchd.in" type="email" />
+              <Input id="personalEmail" label="Personal Email ID *" placeholder="name@gmail.com" type="email" />
+              <Input id="phone" label="Phone Number *" placeholder="Enter 10-15 digit number" type="tel" />
               <div>
-                <Select id="department" label="Department" options={departments.map((d) => ({ value: d, label: d }))} />
+                <Select id="department" label="Department *" options={departments.map((d) => ({ value: d, label: d }))} />
                 {f.department === 'Other' && (
                   <div className="mt-3">
                     <input className={getCardCls(dk)} placeholder="Please specify your department" value={f.departmentOther || ''} onChange={(e) => set('departmentOther', e.target.value)} />
                   </div>
                 )}
               </div>
-              <Select id="year" label="Year" options={years.map((y) => ({ value: y, label: `${y} Year` }))} />
+              <Select id="year" label="Year *" options={years.map((y) => ({ value: y, label: `${y} Year` }))} />
             </div>
           );
 
@@ -740,7 +717,6 @@ export default function CusocForm() {
               <Radio id="exploredRepo" label="Have you explored their repository?" options={[
                 { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
               ]} />
-              <Input id="orgRepoLink" label="GitHub repo link of chosen org" placeholder="https://github.com/org/repo" type="url" />
             </div>
           );
 
@@ -974,6 +950,7 @@ export default function CusocForm() {
       {/* Header */}
       <div className="relative mb-6 flex flex-col gap-4 border-b border-white/10 pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
+          <p className="mb-2 text-xs text-foreground/60">* All fields are compulsory unless explicitly marked optional.</p>
           <div className="flex items-center gap-2 mb-2">
             <button type="button" onClick={() => { setTrack(null); setStep(0); setError(null); }}
               className={`rounded-lg border px-2 py-1 text-xs font-medium transition-colors ${dk ? 'border-white/10 bg-white/[0.03] text-foreground/50 hover:text-foreground' : 'border-[#fecaca] bg-white text-foreground/60 hover:text-foreground'}`}>
@@ -1056,10 +1033,12 @@ export default function CusocForm() {
 
       {/* Navigation */}
       <div className="relative mt-6 flex items-center justify-between">
-        <button type="button" onClick={back} disabled={step === 0}
-          className={`flex items-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed ${dk ? 'border-white/10 bg-white/[0.03] text-foreground/60 hover:text-foreground hover:bg-white/[0.05]' : 'border-[#fecaca] bg-white text-foreground/60 hover:text-foreground'}`}>
-          <ChevronLeft className="h-4 w-4" /> Back
-        </button>
+        {step === 0 ? <div /> : (
+          <button type="button" onClick={back}
+            className={`flex items-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-medium transition-all ${dk ? 'border-white/10 bg-white/[0.03] text-foreground/60 hover:text-foreground hover:bg-white/[0.05]' : 'border-[#fecaca] bg-white text-foreground/60 hover:text-foreground'}`}>
+            <ChevronLeft className="h-4 w-4" /> Back
+          </button>
+        )}
 
         {isLast ? (
           <button type="button" onClick={submit} disabled={isLoading || Boolean(duplicateError)}
