@@ -1,10 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Plus, Trash2 } from "lucide-react";
 
 type EventType = "Online" | "Offline" | "Hybrid";
 type EventCategory = "Hackathon" | "Workshop" | "Fest" | "Meetup";
 type EventStatus = "draft" | "published";
+
+type Sponsor = {
+  title: string;
+  logoUrl: string | null;
+  logoLightUrl: string | null;
+  logoDarkUrl: string | null;
+  devfolioApplyLogoLightUrl: string | null;
+  devfolioApplyLogoDarkUrl: string | null;
+};
 
 type FormState = {
   title: string;
@@ -26,7 +36,7 @@ type FormState = {
   prizes: string;
   rules: string;
   schedule: string;
-  sponsors: string;
+  sponsors: Sponsor[];
   status: EventStatus;
   slug: string;
 };
@@ -53,7 +63,7 @@ const initialForm: FormState = {
   prizes: "",
   rules: "",
   schedule: "",
-  sponsors: "",
+  sponsors: [],
   status: "draft",
   slug: "",
 };
@@ -201,7 +211,7 @@ export default function CreateEventPage() {
         prizes: form.prizes.trim() || null,
         rules: form.rules.trim() || null,
         schedule: form.schedule.trim() || null,
-        sponsors: form.sponsors.trim() || null,
+        sponsors: form.sponsors.filter(s => s.title.trim()),
         status: form.status,
         slug: form.slug.trim(),
       };
@@ -370,11 +380,84 @@ export default function CreateEventPage() {
 
         <div className="md:col-span-2">
           <label className="mb-1 block text-sm font-medium">Sponsors</label>
-          <textarea
-            value={form.sponsors}
-            onChange={(e) => update("sponsors", e.target.value)}
-            className="min-h-28 w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm leading-relaxed"
-          />
+          <button
+            type="button"
+            onClick={() => {
+              setForm((prev) => ({
+                ...prev,
+                sponsors: [
+                  ...prev.sponsors,
+                  {
+                    title: "",
+                    logoUrl: null,
+                    logoLightUrl: null,
+                    logoDarkUrl: null,
+                    devfolioApplyLogoLightUrl: null,
+                    devfolioApplyLogoDarkUrl: null,
+                  },
+                ],
+              }));
+            }}
+            className="inline-flex items-center gap-1 rounded-lg border border-primary bg-primary/10 px-3 py-1.5 text-sm text-primary font-medium hover:bg-primary/20 transition mb-3"
+          >
+            <Plus size={16} />
+            Add Sponsor
+          </button>
+
+          {form.sponsors.length > 0 ? (
+            <div className="space-y-3 rounded-lg border border-border bg-background/50 p-4">
+              {form.sponsors.map((sponsor, idx) => (
+                <div key={idx} className="space-y-2 rounded-lg border border-border bg-card p-4 shadow-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <input
+                      placeholder="Sponsor name"
+                      value={sponsor.title}
+                      onChange={(e) => {
+                        const updated = [...form.sponsors];
+                        updated[idx].title = e.target.value;
+                        setForm((prev) => ({ ...prev, sponsors: updated }));
+                      }}
+                      className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setForm((prev) => ({
+                          ...prev,
+                          sponsors: prev.sponsors.filter((_, i) => i !== idx),
+                        }));
+                      }}
+                      className="rounded-lg border border-red-200 bg-red-50 p-2 text-red-700 hover:bg-red-100"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                  <input
+                    placeholder="Logo Light URL (Light mode)"
+                    value={sponsor.logoLightUrl || ""}
+                    onChange={(e) => {
+                      const updated = [...form.sponsors];
+                      updated[idx].logoLightUrl = e.target.value || null;
+                      setForm((prev) => ({ ...prev, sponsors: updated }));
+                    }}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  />
+                  <input
+                    placeholder="Logo Dark URL (Dark mode)"
+                    value={sponsor.logoDarkUrl || ""}
+                    onChange={(e) => {
+                      const updated = [...form.sponsors];
+                      updated[idx].logoDarkUrl = e.target.value || null;
+                      setForm((prev) => ({ ...prev, sponsors: updated }));
+                    }}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-foreground/50">No sponsors added yet</p>
+          )}
         </div>
 
         <div>
