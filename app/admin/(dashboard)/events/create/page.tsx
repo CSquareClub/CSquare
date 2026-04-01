@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, GripVertical } from "lucide-react";
 import CommunityPartnersEditor, { type CommunityPartnerDraft } from "@/components/admin/community-partners-editor";
 
 type EventType = "Online" | "Offline" | "Hybrid";
@@ -105,6 +105,7 @@ export default function CreateEventPage() {
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [draggedSponsorIndex, setDraggedSponsorIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!form.slug.trim()) {
@@ -116,6 +117,18 @@ export default function CreateEventPage() {
   function update<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
+  }
+
+  function moveSponsor(fromIndex: number, toIndex: number) {
+    if (fromIndex === toIndex) return;
+
+    setForm((prev) => {
+      const updated = [...prev.sponsors];
+      const [moved] = updated.splice(fromIndex, 1);
+      if (!moved) return prev;
+      updated.splice(toIndex, 0, moved);
+      return { ...prev, sponsors: updated };
+    });
   }
 
   function validate(): FormErrors {
@@ -479,8 +492,28 @@ export default function CreateEventPage() {
           {form.sponsors.length > 0 ? (
             <div className="space-y-3 rounded-lg border border-border bg-background/50 p-4">
               {form.sponsors.map((sponsor, idx) => (
-                <div key={idx} className="space-y-2 rounded-lg border border-border bg-card p-4 shadow-sm">
+                <div
+                  key={idx}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={() => {
+                    if (draggedSponsorIndex === null) return;
+                    moveSponsor(draggedSponsorIndex, idx);
+                    setDraggedSponsorIndex(null);
+                  }}
+                  className={`space-y-2 rounded-lg border bg-card p-4 shadow-sm ${draggedSponsorIndex === idx ? "border-primary/60" : "border-border"}`}
+                >
                   <div className="flex items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      draggable
+                      onDragStart={() => setDraggedSponsorIndex(idx)}
+                      onDragEnd={() => setDraggedSponsorIndex(null)}
+                      className="rounded-md border border-border bg-background p-2 text-foreground/70 hover:text-foreground"
+                      aria-label="Drag to reorder sponsor"
+                      title="Drag to reorder sponsor"
+                    >
+                      <GripVertical size={14} />
+                    </button>
                     <input
                       placeholder="Sponsor name"
                       value={sponsor.title}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, GripVertical } from "lucide-react";
 import { formatEventDateTime } from "@/lib/event-time-utils";
 import CommunityPartnersEditor, { type CommunityPartnerDraft } from "@/components/admin/community-partners-editor";
 
@@ -107,6 +107,15 @@ function toInputDateValue(isoDate: string) {
   return local.toISOString().slice(0, 16);
 }
 
+function reorderSponsors(list: Sponsor[], fromIndex: number, toIndex: number): Sponsor[] {
+  if (fromIndex === toIndex) return list;
+  const updated = [...list];
+  const [moved] = updated.splice(fromIndex, 1);
+  if (!moved) return list;
+  updated.splice(toIndex, 0, moved);
+  return updated;
+}
+
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -115,6 +124,7 @@ export default function AdminEventsPage() {
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<EventFormState>(defaultForm);
+  const [draggedSponsorIndex, setDraggedSponsorIndex] = useState<number | null>(null);
 
   const isEditing = useMemo(() => editingId !== null, [editingId]);
 
@@ -380,8 +390,31 @@ export default function AdminEventsPage() {
           {form.sponsors.length > 0 ? (
             <div className="space-y-3 rounded-lg border border-border bg-background/50 p-4">
               {form.sponsors.map((sponsor, idx) => (
-                <div key={idx} className="space-y-2 rounded-lg border border-border bg-card p-4 shadow-sm">
+                <div
+                  key={idx}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={() => {
+                    if (draggedSponsorIndex === null) return;
+                    setForm((prev) => ({
+                      ...prev,
+                      sponsors: reorderSponsors(prev.sponsors, draggedSponsorIndex, idx),
+                    }));
+                    setDraggedSponsorIndex(null);
+                  }}
+                  className={`space-y-2 rounded-lg border bg-card p-4 shadow-sm ${draggedSponsorIndex === idx ? "border-primary/60" : "border-border"}`}
+                >
                   <div className="flex items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      draggable
+                      onDragStart={() => setDraggedSponsorIndex(idx)}
+                      onDragEnd={() => setDraggedSponsorIndex(null)}
+                      className="rounded-md border border-border bg-background p-2 text-foreground/70 hover:text-foreground"
+                      aria-label="Drag to reorder sponsor"
+                      title="Drag to reorder sponsor"
+                    >
+                      <GripVertical size={14} />
+                    </button>
                     <input
                       placeholder="Sponsor name"
                       value={sponsor.title}
