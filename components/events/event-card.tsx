@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { Calendar, MapPin, Users, ArrowRight, AlertCircle, Instagram, Linkedin } from 'lucide-react';
+import { Calendar, MapPin, Users, ArrowRight, AlertCircle } from 'lucide-react';
 import type { CommunityPartner, Sponsor } from '@/lib/events-store';
 
 interface EventCardProps {
@@ -126,8 +126,6 @@ export default function EventCard({
   const applyLogoLight = devfolioApplyLogoLightUrl || null;
   const applyLogoDark = devfolioApplyLogoDarkUrl || applyLogoLight;
   const hasDevfolioApplyLogos = Boolean(isDevfolio && registrationUrl && applyLogoLight && applyLogoDark);
-  const hasMultiplesponsors = sponsors && sponsors.length > 0;
-  const hasCommunityPartners = communityPartners && communityPartners.length > 0;
   const legacySponsor = lightSponsorLogo || darkSponsorLogo;
 
   useEffect(() => {
@@ -225,41 +223,7 @@ export default function EventCard({
           </Link>
         </h3>
 
-        {/* Multiple Sponsors */}
-        {hasMultiplesponsors ? (
-          <div className="mb-6">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/60">
-              Sponsors
-            </p>
-            <div className="space-y-3">
-              {sponsors.map((sponsor) => (
-                <div key={sponsor.id} className="rounded-lg border border-border bg-background/60 p-3">
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground/50">
-                    {sponsor.title}
-                  </p>
-                  <div className="flex items-center justify-center h-10">
-                    {sponsor.logoLightUrl ? (
-                      <img
-                        src={normalizeEventImageUrl(sponsor.logoLightUrl)}
-                        alt={sponsor.title}
-                        className="max-h-10 w-auto object-contain dark:hidden"
-                        loading="lazy"
-                      />
-                    ) : null}
-                    {sponsor.logoDarkUrl ? (
-                      <img
-                        src={normalizeEventImageUrl(sponsor.logoDarkUrl)}
-                        alt={sponsor.title}
-                        className="hidden max-h-10 w-auto object-contain dark:block"
-                        loading="lazy"
-                      />
-                    ) : null}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : legacySponsor ? (
+        {legacySponsor ? (
           <div className="mb-6 rounded-lg border border-border bg-background/60 p-3">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/60">
               Sponsored by {sponsorTitle?.trim() || "Our Partner"}
@@ -280,67 +244,6 @@ export default function EventCard({
                 loading="lazy"
               />
             ) : null}
-          </div>
-        ) : null}
-
-        {hasCommunityPartners ? (
-          <div className="mb-6">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/60">
-              Community Partners
-            </p>
-            <div className="space-y-3">
-              {communityPartners.map((partner) => (
-                <div key={partner.id} className="rounded-lg border border-border bg-background/60 p-3">
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground/50">
-                    {partner.name}
-                  </p>
-                  <div className="flex items-center justify-center h-10">
-                    {partner.logoLightUrl ? (
-                      <img
-                        src={normalizeEventImageUrl(partner.logoLightUrl)}
-                        alt={partner.name}
-                        className="max-h-10 w-auto object-contain dark:hidden"
-                        loading="lazy"
-                      />
-                    ) : null}
-                    {partner.logoDarkUrl ? (
-                      <img
-                        src={normalizeEventImageUrl(partner.logoDarkUrl)}
-                        alt={partner.name}
-                        className="hidden max-h-10 w-auto object-contain dark:block"
-                        loading="lazy"
-                      />
-                    ) : null}
-                  </div>
-                  {(partner.instagramUrl || partner.linkedinUrl) ? (
-                    <div className="mt-3 flex items-center justify-center gap-2">
-                      {partner.instagramUrl ? (
-                        <a
-                          href={partner.instagramUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          aria-label={`${partner.name} Instagram`}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground/70 transition hover:border-[#dc2626] hover:text-[#dc2626]"
-                        >
-                          <Instagram size={14} />
-                        </a>
-                      ) : null}
-                      {partner.linkedinUrl ? (
-                        <a
-                          href={partner.linkedinUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          aria-label={`${partner.name} LinkedIn`}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground/70 transition hover:border-[#dc2626] hover:text-[#dc2626]"
-                        >
-                          <Linkedin size={14} />
-                        </a>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </div>
-              ))}
-            </div>
           </div>
         ) : null}
 
