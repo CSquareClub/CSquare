@@ -103,6 +103,13 @@ export default function CoreTeamRegistrationForm() {
   const [outsideForm, setOutsideForm] = useState<OutsideFormState>(initialOutsideForm);
   const [membershipState, setMembershipState] = useState<MembershipCheckState>('idle');
   const [membershipMessage, setMembershipMessage] = useState<string | null>(null);
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpMessage, setOtpMessage] = useState<string | null>(null);
+  const [otpError, setOtpError] = useState<string | null>(null);
+  const [otpCooldown, setOtpCooldown] = useState(0);
 
   useEffect(() => {
     if (step !== 'outside-campus-form') return;
@@ -206,10 +213,107 @@ export default function CoreTeamRegistrationForm() {
     };
   }, [step, coreForm.membershipId]);
 
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const timer = window.setTimeout(() => setOtpCooldown((prev) => prev - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [otpCooldown]);
+
+  useEffect(() => {
+    setOtp('');
+    setOtpSent(false);
+    setOtpVerified(false);
+    setOtpMessage(null);
+    setOtpError(null);
+    setOtpCooldown(0);
+  }, [coreForm.uid]);
+
+  async function sendOtp() {
+    const uid = coreForm.uid.trim();
+    if (!uid) {
+      setOtpError('Enter UID first to receive OTP');
+      return;
+    }
+
+    setOtpLoading(true);
+    setOtpError(null);
+    setOtpMessage(null);
+
+    try {
+      const response = await fetch('/api/join/core-team', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send-otp',
+          uid,
+          fullName: coreForm.fullName,
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Failed to send OTP');
+      }
+
+      setOtpSent(true);
+      setOtpVerified(false);
+      setOtp('');
+      setOtpMessage(payload?.message || 'OTP sent to your CUCHD email');
+      setOtpCooldown(Number(payload?.cooldownSeconds || 60));
+    } catch (err) {
+      setOtpError(err instanceof Error ? err.message : 'Failed to send OTP');
+    } finally {
+      setOtpLoading(false);
+    }
+  }
+
+  async function verifyOtp() {
+    const uid = coreForm.uid.trim();
+    const otpValue = otp.trim();
+    if (!uid || !otpValue) {
+      setOtpError('Enter UID and OTP to verify');
+      return;
+    }
+
+    setOtpLoading(true);
+    setOtpError(null);
+    setOtpMessage(null);
+
+    try {
+      const response = await fetch('/api/join/core-team', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'verify-otp',
+          uid,
+          otp: otpValue,
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload?.error || 'OTP verification failed');
+      }
+
+      setOtpVerified(true);
+      setOtpMessage('OTP verified successfully');
+    } catch (err) {
+      setOtpVerified(false);
+      setOtpError(err instanceof Error ? err.message : 'OTP verification failed');
+    } finally {
+      setOtpLoading(false);
+    }
+  }
+
   async function submitCoreTeamForm(e: React.FormEvent) {
     e.preventDefault();
     if (membershipState !== 'valid') {
       setError('Please verify a valid Membership ID before submitting');
+      return;
+    }
+
+    if (!otpVerified) {
+      setError('Please verify OTP sent to your CUCHD email before submitting');
       return;
     }
 
@@ -479,6 +583,40 @@ export default function CoreTeamRegistrationForm() {
             className="w-full rounded-lg border border-dashed border-border bg-card/60 px-3 py-2.5 text-sm text-foreground/70"
           />
           <p className="text-xs text-foreground/55">Your CUCHD email is generated automatically from your UID.</p>
+
+          <div className="rounded-lg border border-border bg-card/50 p-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-foreground/65">CUCHD OTP Verification</p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={sendOtp}
+                disabled={otpLoading || otpCooldown > 0 || !coreForm.uid.trim()}
+                className="inline-flex items-center justify-center rounded-lg border border-primary bg-primary/10 px-4 py-2 text-xs font-semibold text-primary disabled:opacity-60"
+              >
+                {otpLoading ? 'Sending...' : otpCooldown > 0 ? `Resend in ${otpCooldown}s` : otpSent ? 'Resend OTP' : 'Send OTP'}
+              </button>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                placeholder="Enter 6-digit OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              />
+              <button
+                type="button"
+                onClick={verifyOtp}
+                disabled={otpLoading || otp.length !== 6}
+                className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground disabled:opacity-60"
+              >
+                {otpLoading ? 'Verifying...' : 'Verify OTP'}
+              </button>
+            </div>
+            {otpMessage ? <p className={`mt-2 text-xs ${otpVerified ? 'text-green-500' : 'text-foreground/70'}`}>{otpMessage}</p> : null}
+            {otpError ? <p className="mt-2 text-xs text-red-500">{otpError}</p> : null}
+          </div>
+
           <select
             required
             value={coreForm.department}
@@ -578,7 +716,8 @@ export default function CoreTeamRegistrationForm() {
             disabled={
               submitting ||
               membershipState === 'checking' ||
-              membershipState === 'invalid'
+              membershipState === 'invalid' ||
+              !otpVerified
             }
             className="inline-flex items-center rounded-lg border border-primary bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
           >

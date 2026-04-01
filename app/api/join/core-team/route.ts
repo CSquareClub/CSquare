@@ -4,7 +4,15 @@ import {
   hasCoreTeamDuplicate,
   hasCoreTeamMembershipDuplicate,
 } from '@/lib/core-team-applications-store';
+import {
+  getCoreTeamOtpSentAt,
+  isCoreTeamOtpVerified,
+  markCoreTeamOtpUsed,
+  upsertCoreTeamOtp,
+  verifyCoreTeamOtp,
+} from '@/lib/core-team-otp-store';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+import { createHash, randomInt } from 'crypto';
 
 const ses = new SESClient({
   region: process.env.AWS_REGION || 'us-east-1',
@@ -15,6 +23,9 @@ const ses = new SESClient({
 });
 
 const MEMBERSHIP_ID_REGEX = /^[A-Za-z0-9-]{5,24}$/;
+const OTP_REGEX = /^\d{6}$/;
+const OTP_EXPIRY_MINUTES = 10;
+const OTP_COOLDOWN_SECONDS = 60;
 const DEPARTMENTS = new Set([
   'CSE',
   'AIML',
@@ -58,6 +69,35 @@ function isValidUrl(value: string): boolean {
   } catch {
     return false;
   }
+}
+
+function hashOtp(otp: string): string {
+  return createHash('sha256').update(otp).digest('hex');
+}
+
+function generateOtp(): string {
+  return String(randomInt(100000, 1000000));
+}
+
+async function sendOtpEmail(collegeEmail: string, otp: string, fullName?: string) {
+  const sourceEmail = process.env.AWS_SES_FROM_EMAIL || 'csquareclub@cumail.in';
+  if (!collegeEmail || !collegeEmail.includes('@')) return;
+
+  const greeting = fullName?.trim() ? `Hi ${fullName.trim()},` : 'Hi,';
+  const command = new SendEmailCommand({
+    Source: sourceEmail,
+    Destination: { ToAddresses: [collegeEmail] },
+    Message: {
+      Subject: { Data: 'C Square Core Team OTP Verification' },
+      Body: {
+        Text: {
+          Data: `${greeting}\n\nYour OTP for Core Team application is: ${otp}\nThis OTP is valid for ${OTP_EXPIRY_MINUTES} minutes.\n\nIf you did not request this, you can ignore this email.\n\nC Square Club`,
+        },
+      },
+    },
+  });
+
+  await ses.send(command);
 }
 
 async function sendWelcomeEmail(personalEmail: string, fullName: string) {
@@ -219,6 +259,83 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    const action = String(body.action || '').trim().toLowerCase();
+
+    if (action === 'send-otp') {
+      const uid = String(body.uid || '').trim();
+      const fullName = String(body.fullName || '').trim();
+      const collegeEmail = deriveCollegeEmail(uid);
+
+      if (!uid) {
+        return NextResponse.json({ error: 'UID is required to send OTP' }, { status: 400 });
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(collegeEmail) || !/@cuchd\.in$/i.test(collegeEmail)) {
+        return NextResponse.json({ error: 'Valid CUCHD email could not be derived from UID' }, { status: 400 });
+      }
+
+      const sentAt = await getCoreTeamOtpSentAt(uid);
+      if (sentAt) {
+        const elapsed = Math.floor((Date.now() - sentAt.getTime()) / 1000);
+        if (elapsed < OTP_COOLDOWN_SECONDS) {
+          return NextResponse.json(
+            { error: `Please wait ${OTP_COOLDOWN_SECONDS - elapsed}s before requesting another OTP` },
+            { status: 429 }
+          );
+        }
+      }
+
+      const otp = generateOtp();
+      const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+      await upsertCoreTeamOtp({
+        uid,
+        collegeEmail,
+        otpHash: hashOtp(otp),
+        expiresAt,
+      });
+
+      try {
+        await sendOtpEmail(collegeEmail, otp, fullName);
+      } catch (err) {
+        console.error('Failed to send core team OTP email', err);
+        return NextResponse.json({ error: 'Could not send OTP email right now' }, { status: 500 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `OTP sent to ${collegeEmail}`,
+        cooldownSeconds: OTP_COOLDOWN_SECONDS,
+      });
+    }
+
+    if (action === 'verify-otp') {
+      const uid = String(body.uid || '').trim();
+      const otp = String(body.otp || '').trim();
+
+      if (!uid || !otp) {
+        return NextResponse.json({ error: 'UID and OTP are required' }, { status: 400 });
+      }
+
+      if (!OTP_REGEX.test(otp)) {
+        return NextResponse.json({ error: 'OTP must be 6 digits' }, { status: 400 });
+      }
+
+      const result = await verifyCoreTeamOtp({ uid, otpHash: hashOtp(otp) });
+      if (!result.verified) {
+        if (result.reason === 'missing') {
+          return NextResponse.json({ error: 'Request OTP first' }, { status: 400 });
+        }
+        if (result.reason === 'expired') {
+          return NextResponse.json({ error: 'OTP expired. Request a new OTP' }, { status: 400 });
+        }
+        if (result.reason === 'max-attempts') {
+          return NextResponse.json({ error: 'Too many invalid attempts. Request a new OTP' }, { status: 429 });
+        }
+        return NextResponse.json({ error: 'Invalid OTP' }, { status: 400 });
+      }
+
+      return NextResponse.json({ success: true, verified: true });
+    }
 
     const membershipId = String(body.membershipId || '').trim();
     const fullName = String(body.fullName || '').trim();
@@ -285,6 +402,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Portfolio URL must be valid' }, { status: 400 });
     }
 
+    const otpVerified = await isCoreTeamOtpVerified(uid);
+    if (!otpVerified) {
+      return NextResponse.json({ error: 'Please verify OTP sent to your CUCHD email before submitting' }, { status: 400 });
+    }
+
     const isDuplicate = await hasCoreTeamDuplicate(membershipId, uid);
     if (isDuplicate) {
       return NextResponse.json(
@@ -312,6 +434,7 @@ export async function POST(req: Request) {
 
     // Send welcome email with WhatsApp group link
     await sendWelcomeEmail(personalEmail, fullName);
+    await markCoreTeamOtpUsed(uid);
 
     return NextResponse.json({ success: true, id: record.id }, { status: 201 });
   } catch (error) {
