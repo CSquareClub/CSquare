@@ -104,6 +104,27 @@ export async function POST(req: Request) {
       ? `${input.description}\n\n---\n${detailLines.join("\n")}`
       : input.description;
 
+    // Parse sponsors from the sponsors string if provided
+    // Format: "Sponsor Name|light_logo_url|dark_logo_url;Sponsor2|light_logo_url|dark_logo_url"
+    let sponsorsArray: any[] = [];
+    if (input.sponsors) {
+      sponsorsArray = input.sponsors
+        .split(";")
+        .filter((s) => s.trim())
+        .map((sponsor) => {
+          const parts = sponsor.split("|").map((p) => p.trim());
+          return {
+            title: parts[0] || "",
+            logoUrl: null,
+            logoLightUrl: parts[1] || null,
+            logoDarkUrl: parts[2] || null,
+            devfolioApplyLogoLightUrl: null,
+            devfolioApplyLogoDarkUrl: null,
+          };
+        })
+        .filter((s) => s.title);
+    }
+
     const created = await createEvent({
       title: input.title,
       description: fullDescription,
@@ -121,7 +142,7 @@ export async function POST(req: Request) {
       devfolioApplyLogoDarkUrl: null,
       isPublished: input.status === "published",
       registrationUrl: input.registrationLink,
-      sponsors: [],
+      sponsors: sponsorsArray,
     });
 
     return NextResponse.json({ ...created, slug: input.slug, status: input.status }, { status: 201 });
