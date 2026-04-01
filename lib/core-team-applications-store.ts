@@ -120,6 +120,20 @@ export async function hasCoreTeamDuplicate(membershipId: string, uid: string): P
   return rows[0]?.exists ?? false;
 }
 
+export async function hasCoreTeamMembershipDuplicate(membershipId: string): Promise<boolean> {
+  await ensureCoreTeamApplicationsTable();
+
+  const rows = await prisma.$queryRawUnsafe<Array<{ exists: boolean }>>(
+    `SELECT EXISTS(
+      SELECT 1 FROM core_team_applications
+      WHERE LOWER(membership_id) = LOWER($1::text)
+    ) AS exists;`,
+    membershipId
+  );
+
+  return rows[0]?.exists ?? false;
+}
+
 export async function createCoreTeamApplication(
   input: CreateCoreTeamApplicationInput
 ): Promise<CoreTeamApplication> {

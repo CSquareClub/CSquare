@@ -1,5 +1,35 @@
 import { NextResponse } from 'next/server';
-import { createCoreTeamApplication, hasCoreTeamDuplicate } from '@/lib/core-team-applications-store';
+import {
+  createCoreTeamApplication,
+  hasCoreTeamDuplicate,
+  hasCoreTeamMembershipDuplicate,
+} from '@/lib/core-team-applications-store';
+
+const MEMBERSHIP_ID_REGEX = /^[A-Za-z0-9-]{5,24}$/;
+const DEPARTMENTS = new Set([
+  'CSE',
+  'AIML',
+  'ECE',
+  'ME',
+  'CE',
+  'Biotechnology',
+  'Management',
+  'Commerce',
+  'Law',
+  'Pharmacy',
+  'Other',
+]);
+
+function normalizeUrl(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
+function isValidMembershipId(value: string): boolean {
+  return MEMBERSHIP_ID_REGEX.test(value);
+}
 
 function isValidUrl(value: string): boolean {
   try {
@@ -7,6 +37,37 @@ function isValidUrl(value: string): boolean {
     return url.protocol === 'http:' || url.protocol === 'https:';
   } catch {
     return false;
+  }
+}
+
+function isValidResumeReference(value: string): boolean {
+  if (!value) return false;
+  if (value.startsWith('/uploads/resumes/')) return true;
+  return isValidUrl(value);
+}
+
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const membershipId = String(searchParams.get('membershipId') || '').trim();
+
+    if (!membershipId) {
+      return NextResponse.json({ valid: false, available: false, error: 'Membership ID is required' }, { status: 400 });
+    }
+
+    if (!isValidMembershipId(membershipId)) {
+      return NextResponse.json({
+        valid: false,
+        available: false,
+        error: 'Membership ID must be 5-24 characters and contain only letters, numbers, or hyphen',
+      });
+    }
+
+    const duplicate = await hasCoreTeamMembershipDuplicate(membershipId);
+    return NextResponse.json({ valid: true, available: !duplicate, error: duplicate ? 'This Membership ID has already applied' : null });
+  } catch (error) {
+    console.error('Failed to verify membership ID', error);
+    return NextResponse.json({ valid: false, available: false, error: 'Verification failed' }, { status: 500 });
   }
 }
 
@@ -23,8 +84,8 @@ export async function POST(req: Request) {
     const semester = String(body.semester || '').trim();
     const rolesInterested = String(body.rolesInterested || '').trim();
     const resumeLink = String(body.resumeLink || '').trim();
-    const linkedinUrl = String(body.linkedinUrl || '').trim();
-    const portfolioUrl = String(body.portfolioUrl || '').trim();
+    const linkedinUrl = normalizeUrl(String(body.linkedinUrl || ''));
+    const portfolioUrl = normalizeUrl(String(body.portfolioUrl || ''));
     const whyJoin = String(body.whyJoin || '').trim();
 
     if (
@@ -44,8 +105,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Please fill all required fields' }, { status: 400 });
     }
 
-    if (!isValidUrl(resumeLink)) {
-      return NextResponse.json({ error: 'Resume link must be a valid URL' }, { status: 400 });
+    if (!isValidMembershipId(membershipId)) {
+      return NextResponse.json(
+        { error: 'Membership ID must be 5-24 characters and contain only letters, numbers, or hyphen' },
+        { status: 400 }
+      );
+    }
+
+    if (!DEPARTMENTS.has(department)) {
+      return NextResponse.json({ error: 'Please select a valid department' }, { status: 400 });
+    }
+
+    if (!isValidResumeReference(resumeLink)) {
+      return NextResponse.json({ error: 'Resume is required. Upload your file and try again.' }, { status: 400 });
     }
 
     if (!isValidUrl(linkedinUrl)) {

@@ -3,6 +3,19 @@
 import { useEffect, useState } from 'react';
 
 const CU_JOIN_URL = 'https://cuintranet.in/join-now';
+const DEPARTMENTS = [
+  'CSE',
+  'AIML',
+  'ECE',
+  'ME',
+  'CE',
+  'Biotechnology',
+  'Management',
+  'Commerce',
+  'Law',
+  'Pharmacy',
+  'Other',
+];
 
 type Step =
   | 'choose-student'
@@ -60,6 +73,15 @@ const initialOutsideForm: OutsideFormState = {
   campusAmbassador: 'No',
 };
 
+type MembershipCheckState = 'idle' | 'checking' | 'valid' | 'invalid';
+
+function normalizeUrl(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
 export default function CoreTeamRegistrationForm() {
   const [step, setStep] = useState<Step>('choose-student');
   const [submitting, setSubmitting] = useState(false);
@@ -68,6 +90,10 @@ export default function CoreTeamRegistrationForm() {
   const [checkingDuplicate, setCheckingDuplicate] = useState(false);
   const [coreForm, setCoreForm] = useState<CoreTeamFormState>(initialCoreForm);
   const [outsideForm, setOutsideForm] = useState<OutsideFormState>(initialOutsideForm);
+  const [membershipState, setMembershipState] = useState<MembershipCheckState>('idle');
+  const [membershipMessage, setMembershipMessage] = useState<string | null>(null);
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const [resumeUploadError, setResumeUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (step !== 'outside-campus-form') return;
@@ -128,16 +154,101 @@ export default function CoreTeamRegistrationForm() {
     };
   }, [step, outsideForm.rollNumber, outsideForm.personalEmail, outsideForm.collegeEmail]);
 
+  useEffect(() => {
+    if (step !== 'core-team-form') return;
+
+    const membershipId = coreForm.membershipId.trim();
+    if (!membershipId) {
+      setMembershipState('idle');
+      setMembershipMessage(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        setMembershipState('checking');
+        const query = new URLSearchParams({ membershipId });
+        const response = await fetch(`/api/join/core-team?${query.toString()}`, {
+          method: 'GET',
+          signal: controller.signal,
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !payload?.valid || !payload?.available) {
+          setMembershipState('invalid');
+          setMembershipMessage(payload?.error || 'Membership verification failed');
+          return;
+        }
+
+        setMembershipState('valid');
+        setMembershipMessage('Membership ID verified');
+      } catch {
+        if (!controller.signal.aborted) {
+          setMembershipState('invalid');
+          setMembershipMessage('Membership verification failed. Try again.');
+        }
+      }
+    }, 350);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [step, coreForm.membershipId]);
+
+  async function uploadResumeFile(file: File) {
+    setResumeUploadError(null);
+    setUploadingResume(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('resume', file);
+
+      const response = await fetch('/api/upload/resume', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload?.url) {
+        throw new Error(payload?.error || 'Resume upload failed');
+      }
+
+      setCoreForm((prev) => ({ ...prev, resumeLink: payload.url }));
+    } catch (err) {
+      setResumeUploadError(err instanceof Error ? err.message : 'Resume upload failed');
+      setCoreForm((prev) => ({ ...prev, resumeLink: '' }));
+    } finally {
+      setUploadingResume(false);
+    }
+  }
+
   async function submitCoreTeamForm(e: React.FormEvent) {
     e.preventDefault();
+    if (membershipState !== 'valid') {
+      setError('Please verify a valid Membership ID before submitting');
+      return;
+    }
+    if (!coreForm.resumeLink) {
+      setError('Please upload your resume before submitting');
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
+
+    const payload = {
+      ...coreForm,
+      linkedinUrl: normalizeUrl(coreForm.linkedinUrl),
+      portfolioUrl: normalizeUrl(coreForm.portfolioUrl),
+    };
 
     try {
       const response = await fetch('/api/join/core-team', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(coreForm),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -181,16 +292,6 @@ export default function CoreTeamRegistrationForm() {
     } finally {
       setSubmitting(false);
     }
-  }
-
-  function resetAll() {
-    setStep('choose-student');
-    setSubmitting(false);
-    setError(null);
-    setDuplicateError(null);
-    setCheckingDuplicate(false);
-    setCoreForm(initialCoreForm);
-    setOutsideForm(initialOutsideForm);
   }
 
   return (
@@ -352,7 +453,7 @@ export default function CoreTeamRegistrationForm() {
 
       {step === 'core-team-form' ? (
         <form className="space-y-3" onSubmit={submitCoreTeamForm}>
-          <p className="text-sm text-foreground/65">Core Team Form (CU Students with Membership ID)</p>
+          <p className="text-sm text-foreground/65">Core Team Form (all fields are compulsory)</p>
           <input
             required
             placeholder="C Square Membership ID"
@@ -360,6 +461,10 @@ export default function CoreTeamRegistrationForm() {
             onChange={(e) => setCoreForm((prev) => ({ ...prev, membershipId: e.target.value }))}
             className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
           />
+          {membershipState === 'checking' ? <p className="text-xs text-foreground/60">Verifying membership ID...</p> : null}
+          {membershipMessage ? (
+            <p className={`text-xs ${membershipState === 'valid' ? 'text-green-500' : 'text-red-500'}`}>{membershipMessage}</p>
+          ) : null}
           <input
             required
             placeholder="Full Name"
@@ -374,13 +479,19 @@ export default function CoreTeamRegistrationForm() {
             onChange={(e) => setCoreForm((prev) => ({ ...prev, uid: e.target.value }))}
             className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
           />
-          <input
+          <select
             required
-            placeholder="Department"
             value={coreForm.department}
             onChange={(e) => setCoreForm((prev) => ({ ...prev, department: e.target.value }))}
             className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
-          />
+          >
+            <option value="">Select Department</option>
+            {DEPARTMENTS.map((department) => (
+              <option key={department} value={department}>
+                {department}
+              </option>
+            ))}
+          </select>
           <input
             required
             placeholder="Course"
@@ -427,28 +538,42 @@ export default function CoreTeamRegistrationForm() {
             onChange={(e) => setCoreForm((prev) => ({ ...prev, rolesInterested: e.target.value }))}
             className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
           />
+          <div className="space-y-2 rounded-lg border border-border bg-card p-3">
+            <p className="text-sm font-medium text-foreground">Resume Upload (PDF, DOC, DOCX) *</p>
+            <input
+              required
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={(e) => {
+                const selectedFile = e.target.files?.[0];
+                if (selectedFile) {
+                  uploadResumeFile(selectedFile);
+                }
+              }}
+              className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
+            />
+            {uploadingResume ? <p className="text-xs text-foreground/60">Uploading resume...</p> : null}
+            {coreForm.resumeLink && !uploadingResume ? (
+              <p className="text-xs text-green-500">Resume uploaded successfully</p>
+            ) : null}
+            {resumeUploadError ? <p className="text-xs text-red-500">{resumeUploadError}</p> : null}
+          </div>
           <input
             required
-            type="url"
-            placeholder="Resume Link (viewer access)"
-            value={coreForm.resumeLink}
-            onChange={(e) => setCoreForm((prev) => ({ ...prev, resumeLink: e.target.value }))}
-            className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
-          />
-          <input
-            required
-            type="url"
+            type="text"
             placeholder="LinkedIn URL"
             value={coreForm.linkedinUrl}
             onChange={(e) => setCoreForm((prev) => ({ ...prev, linkedinUrl: e.target.value }))}
+            onBlur={(e) => setCoreForm((prev) => ({ ...prev, linkedinUrl: normalizeUrl(e.target.value) }))}
             className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
           />
           <input
             required
-            type="url"
+            type="text"
             placeholder="Portfolio URL"
             value={coreForm.portfolioUrl}
             onChange={(e) => setCoreForm((prev) => ({ ...prev, portfolioUrl: e.target.value }))}
+            onBlur={(e) => setCoreForm((prev) => ({ ...prev, portfolioUrl: normalizeUrl(e.target.value) }))}
             className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
           />
           <textarea
@@ -462,7 +587,12 @@ export default function CoreTeamRegistrationForm() {
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={
+              submitting ||
+              uploadingResume ||
+              membershipState === 'checking' ||
+              membershipState === 'invalid'
+            }
             className="inline-flex items-center rounded-lg border border-primary bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
           >
             {submitting ? 'Submitting...' : 'Submit Core Team Application'}
@@ -474,13 +604,6 @@ export default function CoreTeamRegistrationForm() {
         <div className="space-y-3 rounded-xl border border-green-400/30 bg-green-500/10 p-4">
           <h4 className="text-lg font-semibold text-foreground">Submitted Successfully</h4>
           <p className="text-sm text-foreground/75">Thank you. Your response has been recorded.</p>
-          <button
-            type="button"
-            onClick={resetAll}
-            className="inline-flex items-center rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground"
-          >
-            Submit Another Response
-          </button>
         </div>
       ) : null}
     </div>
