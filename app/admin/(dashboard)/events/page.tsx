@@ -209,6 +209,8 @@ export default function AdminEventsPage() {
         name: partner.name.trim(),
         logoLightUrl: partner.logoLightUrl?.trim() || null,
         logoDarkUrl: partner.logoDarkUrl?.trim() || null,
+        instagramUrl: partner.instagramUrl?.trim() || null,
+        linkedinUrl: partner.linkedinUrl?.trim() || null,
       })),
       sponsorTitle: form.sponsorTitle || null,
       sponsorLogoLightUrl: form.sponsorLogoLightUrl || null,

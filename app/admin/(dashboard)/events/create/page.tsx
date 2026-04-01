@@ -236,7 +236,14 @@ export default function CreateEventPage() {
         rules: form.rules.trim() || null,
         schedule: form.schedule.trim() || null,
         sponsors: form.sponsors.filter(s => s.title.trim()),
-        communityPartners: form.communityPartners.filter((partner) => partner.name.trim()),
+        communityPartners: form.communityPartners.filter((partner) => partner.name.trim()).map((partner) => ({
+          name: partner.name.trim(),
+          logoUrl: partner.logoUrl?.trim() || null,
+          logoLightUrl: partner.logoLightUrl?.trim() || null,
+          logoDarkUrl: partner.logoDarkUrl?.trim() || null,
+          instagramUrl: partner.instagramUrl?.trim() || null,
+          linkedinUrl: partner.linkedinUrl?.trim() || null,
+        })),
         status: form.status,
         slug: form.slug.trim(),
       };

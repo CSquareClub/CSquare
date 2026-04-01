@@ -40,6 +40,8 @@ export async function PATCH(req: Request, context: RouteContext) {
       logoUrl: partner.logoUrl || null,
       logoLightUrl: partner.logoLightUrl || null,
       logoDarkUrl: partner.logoDarkUrl || null,
+      instagramUrl: partner.instagramUrl || null,
+      linkedinUrl: partner.linkedinUrl || null,
     })) : undefined;
 
     const updated = await updateEvent(eventId, {

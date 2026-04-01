@@ -7,6 +7,8 @@ export type CommunityPartnerDraft = {
   logoUrl: string | null;
   logoLightUrl: string | null;
   logoDarkUrl: string | null;
+  instagramUrl: string | null;
+  linkedinUrl: string | null;
 };
 
 type CommunityPartnersEditorProps = {
@@ -48,6 +50,8 @@ export default function CommunityPartnersEditor({
         logoUrl: null,
         logoLightUrl: null,
         logoDarkUrl: null,
+        instagramUrl: null,
+        linkedinUrl: null,
       },
     ]);
   }
@@ -139,6 +143,30 @@ export default function CommunityPartnersEditor({
                       />
                     </div>
                   ) : null}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-foreground/80">Instagram URL</label>
+                  <input
+                    type="url"
+                    placeholder="https://instagram.com/..."
+                    value={item.instagramUrl ?? ''}
+                    onChange={(e) => updateItem(index, (current) => ({ ...current, instagramUrl: e.target.value || null }))}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-foreground/80">LinkedIn URL</label>
+                  <input
+                    type="url"
+                    placeholder="https://linkedin.com/company/..."
+                    value={item.linkedinUrl ?? ''}
+                    onChange={(e) => updateItem(index, (current) => ({ ...current, linkedinUrl: e.target.value || null }))}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  />
                 </div>
               </div>
             </div>

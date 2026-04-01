@@ -8,6 +8,7 @@ import GridBackground from '@/components/grid-background';
 import { getPublicEventById, listPublicEvents } from '@/lib/events-store';
 import { listGalleryItemsByEventId } from '@/lib/gallery-store';
 import { getEventPageOverride } from '@/lib/event-page-overrides';
+import { Instagram, Linkedin } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 const EVENT_TIMEZONE = 'Asia/Kolkata';
@@ -275,6 +276,32 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                             />
                           ) : null}
                         </div>
+                        {(partner.instagramUrl || partner.linkedinUrl) ? (
+                          <div className="mt-3 flex items-center justify-center gap-2">
+                            {partner.instagramUrl ? (
+                              <a
+                                href={partner.instagramUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                aria-label={`${partner.name} Instagram`}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground/70 transition hover:border-[#dc2626] hover:text-[#dc2626]"
+                              >
+                                <Instagram size={14} />
+                              </a>
+                            ) : null}
+                            {partner.linkedinUrl ? (
+                              <a
+                                href={partner.linkedinUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                aria-label={`${partner.name} LinkedIn`}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground/70 transition hover:border-[#dc2626] hover:text-[#dc2626]"
+                              >
+                                <Linkedin size={14} />
+                              </a>
+                            ) : null}
+                          </div>
+                        ) : null}
                       </div>
                     ))}
                   </div>

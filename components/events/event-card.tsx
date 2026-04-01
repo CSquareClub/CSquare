@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { Calendar, MapPin, Users, ArrowRight, AlertCircle } from 'lucide-react';
+import { Calendar, MapPin, Users, ArrowRight, AlertCircle, Instagram, Linkedin } from 'lucide-react';
 import type { CommunityPartner, Sponsor } from '@/lib/events-store';
 
 interface EventCardProps {
@@ -312,6 +312,32 @@ export default function EventCard({
                       />
                     ) : null}
                   </div>
+                  {(partner.instagramUrl || partner.linkedinUrl) ? (
+                    <div className="mt-3 flex items-center justify-center gap-2">
+                      {partner.instagramUrl ? (
+                        <a
+                          href={partner.instagramUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={`${partner.name} Instagram`}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground/70 transition hover:border-[#dc2626] hover:text-[#dc2626]"
+                        >
+                          <Instagram size={14} />
+                        </a>
+                      ) : null}
+                      {partner.linkedinUrl ? (
+                        <a
+                          href={partner.linkedinUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={`${partner.name} LinkedIn`}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground/70 transition hover:border-[#dc2626] hover:text-[#dc2626]"
+                        >
+                          <Linkedin size={14} />
+                        </a>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>

@@ -19,6 +19,8 @@ export type CommunityPartner = {
   logoUrl: string | null;
   logoLightUrl: string | null;
   logoDarkUrl: string | null;
+  instagramUrl: string | null;
+  linkedinUrl: string | null;
 };
 
 export type ClubEvent = {
@@ -67,6 +69,17 @@ type EventRow = {
   devfolio_apply_logo_dark_url: string | null;
   is_published: boolean;
   registration_url: string | null;
+};
+
+type CommunityPartnerRow = {
+  id: number;
+  eventId: number;
+  name: string;
+  logoUrl: string | null;
+  logoLightUrl: string | null;
+  logoDarkUrl: string | null;
+  instagramUrl: string | null;
+  linkedinUrl: string | null;
 };
 
 let tableReady = false;
@@ -125,6 +138,8 @@ async function ensureEventsTable() {
         logo_url TEXT,
         logo_light_url TEXT,
         logo_dark_url TEXT,
+        instagram_url TEXT,
+        linkedin_url TEXT,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
@@ -145,6 +160,8 @@ async function ensureEventsTable() {
     await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_dark_url TEXT;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS devfolio_apply_logo_light_url TEXT;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS devfolio_apply_logo_dark_url TEXT;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE event_community_partners ADD COLUMN IF NOT EXISTS instagram_url TEXT;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE event_community_partners ADD COLUMN IF NOT EXISTS linkedin_url TEXT;`);
     await prisma.$executeRawUnsafe(`UPDATE events SET start_at = event_date WHERE start_at IS NULL;`);
     await prisma.$executeRawUnsafe(`UPDATE events SET end_at = event_date WHERE end_at IS NULL;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN title DROP NOT NULL;`);
@@ -231,8 +248,8 @@ async function getEventSponsors(eventId: number): Promise<Sponsor[]> {
 
 async function getEventCommunityPartners(eventId: number): Promise<CommunityPartner[]> {
   try {
-    const partners = await prisma.$queryRawUnsafe<CommunityPartner[]>(
-      `SELECT id, event_id as "eventId", name, logo_url as "logoUrl", logo_light_url as "logoLightUrl", logo_dark_url as "logoDarkUrl"
+    const partners = await prisma.$queryRawUnsafe<CommunityPartnerRow[]>(
+      `SELECT id, event_id as "eventId", name, logo_url as "logoUrl", logo_light_url as "logoLightUrl", logo_dark_url as "logoDarkUrl", instagram_url as "instagramUrl", linkedin_url as "linkedinUrl"
        FROM event_community_partners
        WHERE event_id = $1
        ORDER BY created_at ASC;`,
@@ -519,15 +536,17 @@ export async function addCommunityPartner(
 ): Promise<CommunityPartner | null> {
   await ensureEventsTable();
 
-  const rows = await prisma.$queryRawUnsafe<CommunityPartner[]>(
-    `INSERT INTO event_community_partners (event_id, name, logo_url, logo_light_url, logo_dark_url)
-     VALUES ($1, $2, $3, $4, $5)
-     RETURNING id, event_id as "eventId", name, logo_url as "logoUrl", logo_light_url as "logoLightUrl", logo_dark_url as "logoDarkUrl";`,
+  const rows = await prisma.$queryRawUnsafe<CommunityPartnerRow[]>(
+    `INSERT INTO event_community_partners (event_id, name, logo_url, logo_light_url, logo_dark_url, instagram_url, linkedin_url)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     RETURNING id, event_id as "eventId", name, logo_url as "logoUrl", logo_light_url as "logoLightUrl", logo_dark_url as "logoDarkUrl", instagram_url as "instagramUrl", linkedin_url as "linkedinUrl";`,
     eventId,
     partner.name,
     partner.logoUrl,
     partner.logoLightUrl,
-    partner.logoDarkUrl
+    partner.logoDarkUrl,
+    partner.instagramUrl,
+    partner.linkedinUrl
   );
 
   return rows.length ? rows[0] : null;

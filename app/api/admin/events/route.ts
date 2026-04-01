@@ -44,6 +44,8 @@ export async function POST(req: Request) {
       logoUrl: partner.logoUrl || null,
       logoLightUrl: partner.logoLightUrl || null,
       logoDarkUrl: partner.logoDarkUrl || null,
+      instagramUrl: partner.instagramUrl || null,
+      linkedinUrl: partner.linkedinUrl || null,
     })) : [];
 
     const event = await createEvent({
