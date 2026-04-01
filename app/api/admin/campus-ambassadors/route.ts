@@ -31,6 +31,8 @@ const coreTeamExportColumns: Array<{ key: string; header: string }> = [
   { key: "membershipId", header: "Membership ID" },
   { key: "fullName", header: "Full Name" },
   { key: "uid", header: "UID" },
+  { key: "personalEmail", header: "Personal Email" },
+  { key: "collegeEmail", header: "College Email" },
   { key: "department", header: "Department" },
   { key: "course", header: "Course" },
   { key: "year", header: "Year" },

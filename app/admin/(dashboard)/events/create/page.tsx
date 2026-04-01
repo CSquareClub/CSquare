@@ -17,60 +17,49 @@ type Sponsor = {
   devfolioApplyLogoDarkUrl: string | null;
   instagramUrl: string | null;
   linkedinUrl: string | null;
-  instagramUrl: string | null;
-  linkedinUrl: string | null;
 };
 
-type FormState = {
-  title: string;
-  tagline: string;
-  description: string;
-  category: EventCategory;
-  eventType: EventType;
-  tagsInput: string;
-  startDateTime: string;
-  endDateTime: string;
-  venueName: string;
-  city: string;
-  onlineLink: string;
-  organizerName: string;
-  contactEmail: string;
-  registrationLink: string;
-  registrationDeadline: string;
-  bannerImage: string;
-  prizes: string;
-  rules: string;
-  schedule: string;
-  sponsors: Sponsor[];
-  communityPartners: CommunityPartnerDraft[];
-  status: EventStatus;
-  slug: string;
+        <div className="md:col-span-2">
+          <label className="mb-1 block text-sm font-medium">Sponsor Logo Light (Light mode)</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleSponsorLogoFile(e.target.files?.[0] || null, idx, "light")}
+            className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base"
+          />
+        </div>
+        <div className="md:col-span-2">
+          <label className="mb-1 block text-sm font-medium">Sponsor Logo Dark (Dark mode)</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleSponsorLogoFile(e.target.files?.[0] || null, idx, "dark")}
+            className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base"
+          />
+        </div>
 };
 
-type FormErrors = Partial<Record<keyof FormState, string>>;
-
-const initialForm: FormState = {
-  title: "",
-  tagline: "",
-  description: "",
-  category: "Workshop",
-  eventType: "Offline",
-  tagsInput: "",
-  startDateTime: "",
-  endDateTime: "",
-  venueName: "",
-  city: "",
-  onlineLink: "",
-  organizerName: "",
-  contactEmail: "",
-  registrationLink: "",
-  registrationDeadline: "",
-  bannerImage: "",
-  prizes: "",
-  rules: "",
-  schedule: "",
-  sponsors: [],
-  communityPartners: [],
+            <div className="md:col-span-2 rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4 text-sm text-foreground/70">
+              Devfolio sponsor detected. Upload both Apply with Devfolio button images below.
+            </div>
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-sm font-medium">Apply with Devfolio Logo Light</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleApplyLogoFile(e.target.files?.[0] || null, "light")}
+                className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-sm font-medium">Apply with Devfolio Logo Dark</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleApplyLogoFile(e.target.files?.[0] || null, "dark")}
+                className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base"
+              />
+            </div>
   status: "draft",
   slug: "",
 };
@@ -202,6 +191,22 @@ export default function CreateEventPage() {
     reader.readAsDataURL(file);
   }
 
+  function handleApplyLogoFile(file: File | null, mode: "light" | "dark") {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      if (typeof result === "string") {
+        setForm((prev) =>
+          mode === "light"
+            ? { ...prev, devfolioApplyLogoLightUrl: result }
+            : { ...prev, devfolioApplyLogoDarkUrl: result }
+        );
+      }
+    };
+    reader.readAsDataURL(file);
+  }
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSuccessMessage(null);

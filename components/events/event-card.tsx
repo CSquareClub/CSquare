@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { Calendar, MapPin, Users, ArrowRight, AlertCircle } from 'lucide-react';
-import type { CommunityPartner, Sponsor } from '@/lib/events-store';
 
 interface EventCardProps {
   id: string | number;
@@ -16,14 +15,6 @@ interface EventCardProps {
   attendees: number | null;
   category: string | null;
   image: string | null;
-  sponsors?: Sponsor[];
-  communityPartners?: CommunityPartner[];
-  sponsorTitle?: string | null;
-  sponsorLogoUrl?: string | null;
-  sponsorLogoLightUrl?: string | null;
-  sponsorLogoDarkUrl?: string | null;
-  devfolioApplyLogoLightUrl?: string | null;
-  devfolioApplyLogoDarkUrl?: string | null;
   registrationUrl?: string | null;
   isRegistrationOpen?: boolean;
 }
@@ -79,10 +70,6 @@ function isDevfolioLink(url: string | null | undefined): boolean {
   return /devfolio\.(co|in|com)/i.test(url);
 }
 
-function isDevfolioSponsor(title: string | null | undefined): boolean {
-  return title?.trim().toLowerCase() === 'devfolio';
-}
-
 export default function EventCard({
   id,
   slug,
@@ -94,14 +81,6 @@ export default function EventCard({
   attendees,
   category,
   image,
-  sponsors = [],
-  communityPartners = [],
-  sponsorTitle,
-  sponsorLogoUrl,
-  sponsorLogoLightUrl,
-  sponsorLogoDarkUrl,
-  devfolioApplyLogoLightUrl,
-  devfolioApplyLogoDarkUrl,
   registrationUrl,
   isRegistrationOpen = true,
 }: EventCardProps) {
@@ -118,15 +97,7 @@ export default function EventCard({
   );
   const [currentImage, setCurrentImage] = useState(normalizedImage || fallbackImage);
   const [imageError, setImageError] = useState(false);
-  const lightSponsorLogo = sponsorLogoLightUrl || sponsorLogoUrl || null;
-  const darkSponsorLogo = sponsorLogoDarkUrl || sponsorLogoLightUrl || sponsorLogoUrl || null;
-  const isDevfolio = isDevfolioSponsor(sponsorTitle);
-  const sponsorLogoAlt = isDevfolio ? 'DEVFOLIO LOGO' : 'Sponsor logo';
   const registrationButtonLabel = isDevfolioLink(registrationUrl) ? 'Apply with Devfolio' : 'Register Now';
-  const applyLogoLight = devfolioApplyLogoLightUrl || null;
-  const applyLogoDark = devfolioApplyLogoDarkUrl || applyLogoLight;
-  const hasDevfolioApplyLogos = Boolean(isDevfolio && registrationUrl && applyLogoLight && applyLogoDark);
-  const legacySponsor = lightSponsorLogo || darkSponsorLogo;
 
   useEffect(() => {
     setCurrentImage(normalizedImage || fallbackImage);
@@ -223,30 +194,6 @@ export default function EventCard({
           </Link>
         </h3>
 
-        {legacySponsor ? (
-          <div className="mb-6 rounded-lg border border-border bg-background/60 p-3">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/60">
-              Sponsored by {sponsorTitle?.trim() || "Our Partner"}
-            </p>
-            {lightSponsorLogo ? (
-              <img
-                src={normalizeEventImageUrl(lightSponsorLogo)}
-                alt={sponsorLogoAlt}
-                className="h-14 w-full object-contain dark:hidden"
-                loading="lazy"
-              />
-            ) : null}
-            {darkSponsorLogo ? (
-              <img
-                src={normalizeEventImageUrl(darkSponsorLogo)}
-                alt={sponsorLogoAlt}
-                className="hidden h-14 w-full object-contain dark:block"
-                loading="lazy"
-              />
-            ) : null}
-          </div>
-        ) : null}
-
         {time || location || typeof attendees === 'number' ? (
           <div className="space-y-3 mb-6 text-sm text-foreground/60">
             {time ? (
@@ -271,28 +218,7 @@ export default function EventCard({
         ) : null}
 
         <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
-          {hasDevfolioApplyLogos && isRegistrationOpen ? (
-            <Link
-              href={registrationUrl || '#'}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-lg border border-border bg-card px-4 py-3 transition-all duration-300 hover:border-[#dc2626] hover:bg-[#dc2626]/10"
-              aria-label="Apply with Devfolio"
-            >
-              <img
-                src={normalizeEventImageUrl(applyLogoLight)}
-                alt="APPLY WITH DEVFOLIO"
-                className="h-12 w-auto max-w-[260px] object-contain dark:hidden"
-                loading="lazy"
-              />
-              <img
-                src={normalizeEventImageUrl(applyLogoDark)}
-                alt="APPLY WITH DEVFOLIO"
-                className="hidden h-12 w-auto max-w-[260px] object-contain dark:block"
-                loading="lazy"
-              />
-            </Link>
-          ) : registrationUrl && isRegistrationOpen ? (
+          {registrationUrl && isRegistrationOpen ? (
             <Link
               href={registrationUrl}
               target="_blank"

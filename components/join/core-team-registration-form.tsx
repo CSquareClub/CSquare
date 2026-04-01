@@ -29,6 +29,8 @@ type CoreTeamFormState = {
   membershipId: string;
   fullName: string;
   uid: string;
+  personalEmail: string;
+  collegeEmail: string;
   department: string;
   course: string;
   year: string;
@@ -53,6 +55,8 @@ const initialCoreForm: CoreTeamFormState = {
   membershipId: '',
   fullName: '',
   uid: '',
+  personalEmail: '',
+  collegeEmail: '',
   department: '',
   course: '',
   year: '',
@@ -80,6 +84,13 @@ function normalizeUrl(value: string): string {
   if (!trimmed) return '';
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
   return `https://${trimmed}`;
+}
+
+function deriveCollegeEmail(uid: string): string {
+  const trimmed = uid.trim().toLowerCase();
+  if (!trimmed) return '';
+  if (/@cuchd\.in$/i.test(trimmed)) return trimmed;
+  return `${trimmed}@cuchd.in`;
 }
 
 export default function CoreTeamRegistrationForm() {
@@ -207,6 +218,7 @@ export default function CoreTeamRegistrationForm() {
 
     const payload = {
       ...coreForm,
+      collegeEmail: deriveCollegeEmail(coreForm.uid),
       linkedinUrl: normalizeUrl(coreForm.linkedinUrl),
       portfolioUrl: normalizeUrl(coreForm.portfolioUrl),
     };
@@ -443,9 +455,30 @@ export default function CoreTeamRegistrationForm() {
             required
             placeholder="UID"
             value={coreForm.uid}
-            onChange={(e) => setCoreForm((prev) => ({ ...prev, uid: e.target.value }))}
+            onChange={(e) =>
+              setCoreForm((prev) => ({
+                ...prev,
+                uid: e.target.value,
+                collegeEmail: deriveCollegeEmail(e.target.value),
+              }))
+            }
             className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
           />
+          <input
+            required
+            type="email"
+            placeholder="Personal Email"
+            value={coreForm.personalEmail}
+            onChange={(e) => setCoreForm((prev) => ({ ...prev, personalEmail: e.target.value }))}
+            className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
+          />
+          <input
+            readOnly
+            type="email"
+            value={coreForm.collegeEmail || deriveCollegeEmail(coreForm.uid)}
+            className="w-full rounded-lg border border-dashed border-border bg-card/60 px-3 py-2.5 text-sm text-foreground/70"
+          />
+          <p className="text-xs text-foreground/55">Your CUCHD email is generated automatically from your UID.</p>
           <select
             required
             value={coreForm.department}

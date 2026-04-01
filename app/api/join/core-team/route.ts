@@ -36,6 +36,17 @@ function normalizeUrl(value: string): string {
   return `https://${trimmed}`;
 }
 
+function normalizeEmail(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function deriveCollegeEmail(uid: string): string {
+  const trimmed = uid.trim().toLowerCase();
+  if (!trimmed) return '';
+  if (/@cuchd\.in$/i.test(trimmed)) return trimmed;
+  return `${trimmed}@cuchd.in`;
+}
+
 function isValidMembershipId(value: string): boolean {
   return MEMBERSHIP_ID_REGEX.test(value);
 }
@@ -49,15 +60,15 @@ function isValidUrl(value: string): boolean {
   }
 }
 
-async function sendWelcomeEmail(cuEmail: string, fullName: string) {
+async function sendWelcomeEmail(personalEmail: string, fullName: string) {
   const whatsappLink = 'https://chat.whatsapp.com/KVcAI2nE6ZR0AyXurBor6O';
   const sourceEmail = process.env.AWS_SES_FROM_EMAIL || 'csquareclub@cumail.in';
 
-  if (!cuEmail || !cuEmail.includes('@')) return;
+  if (!personalEmail || !personalEmail.includes('@')) return;
 
   const command = new SendEmailCommand({
     Source: sourceEmail,
-    Destination: { ToAddresses: [cuEmail] },
+    Destination: { ToAddresses: [personalEmail] },
     Message: {
       Subject: { Data: 'Welcome to C Square Core Team! 🎉' },
       Body: {
@@ -212,6 +223,8 @@ export async function POST(req: Request) {
     const membershipId = String(body.membershipId || '').trim();
     const fullName = String(body.fullName || '').trim();
     const uid = String(body.uid || '').trim();
+    const personalEmail = normalizeEmail(String(body.personalEmail || ''));
+    const collegeEmail = deriveCollegeEmail(uid);
     const department = String(body.department || '').trim();
     const course = String(body.course || '').trim();
     const year = String(body.year || '').trim();
@@ -226,6 +239,8 @@ export async function POST(req: Request) {
       !membershipId ||
       !fullName ||
       !uid ||
+      !personalEmail ||
+      !collegeEmail ||
       !department ||
       !course ||
       !year ||
@@ -254,6 +269,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Resume link must be a valid URL with viewer access' }, { status: 400 });
     }
 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(personalEmail)) {
+      return NextResponse.json({ error: 'Personal email must be valid' }, { status: 400 });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(collegeEmail) || !/@cuchd\.in$/i.test(collegeEmail)) {
+      return NextResponse.json({ error: 'CU college email must be derived from UID and end with @cuchd.in' }, { status: 400 });
+    }
+
     if (!isValidUrl(linkedinUrl)) {
       return NextResponse.json({ error: 'LinkedIn URL must be valid' }, { status: 400 });
     }
@@ -274,6 +297,8 @@ export async function POST(req: Request) {
       membershipId,
       fullName,
       uid,
+      personalEmail,
+      collegeEmail,
       department,
       course,
       year,
@@ -286,7 +311,7 @@ export async function POST(req: Request) {
     });
 
     // Send welcome email with WhatsApp group link
-    await sendWelcomeEmail(uid, fullName);
+    await sendWelcomeEmail(personalEmail, fullName);
 
     return NextResponse.json({ success: true, id: record.id }, { status: 201 });
   } catch (error) {

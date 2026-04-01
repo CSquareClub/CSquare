@@ -6,6 +6,8 @@ export type CoreTeamApplication = {
   membershipId: string;
   fullName: string;
   uid: string;
+  personalEmail: string;
+  collegeEmail: string;
   department: string;
   course: string;
   year: string;
@@ -23,6 +25,8 @@ type CoreTeamApplicationRow = {
   membership_id: string;
   full_name: string;
   uid: string;
+  personal_email: string;
+  college_email: string;
   department: string;
   course: string;
   year: string;
@@ -38,6 +42,8 @@ type CreateCoreTeamApplicationInput = {
   membershipId: string;
   fullName: string;
   uid: string;
+  personalEmail: string;
+  collegeEmail: string;
   department: string;
   course: string;
   year: string;
@@ -61,6 +67,8 @@ async function ensureCoreTeamApplicationsTable() {
       membership_id TEXT NOT NULL,
       full_name TEXT NOT NULL,
       uid TEXT NOT NULL,
+      personal_email TEXT NOT NULL DEFAULT '',
+      college_email TEXT NOT NULL DEFAULT '',
       department TEXT NOT NULL,
       course TEXT NOT NULL,
       year TEXT NOT NULL,
@@ -71,6 +79,12 @@ async function ensureCoreTeamApplicationsTable() {
       portfolio_url TEXT,
       why_join TEXT NOT NULL
     );
+  `);
+
+  await prisma.$executeRawUnsafe(`
+    ALTER TABLE core_team_applications
+      ADD COLUMN IF NOT EXISTS personal_email TEXT NOT NULL DEFAULT '',
+      ADD COLUMN IF NOT EXISTS college_email TEXT NOT NULL DEFAULT '';
   `);
 
   await prisma.$executeRawUnsafe(
@@ -92,6 +106,8 @@ function rowToCoreTeamApplication(row: CoreTeamApplicationRow): CoreTeamApplicat
     membershipId: row.membership_id,
     fullName: row.full_name,
     uid: row.uid,
+    personalEmail: row.personal_email,
+    collegeEmail: row.college_email,
     department: row.department,
     course: row.course,
     year: row.year,
@@ -141,12 +157,14 @@ export async function createCoreTeamApplication(
 
   const rows = await prisma.$queryRawUnsafe<CoreTeamApplicationRow[]>(
     `INSERT INTO core_team_applications
-      (membership_id, full_name, uid, department, course, year, semester, roles_interested, resume_link, linkedin_url, portfolio_url, why_join)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-     RETURNING id, created_at, membership_id, full_name, uid, department, course, year, semester, roles_interested, resume_link, linkedin_url, portfolio_url, why_join;`,
+      (membership_id, full_name, uid, personal_email, college_email, department, course, year, semester, roles_interested, resume_link, linkedin_url, portfolio_url, why_join)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+     RETURNING id, created_at, membership_id, full_name, uid, personal_email, college_email, department, course, year, semester, roles_interested, resume_link, linkedin_url, portfolio_url, why_join;`,
     input.membershipId,
     input.fullName,
     input.uid,
+    input.personalEmail,
+    input.collegeEmail,
     input.department,
     input.course,
     input.year,
@@ -165,7 +183,7 @@ export async function listCoreTeamApplications(): Promise<CoreTeamApplication[]>
   await ensureCoreTeamApplicationsTable();
 
   const rows = await prisma.$queryRawUnsafe<CoreTeamApplicationRow[]>(
-    `SELECT id, created_at, membership_id, full_name, uid, department, course, year, semester, roles_interested, resume_link, linkedin_url, portfolio_url, why_join
+    `SELECT id, created_at, membership_id, full_name, uid, personal_email, college_email, department, course, year, semester, roles_interested, resume_link, linkedin_url, portfolio_url, why_join
      FROM core_team_applications
      ORDER BY created_at DESC;`
   );

@@ -353,56 +353,47 @@ export default function AdminEventsPage() {
             Devfolio sponsor requires: Devfolio logo (light and dark), Apply with Devfolio logo (light and dark), and a registration URL.
           </p>
         ) : null}
-        <input
-          placeholder={form.sponsorTitle.trim().toLowerCase() === "devfolio" ? "Devfolio logo URL (light theme)" : "Sponsor logo URL (light theme)"}
-          value={form.sponsorLogoLightUrl}
-          onChange={(e) => setForm((prev) => ({ ...prev, sponsorLogoLightUrl: e.target.value }))}
-          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
-        />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "light", "sponsor")}
-          className="rounded-lg border border-border bg-background px-4 py-3 text-base md:col-span-2"
-        />
-        <input
-          placeholder={form.sponsorTitle.trim().toLowerCase() === "devfolio" ? "Devfolio logo URL (dark theme)" : "Sponsor logo URL (dark theme)"}
-          value={form.sponsorLogoDarkUrl}
-          onChange={(e) => setForm((prev) => ({ ...prev, sponsorLogoDarkUrl: e.target.value }))}
-          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
-        />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "dark", "sponsor")}
-          className="rounded-lg border border-border bg-background px-4 py-3 text-base md:col-span-2"
-        />
+        <div className="md:col-span-2">
+          <label className="mb-1 block text-sm font-medium">Sponsor Logo Light (Light mode)</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "light", "sponsor")}
+            className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base"
+          />
+        </div>
+        <div className="md:col-span-2">
+          <label className="mb-1 block text-sm font-medium">Sponsor Logo Dark (Dark mode)</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "dark", "sponsor")}
+            className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base"
+          />
+        </div>
         {form.sponsorTitle.trim().toLowerCase() === "devfolio" ? (
           <>
-            <input
-              placeholder="Apply with Devfolio logo URL (light theme)"
-              value={form.devfolioApplyLogoLightUrl}
-              onChange={(e) => setForm((prev) => ({ ...prev, devfolioApplyLogoLightUrl: e.target.value }))}
-              className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "light", "apply")}
-              className="rounded-lg border border-border bg-background px-4 py-3 text-base md:col-span-2"
-            />
-            <input
-              placeholder="Apply with Devfolio logo URL (dark theme)"
-              value={form.devfolioApplyLogoDarkUrl}
-              onChange={(e) => setForm((prev) => ({ ...prev, devfolioApplyLogoDarkUrl: e.target.value }))}
-              className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "dark", "apply")}
-              className="rounded-lg border border-border bg-background px-4 py-3 text-base md:col-span-2"
-            />
+            <div className="md:col-span-2 rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4 text-sm text-foreground/70">
+              Devfolio sponsor detected. Upload both Devfolio logos and both Apply with Devfolio button images below.
+            </div>
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-sm font-medium">Apply with Devfolio Logo Light</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "light", "apply")}
+                className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-sm font-medium">Apply with Devfolio Logo Dark</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "dark", "apply")}
+                className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base"
+              />
+            </div>
           </>
         ) : null}
         <input
