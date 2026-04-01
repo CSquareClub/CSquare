@@ -7,6 +7,15 @@ import { getGoogleServiceAccountConfig } from "@/lib/google-service-account";
 
 type Track = "2026" | "2027";
 
+const preferenceLabelMap: Record<string, string> = {
+  web: "Web Development",
+  app: "App Development",
+  backend: "Backend",
+  opensource: "Open Source",
+  dsa_cp: "DSA / CP",
+  dsa: "DSA",
+};
+
 const fallbackSpreadsheetIds: Record<Track, string> = {
   "2026": "1Z-s5HxgSVzfXf4m9mV5WW8B-fTH1Fs7KYg0JvjConp4",
   "2027": "1zvqnoc2JzUREzbuKtzgPKBiNXMpepqbzTxqjqa82vy0",
@@ -121,6 +130,29 @@ function getErrorMessage(err: unknown): string {
   return String(err);
 }
 
+function normalizePreferenceString(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+
+  const tokens = value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  if (!tokens.length) return value;
+
+  return tokens
+    .map((token) => preferenceLabelMap[token] ?? token)
+    .join(", ");
+}
+
+function normalizeCusocRow<T extends Record<string, unknown>>(row: T): T {
+  return {
+    ...row,
+    domainOrder: normalizePreferenceString(row.domainOrder),
+    interestArea: normalizePreferenceString(row.interestArea),
+  } as T;
+}
+
 async function ensureSheetExists(
   spreadsheetId: string,
   title: string,
@@ -160,16 +192,16 @@ export async function GET(req: Request) {
   try {
     if (track === "2026") {
       const data = await prisma.cusocRegistration2026.findMany({
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: "desc" },
       });
-      return NextResponse.json(data);
+      return NextResponse.json(data.map((row) => normalizeCusocRow(row as Record<string, unknown>)));
     }
 
     if (track === "2027") {
       const data = await prisma.cusocRegistration2027.findMany({
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: "desc" },
       });
-      return NextResponse.json(data);
+      return NextResponse.json(data.map((row) => normalizeCusocRow(row as Record<string, unknown>)));
     }
 
     // Return both counts for overview
@@ -217,13 +249,16 @@ export async function POST(req: NextRequest) {
     const spreadsheetId = resolveSpreadsheetId(spreadsheetInput);
     const registrations =
       track === "2026"
-        ? await prisma.cusocRegistration2026.findMany({ orderBy: { createdAt: "asc" } })
-        : await prisma.cusocRegistration2027.findMany({ orderBy: { createdAt: "asc" } });
+        ? await prisma.cusocRegistration2026.findMany({ orderBy: { createdAt: "desc" } })
+        : await prisma.cusocRegistration2027.findMany({ orderBy: { createdAt: "desc" } });
+    const normalizedRegistrations = registrations.map((row) =>
+      normalizeCusocRow(row as Record<string, unknown>)
+    );
 
     const sheetTitle = track === "2026" ? "CUSoC 2026" : "CUSoC 2027-28";
     const columns = exportColumns[track];
     const headerRow = columns.map((col) => col.header);
-    const valueRows = registrations.map((row) =>
+    const valueRows = normalizedRegistrations.map((row) =>
       columns.map((col) => asSheetValue((row as Record<string, unknown>)[col.key]))
     );
 
@@ -256,7 +291,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      rowCount: registrations.length,
+      rowCount: normalizedRegistrations.length,
       sheetTitle,
     });
   } catch (err) {
