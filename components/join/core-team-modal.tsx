@@ -34,6 +34,7 @@ type OutsideFormState = {
   rollNumber: string;
   personalEmail: string;
   collegeEmail: string;
+  campusAmbassador: 'Yes' | 'No';
 };
 
 const initialCoreForm: CoreTeamFormState = {
@@ -57,6 +58,7 @@ const initialOutsideForm: OutsideFormState = {
   rollNumber: '',
   personalEmail: '',
   collegeEmail: '',
+  campusAmbassador: 'No',
 };
 
 type CoreTeamModalProps = {
@@ -70,6 +72,8 @@ export default function CoreTeamModal({ className, children }: CoreTeamModalProp
   const [step, setStep] = useState<Step>('choose-student');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [duplicateError, setDuplicateError] = useState<string | null>(null);
+  const [checkingDuplicate, setCheckingDuplicate] = useState(false);
   const [coreForm, setCoreForm] = useState<CoreTeamFormState>(initialCoreForm);
   const [outsideForm, setOutsideForm] = useState<OutsideFormState>(initialOutsideForm);
 
@@ -94,10 +98,71 @@ export default function CoreTeamModal({ className, children }: CoreTeamModalProp
       setStep('choose-student');
       setSubmitting(false);
       setError(null);
+      setDuplicateError(null);
+      setCheckingDuplicate(false);
       setCoreForm(initialCoreForm);
       setOutsideForm(initialOutsideForm);
     }, 200);
   }
+
+  useEffect(() => {
+    if (!isOpen || step !== 'outside-campus-form') return;
+
+    const rollNumber = outsideForm.rollNumber.trim();
+    const personalEmail = outsideForm.personalEmail.trim().toLowerCase();
+    const collegeEmail = outsideForm.collegeEmail.trim().toLowerCase();
+
+    if (!rollNumber && !personalEmail && !collegeEmail) {
+      setDuplicateError(null);
+      setCheckingDuplicate(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        setCheckingDuplicate(true);
+
+        const query = new URLSearchParams({
+          rollNumber,
+          personalEmail,
+          collegeEmail,
+        });
+
+        const response = await fetch(`/api/join/outside?${query.toString()}`, {
+          method: 'GET',
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          setDuplicateError(null);
+          return;
+        }
+
+        const payload = await response.json();
+        if (payload?.duplicate) {
+          setDuplicateError(
+            payload?.error || 'You have already submitted the form. Check your registered email for updates.'
+          );
+        } else {
+          setDuplicateError(null);
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setDuplicateError(null);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setCheckingDuplicate(false);
+        }
+      }
+    }, 350);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [isOpen, step, outsideForm.rollNumber, outsideForm.personalEmail, outsideForm.collegeEmail]);
 
   async function submitCoreTeamForm(e: React.FormEvent) {
     e.preventDefault();
@@ -126,6 +191,10 @@ export default function CoreTeamModal({ className, children }: CoreTeamModalProp
 
   async function submitOutsideCampusForm(e: React.FormEvent) {
     e.preventDefault();
+    if (duplicateError) {
+      setError(duplicateError);
+      return;
+    }
     setSubmitting(true);
     setError(null);
 
@@ -135,7 +204,6 @@ export default function CoreTeamModal({ className, children }: CoreTeamModalProp
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...outsideForm,
-          campusAmbassador: 'No',
         }),
       });
 
@@ -247,7 +315,7 @@ export default function CoreTeamModal({ className, children }: CoreTeamModalProp
 
         {step === 'outside-campus-form' ? (
           <form className="space-y-3" onSubmit={submitOutsideCampusForm}>
-            <p className="text-sm text-foreground/65">Other Campus Form</p>
+            <p className="text-sm text-foreground/65">Fill your details for external registration.</p>
             <input
               required
               placeholder="Full Name"
@@ -285,6 +353,33 @@ export default function CoreTeamModal({ className, children }: CoreTeamModalProp
               onChange={(e) => setOutsideForm((prev) => ({ ...prev, collegeEmail: e.target.value }))}
               className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
             />
+
+            <div className="rounded-lg border border-border bg-card p-3">
+              <p className="mb-2 text-sm font-medium text-foreground">Campus Ambassador</p>
+              <label className="mr-4 inline-flex items-center gap-2 text-sm text-foreground/80">
+                <input
+                  type="radio"
+                  name="coreTeamCampusAmbassador"
+                  checked={outsideForm.campusAmbassador === 'Yes'}
+                  onChange={() => setOutsideForm((prev) => ({ ...prev, campusAmbassador: 'Yes' }))}
+                />
+                Yes
+              </label>
+              <label className="inline-flex items-center gap-2 text-sm text-foreground/80">
+                <input
+                  type="radio"
+                  name="coreTeamCampusAmbassador"
+                  checked={outsideForm.campusAmbassador === 'No'}
+                  onChange={() => setOutsideForm((prev) => ({ ...prev, campusAmbassador: 'No' }))}
+                />
+                No
+              </label>
+            </div>
+
+            {checkingDuplicate && !duplicateError ? (
+              <p className="text-xs text-foreground/60">Checking your registration...</p>
+            ) : null}
+            {duplicateError ? <p className="text-sm text-red-500">{duplicateError}</p> : null}
             <button
               type="submit"
               disabled={submitting}
