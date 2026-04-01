@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import JoinNowModal from '@/components/join/join-now-modal';
+import CoreTeamModal from '@/components/join/core-team-modal';
 import { useEffect, useState } from 'react';
 
 export default function Hero() {
@@ -61,6 +62,9 @@ export default function Hero() {
               <JoinNowModal className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-7 py-3 font-semibold text-primary-foreground shadow-lg transition-all duration-200 hover:scale-[1.03] hover:shadow-xl">
                 Join the Club <ArrowRight size={18} />
               </JoinNowModal>
+              <CoreTeamModal className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-7 py-3 font-semibold text-foreground shadow-md transition-all duration-300 hover:bg-primary/20 hover:scale-[1.03] hover:shadow-xl">
+                Join Core Team
+              </CoreTeamModal>
               <Link
                 href="/events"
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-card/80 px-7 py-3 font-semibold text-foreground shadow-md transition-all duration-300 hover:bg-card hover:scale-[1.03] hover:shadow-xl"

@@ -1,4 +1,9 @@
 import { authOptions } from "@/lib/authOptions";
+import {
+  deleteCoreTeamApplications,
+  getCoreTeamApplicationCount,
+  listCoreTeamApplications,
+} from "@/lib/core-team-applications-store";
 import { getGoogleServiceAccountConfig } from "@/lib/google-service-account";
 import {
   deleteOutsideRegistrations,
@@ -10,15 +15,31 @@ import { getServerSession } from "next-auth";
 import { google } from "googleapis";
 import { NextRequest, NextResponse } from "next/server";
 
-type View = "all" | "ambassadors";
+type View = "all" | "ambassadors" | "core-team";
 
-const exportColumns: Array<{ key: string; header: string }> = [
+const outsideExportColumns: Array<{ key: string; header: string }> = [
   { key: "fullName", header: "Full Name" },
   { key: "instituteName", header: "Institute Name" },
   { key: "rollNumber", header: "Roll Number" },
   { key: "personalEmail", header: "Personal Email" },
   { key: "collegeEmail", header: "College Email" },
   { key: "campusAmbassador", header: "Campus Ambassador" },
+  { key: "createdAt", header: "Submitted At" },
+];
+
+const coreTeamExportColumns: Array<{ key: string; header: string }> = [
+  { key: "membershipId", header: "Membership ID" },
+  { key: "fullName", header: "Full Name" },
+  { key: "uid", header: "UID" },
+  { key: "department", header: "Department" },
+  { key: "course", header: "Course" },
+  { key: "year", header: "Year" },
+  { key: "semester", header: "Semester" },
+  { key: "rolesInterested", header: "Roles Interested" },
+  { key: "resumeLink", header: "Resume Link" },
+  { key: "linkedinUrl", header: "LinkedIn" },
+  { key: "portfolioUrl", header: "Portfolio" },
+  { key: "whyJoin", header: "Why Join" },
   { key: "createdAt", header: "Submitted At" },
 ];
 
@@ -77,10 +98,11 @@ async function writeSheet(
   spreadsheetId: string,
   title: string,
   rows: Array<Record<string, unknown>>,
+  columns: Array<{ key: string; header: string }>,
   sheetsClient: ReturnType<typeof google.sheets>
 ) {
-  const headerRow = exportColumns.map((col) => col.header);
-  const valueRows = rows.map((row) => exportColumns.map((col) => asSheetValue(row[col.key])));
+  const headerRow = columns.map((col) => col.header);
+  const valueRows = rows.map((row) => columns.map((col) => asSheetValue(row[col.key])));
 
   await ensureSheetExists(spreadsheetId, title, sheetsClient);
 
@@ -113,7 +135,8 @@ export async function GET(req: NextRequest) {
         listOutsideRegistrations(),
         getOutsideRegistrationCounts(),
       ]);
-      return NextResponse.json({ data, counts });
+      const coreTeamCount = await getCoreTeamApplicationCount();
+      return NextResponse.json({ data, counts: { ...counts, coreTeam: coreTeamCount } });
     }
 
     if (view === "ambassadors") {
@@ -121,7 +144,24 @@ export async function GET(req: NextRequest) {
         listCampusAmbassadors(),
         getOutsideRegistrationCounts(),
       ]);
-      return NextResponse.json({ data, counts });
+      const coreTeamCount = await getCoreTeamApplicationCount();
+      return NextResponse.json({ data, counts: { ...counts, coreTeam: coreTeamCount } });
+    }
+
+    if (view === "core-team") {
+      const [data, outsideCounts, coreTeamCount] = await Promise.all([
+        listCoreTeamApplications(),
+        getOutsideRegistrationCounts(),
+        getCoreTeamApplicationCount(),
+      ]);
+
+      return NextResponse.json({
+        data,
+        counts: {
+          ...outsideCounts,
+          coreTeam: coreTeamCount,
+        },
+      });
     }
 
     return NextResponse.json({ error: "Invalid view" }, { status: 400 });
@@ -150,9 +190,10 @@ export async function POST() {
   }
 
   try {
-    const [allRows, ambassadorRows] = await Promise.all([
+    const [allRows, ambassadorRows, coreTeamRows] = await Promise.all([
       listOutsideRegistrations(),
       listCampusAmbassadors(),
+      listCoreTeamApplications(),
     ]);
 
     const spreadsheetId = resolveSpreadsheetId(spreadsheetInput);
@@ -168,13 +209,33 @@ export async function POST() {
 
     const sheetsClient = google.sheets({ version: "v4", auth });
 
-    await writeSheet(spreadsheetId, "Outside Registrations", allRows as Array<Record<string, unknown>>, sheetsClient);
-    await writeSheet(spreadsheetId, "Campus Ambassadors", ambassadorRows as Array<Record<string, unknown>>, sheetsClient);
+    await writeSheet(
+      spreadsheetId,
+      "Outside Registrations",
+      allRows as Array<Record<string, unknown>>,
+      outsideExportColumns,
+      sheetsClient
+    );
+    await writeSheet(
+      spreadsheetId,
+      "Campus Ambassadors",
+      ambassadorRows as Array<Record<string, unknown>>,
+      outsideExportColumns,
+      sheetsClient
+    );
+    await writeSheet(
+      spreadsheetId,
+      "Core Team Applications",
+      coreTeamRows as Array<Record<string, unknown>>,
+      coreTeamExportColumns,
+      sheetsClient
+    );
 
     return NextResponse.json({
       success: true,
       allRows: allRows.length,
       ambassadorRows: ambassadorRows.length,
+      coreTeamRows: coreTeamRows.length,
     });
   } catch (error) {
     const message = getErrorMessage(error);
@@ -193,6 +254,7 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
+    const view = (req.nextUrl.searchParams.get("view") || "all") as View;
     const body = await req.json();
     const ids = Array.isArray(body?.ids)
       ? body.ids.map((id: unknown) => Number(id)).filter((id: number) => Number.isInteger(id) && id > 0)
@@ -202,7 +264,10 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "No valid ids provided" }, { status: 400 });
     }
 
-    const deletedCount = await deleteOutsideRegistrations(ids);
+    const deletedCount =
+      view === "core-team"
+        ? await deleteCoreTeamApplications(ids)
+        : await deleteOutsideRegistrations(ids);
     return NextResponse.json({ success: true, deletedCount });
   } catch (error) {
     console.error("Failed to delete outside registrations", error);

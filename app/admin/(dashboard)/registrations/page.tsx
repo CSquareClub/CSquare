@@ -19,7 +19,8 @@ type RegistrationSource =
   | "cusoc-2026"
   | "cusoc-2027"
   | "outside-all"
-  | "outside-ambassadors";
+  | "outside-ambassadors"
+  | "core-team";
 
 type OutsideRegistration = {
   id: number;
@@ -51,7 +52,7 @@ export default function CusocRegistrationsPage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<any | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [counts, setCounts] = useState({ count2026: 0, count2027: 0, outsideTotal: 0, outsideAmbassadors: 0 });
+  const [counts, setCounts] = useState({ count2026: 0, count2027: 0, outsideTotal: 0, outsideAmbassadors: 0, coreTeam: 0 });
 
   const isCusocSource = source === "cusoc-2026" || source === "cusoc-2027";
   const track: CusocTrack = source === "cusoc-2026" ? "2026" : "2027";
@@ -59,7 +60,7 @@ export default function CusocRegistrationsPage() {
   function normalizeSourceParam(value: string | null): RegistrationSource | null {
     if (!value) return null;
 
-    if (value === "cusoc-2026" || value === "cusoc-2027" || value === "outside-all" || value === "outside-ambassadors") {
+    if (value === "cusoc-2026" || value === "cusoc-2027" || value === "outside-all" || value === "outside-ambassadors" || value === "core-team") {
       return value;
     }
 
@@ -89,6 +90,7 @@ export default function CusocRegistrationsPage() {
         count2027: Number(cusocPayload?.count2027 ?? 0),
         outsideTotal: Number(outsidePayload?.counts?.total ?? 0),
         outsideAmbassadors: Number(outsidePayload?.counts?.ambassadors ?? 0),
+        coreTeam: Number(outsidePayload?.counts?.coreTeam ?? 0),
       });
     } catch {
       // Ignore transient count fetch errors.
@@ -106,7 +108,12 @@ export default function CusocRegistrationsPage() {
         const payload = await response.json();
         setData(Array.isArray(payload) ? payload : []);
       } else {
-        const view = nextSource === "outside-all" ? "all" : "ambassadors";
+        const view =
+          nextSource === "outside-all"
+            ? "all"
+            : nextSource === "outside-ambassadors"
+            ? "ambassadors"
+            : "core-team";
         const response = await fetch(`/api/admin/campus-ambassadors?view=${view}`, {
           cache: "no-store",
         });
@@ -116,6 +123,7 @@ export default function CusocRegistrationsPage() {
           ...prev,
           outsideTotal: Number(payload?.counts?.total ?? prev.outsideTotal),
           outsideAmbassadors: Number(payload?.counts?.ambassadors ?? prev.outsideAmbassadors),
+          coreTeam: Number(payload?.counts?.coreTeam ?? prev.coreTeam),
         }));
       }
     } finally {
@@ -141,7 +149,13 @@ export default function CusocRegistrationsPage() {
   }, [source]);
 
   async function handleDelete(id: number) {
-    const label = isCusocSource ? `CUSoC ${track}` : source === "outside-ambassadors" ? "Campus Ambassador" : "Outside";
+    const label = isCusocSource
+      ? `CUSoC ${track}`
+      : source === "outside-ambassadors"
+      ? "Campus Ambassador"
+      : source === "core-team"
+      ? "Core Team"
+      : "Outside";
     const confirmed = window.confirm(`Warning: This will permanently delete this ${label} registration from the database.\n\nDo you want to continue?`);
 
     if (!confirmed) return;
@@ -156,7 +170,7 @@ export default function CusocRegistrationsPage() {
             },
             body: JSON.stringify({ id }),
           })
-        : await fetch("/api/admin/campus-ambassadors", {
+        : await fetch(`/api/admin/campus-ambassadors?view=${source === "core-team" ? "core-team" : "all"}`, {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
@@ -186,12 +200,15 @@ export default function CusocRegistrationsPage() {
     const q = search.toLowerCase();
     return (
       r.fullName?.toLowerCase().includes(q) ||
+      r.membershipId?.toLowerCase().includes(q) ||
+      r.uid?.toLowerCase().includes(q) ||
       r.cuEmail?.toLowerCase().includes(q) ||
       r.personalEmail?.toLowerCase().includes(q) ||
       r.collegeEmail?.toLowerCase().includes(q) ||
       r.rollNumber?.toLowerCase().includes(q) ||
       r.department?.toLowerCase().includes(q) ||
-      r.instituteName?.toLowerCase().includes(q)
+      r.instituteName?.toLowerCase().includes(q) ||
+      r.rolesInterested?.toLowerCase().includes(q)
     );
   });
 
@@ -230,7 +247,7 @@ export default function CusocRegistrationsPage() {
         setExportStatus(`Synced ${payload?.rowCount ?? data.length} rows to Google Sheet.`);
       } else {
         setExportStatus(
-          `Synced ${payload?.allRows ?? 0} outside registrations and ${payload?.ambassadorRows ?? 0} campus ambassadors.`
+          `Synced ${payload?.allRows ?? 0} outside registrations, ${payload?.ambassadorRows ?? 0} campus ambassadors, and ${payload?.coreTeamRows ?? 0} core team applications.`
         );
       }
     } catch (err) {
@@ -272,7 +289,22 @@ export default function CusocRegistrationsPage() {
     { key: "collegeEmail", label: "College Email" },
     { key: "campusAmbassador", label: "Ambassador" },
   ];
-  const cols = source === "cusoc-2026" ? cols2026 : source === "cusoc-2027" ? cols2027 : colsOutside;
+  const colsCoreTeam = [
+    { key: "membershipId", label: "Membership ID" },
+    { key: "fullName", label: "Name" },
+    { key: "uid", label: "UID" },
+    { key: "department", label: "Department" },
+    { key: "year", label: "Year" },
+    { key: "rolesInterested", label: "Roles" },
+  ];
+  const cols =
+    source === "cusoc-2026"
+      ? cols2026
+      : source === "cusoc-2027"
+      ? cols2027
+      : source === "core-team"
+      ? colsCoreTeam
+      : colsOutside;
 
   // Detail view field grouping
   const detailSections2026 = [
@@ -393,11 +425,44 @@ export default function CusocRegistrationsPage() {
     },
   ];
 
+  const detailSectionsCoreTeam = [
+    {
+      title: "Basic Details",
+      fields: [
+        ["Membership ID", "membershipId"],
+        ["Full Name", "fullName"],
+        ["UID", "uid"],
+        ["Department", "department"],
+        ["Course", "course"],
+        ["Year", "year"],
+        ["Semester", "semester"],
+        ["Registered At", "createdAt"],
+      ],
+    },
+    {
+      title: "Profile Links",
+      fields: [
+        ["Resume", "resumeLink"],
+        ["LinkedIn", "linkedinUrl"],
+        ["Portfolio", "portfolioUrl"],
+      ],
+    },
+    {
+      title: "Application Details",
+      fields: [
+        ["Roles Interested", "rolesInterested"],
+        ["Why Join", "whyJoin"],
+      ],
+    },
+  ];
+
   const detailSections =
     source === "cusoc-2026"
       ? detailSections2026
       : source === "cusoc-2027"
       ? detailSections2027
+      : source === "core-team"
+      ? detailSectionsCoreTeam
       : detailSectionsOutside;
 
   const formatVal = (v: any) => {
@@ -446,7 +511,7 @@ export default function CusocRegistrationsPage() {
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-4">
+        <div className="mt-5 grid gap-3 sm:grid-cols-5">
           <div className="rounded-xl border border-black/5 bg-black/[0.02] px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
             <p className="text-xs uppercase tracking-wide text-black/45 dark:text-white/35">CUSoC 2026</p>
             <p className="mt-1 text-2xl font-semibold text-emerald-600 dark:text-emerald-400">{counts.count2026}</p>
@@ -462,6 +527,10 @@ export default function CusocRegistrationsPage() {
           <div className="rounded-xl border border-black/5 bg-black/[0.02] px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
             <p className="text-xs uppercase tracking-wide text-black/45 dark:text-white/35">Ambassadors</p>
             <p className="mt-1 text-2xl font-semibold text-indigo-600 dark:text-indigo-400">{counts.outsideAmbassadors}</p>
+          </div>
+          <div className="rounded-xl border border-black/5 bg-black/[0.02] px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
+            <p className="text-xs uppercase tracking-wide text-black/45 dark:text-white/35">Core Team</p>
+            <p className="mt-1 text-2xl font-semibold text-rose-600 dark:text-rose-400">{counts.coreTeam}</p>
           </div>
         </div>
       </div>
@@ -558,6 +627,26 @@ export default function CusocRegistrationsPage() {
             }`}
           >
             {counts.outsideAmbassadors}
+          </span>
+        </button>
+        <button
+          onClick={() => setSource("core-team")}
+          className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all ${
+            source === "core-team"
+              ? "bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-500/15 dark:text-rose-300 border dark:border-rose-400/30"
+              : "bg-black/5 text-black/50 border border-black/5 hover:text-black/80 hover:bg-black/10 dark:bg-white/[0.03] dark:text-white/40 dark:border-white/[0.06] dark:hover:text-white/60 dark:hover:bg-white/[0.05]"
+          }`}
+        >
+          <span className="text-base">🔴</span>
+          Core Team Applications
+          <span
+            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+              source === "core-team"
+                ? "bg-rose-100/60 text-rose-600 dark:bg-rose-500/20 dark:text-rose-300"
+                : "bg-black/10 text-black/50 dark:bg-white/[0.06] dark:text-white/30"
+            }`}
+          >
+            {counts.coreTeam}
           </span>
         </button>
       </div>
