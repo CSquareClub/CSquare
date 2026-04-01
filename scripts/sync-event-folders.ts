@@ -1,7 +1,7 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { config as loadEnv } from 'dotenv';
-import { listPublicEvents } from '../lib/events-store';
+import { listAdminEvents, listPublicEvents } from '../lib/events-store';
 
 loadEnv({ path: path.join(process.cwd(), '.env.local') });
 loadEnv({ path: path.join(process.cwd(), '.env') });
@@ -43,31 +43,42 @@ function parseSlugsFromArgs(): string[] {
     .map((item) => slugifyTitle(item));
 }
 
+function hasAllEventsFlag(): boolean {
+  return process.argv.includes('--all-events');
+}
+
 async function main(): Promise<void> {
   const root = path.join(process.cwd(), 'app', 'events', 'published');
   await ensureDir(root);
   const slugsFromArgs = parseSlugsFromArgs();
+  const includeAllEvents = hasAllEventsFlag();
 
   let eventSlugs: string[] = [];
+  let modeLabel = 'manual';
 
   if (slugsFromArgs.length > 0) {
     eventSlugs = slugsFromArgs;
+    modeLabel = 'manual-slugs';
   } else {
     try {
-      const events = await listPublicEvents();
+      const events = includeAllEvents ? await listAdminEvents() : await listPublicEvents();
       eventSlugs = events
         .map((event) => slugifyTitle((event.title || '').trim() || `event-${event.id}`))
         .filter(Boolean);
+      modeLabel = includeAllEvents ? 'all-events' : 'published-only';
     } catch (error) {
-      console.warn('Could not auto-load published events from database.');
-      console.warn('Use: pnpm sync:event-folders -- --slugs=event-one,event-two');
+      const target = includeAllEvents ? 'all events' : 'published events';
+      console.warn(`Could not auto-load ${target} from database.`);
+      console.warn('Use: npm run sync:event-folders -- --slugs=event-one,event-two');
       console.warn(error);
     }
   }
 
+  const uniqueSlugs = [...new Set(eventSlugs)];
+
   let createdCount = 0;
 
-  for (const slug of eventSlugs) {
+  for (const slug of uniqueSlugs) {
     if (!slug) continue;
 
     const eventDir = path.join(root, slug);
@@ -97,7 +108,7 @@ async function main(): Promise<void> {
     [
       'This folder contains code-managed, per-event page customizations.',
       '',
-      'Each published event gets: app/events/published/<event-slug>/override.json',
+      'Each event gets: app/events/published/<event-slug>/override.json',
       '',
       'Fields:',
       '- heading: section title shown on event detail page',
@@ -105,14 +116,16 @@ async function main(): Promise<void> {
       '- extraCtaLabel: optional CTA button label',
       '- extraCtaUrl: optional CTA button link',
       '',
-      'Auto mode: pnpm sync:event-folders',
-      'Manual mode: pnpm sync:event-folders -- --slugs=event-one,event-two',
+      'Published-only mode: npm run sync:event-folders',
+      'All-events mode (includes older/archived): npm run sync:event-folders -- --all-events',
+      'Manual mode: npm run sync:event-folders -- --slugs=event-one,event-two',
       '',
-      'Run this whenever new events are published.',
+      'Run this whenever events are added or updated.',
     ].join('\n') + '\n'
   );
 
-  console.log(`Published events resolved: ${eventSlugs.length}`);
+  console.log(`Sync mode: ${modeLabel}`);
+  console.log(`Events resolved: ${uniqueSlugs.length}`);
   console.log(`New override folders initialized: ${createdCount}`);
 }
 

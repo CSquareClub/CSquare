@@ -9,7 +9,8 @@
     "start": "next start",
     "postinstall": "prisma generate",
     "lint": "eslint .",
-    "sync:event-folders": "npx --yes tsx scripts/sync-event-folders.ts"
+    "sync:event-folders": "npx --yes tsx scripts/sync-event-folders.ts",
+    "sync:event-folders:all": "npx --yes tsx scripts/sync-event-folders.ts --all-events"
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.1014.0",
