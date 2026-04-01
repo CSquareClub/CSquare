@@ -70,90 +70,100 @@ type EventRow = {
 };
 
 let tableReady = false;
+let tableReadyPromise: Promise<void> | null = null;
 
 async function ensureEventsTable() {
   if (tableReady) return;
+  if (tableReadyPromise) return tableReadyPromise;
 
-  await prisma.$executeRawUnsafe(`
-    CREATE TABLE IF NOT EXISTS events (
-      id SERIAL PRIMARY KEY,
-      title TEXT NOT NULL,
-      description TEXT NOT NULL,
-      start_at TIMESTAMPTZ,
-      end_at TIMESTAMPTZ,
-      event_date TIMESTAMPTZ NOT NULL,
-      time_text TEXT NOT NULL,
-      location TEXT NOT NULL,
-      attendees INTEGER NOT NULL DEFAULT 0,
-      category TEXT NOT NULL,
-      image_url TEXT NOT NULL,
-      sponsor_title TEXT,
-      sponsor_logo_url TEXT,
-      sponsor_logo_light_url TEXT,
-      sponsor_logo_dark_url TEXT,
-      devfolio_apply_logo_light_url TEXT,
-      devfolio_apply_logo_dark_url TEXT,
-      is_published BOOLEAN NOT NULL DEFAULT TRUE,
-      registration_url TEXT,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-  `);
+  tableReadyPromise = (async () => {
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS events (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        start_at TIMESTAMPTZ,
+        end_at TIMESTAMPTZ,
+        event_date TIMESTAMPTZ NOT NULL,
+        time_text TEXT NOT NULL,
+        location TEXT NOT NULL,
+        attendees INTEGER NOT NULL DEFAULT 0,
+        category TEXT NOT NULL,
+        image_url TEXT NOT NULL,
+        sponsor_title TEXT,
+        sponsor_logo_url TEXT,
+        sponsor_logo_light_url TEXT,
+        sponsor_logo_dark_url TEXT,
+        devfolio_apply_logo_light_url TEXT,
+        devfolio_apply_logo_dark_url TEXT,
+        is_published BOOLEAN NOT NULL DEFAULT TRUE,
+        registration_url TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
 
-  await prisma.$executeRawUnsafe(`
-    CREATE TABLE IF NOT EXISTS event_sponsors (
-      id SERIAL PRIMARY KEY,
-      event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
-      title TEXT NOT NULL,
-      logo_url TEXT,
-      logo_light_url TEXT,
-      logo_dark_url TEXT,
-      devfolio_apply_logo_light_url TEXT,
-      devfolio_apply_logo_dark_url TEXT,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-  `);
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS event_sponsors (
+        id SERIAL PRIMARY KEY,
+        event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+        title TEXT NOT NULL,
+        logo_url TEXT,
+        logo_light_url TEXT,
+        logo_dark_url TEXT,
+        devfolio_apply_logo_light_url TEXT,
+        devfolio_apply_logo_dark_url TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
 
-  await prisma.$executeRawUnsafe(`
-    CREATE TABLE IF NOT EXISTS event_community_partners (
-      id SERIAL PRIMARY KEY,
-      event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
-      name TEXT NOT NULL,
-      logo_url TEXT,
-      logo_light_url TEXT,
-      logo_dark_url TEXT,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-  `);
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS event_community_partners (
+        id SERIAL PRIMARY KEY,
+        event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        logo_url TEXT,
+        logo_light_url TEXT,
+        logo_dark_url TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
 
-  await prisma.$executeRawUnsafe(`
-    CREATE INDEX IF NOT EXISTS idx_event_sponsors_event_id ON event_sponsors(event_id);
-  `);
+    await prisma.$executeRawUnsafe(`
+      CREATE INDEX IF NOT EXISTS idx_event_sponsors_event_id ON event_sponsors(event_id);
+    `);
 
-  await prisma.$executeRawUnsafe(`
-    CREATE INDEX IF NOT EXISTS idx_event_community_partners_event_id ON event_community_partners(event_id);
-  `);
+    await prisma.$executeRawUnsafe(`
+      CREATE INDEX IF NOT EXISTS idx_event_community_partners_event_id ON event_community_partners(event_id);
+    `);
 
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS start_at TIMESTAMPTZ;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS end_at TIMESTAMPTZ;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_title TEXT;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_url TEXT;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_light_url TEXT;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_dark_url TEXT;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS devfolio_apply_logo_light_url TEXT;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS devfolio_apply_logo_dark_url TEXT;`);
-  await prisma.$executeRawUnsafe(`UPDATE events SET start_at = event_date WHERE start_at IS NULL;`);
-  await prisma.$executeRawUnsafe(`UPDATE events SET end_at = event_date WHERE end_at IS NULL;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN title DROP NOT NULL;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN description DROP NOT NULL;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN start_at DROP NOT NULL;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN end_at DROP NOT NULL;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN time_text DROP NOT NULL;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN location DROP NOT NULL;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN category DROP NOT NULL;`);
-  await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN image_url DROP NOT NULL;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS start_at TIMESTAMPTZ;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS end_at TIMESTAMPTZ;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_title TEXT;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_url TEXT;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_light_url TEXT;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_dark_url TEXT;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS devfolio_apply_logo_light_url TEXT;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS devfolio_apply_logo_dark_url TEXT;`);
+    await prisma.$executeRawUnsafe(`UPDATE events SET start_at = event_date WHERE start_at IS NULL;`);
+    await prisma.$executeRawUnsafe(`UPDATE events SET end_at = event_date WHERE end_at IS NULL;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN title DROP NOT NULL;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN description DROP NOT NULL;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN start_at DROP NOT NULL;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN end_at DROP NOT NULL;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN time_text DROP NOT NULL;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN location DROP NOT NULL;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN category DROP NOT NULL;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN image_url DROP NOT NULL;`);
 
-  tableReady = true;
+    tableReady = true;
+  })();
+
+  try {
+    await tableReadyPromise;
+  } finally {
+    tableReadyPromise = null;
+  }
 }
 
 function formatTimeRange(startDate: Date, endDate: Date): string {
