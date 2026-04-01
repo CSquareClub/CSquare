@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { z } from "zod";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/authOptions";
 
 const ses = new SESClient({
   region: process.env.AWS_REGION || "us-east-1",
@@ -267,11 +265,6 @@ const schema2027 = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
-      return NextResponse.json({ error: "Please login to submit CUSoC registration." }, { status: 401 });
-    }
-
     const body = await req.json();
     const track = body?.track;
 
