@@ -7,6 +7,7 @@ import Footer from '@/components/footer';
 import GridBackground from '@/components/grid-background';
 import { getPublicEventById, listPublicEvents } from '@/lib/events-store';
 import { listGalleryItemsByEventId } from '@/lib/gallery-store';
+import { getEventPageOverride } from '@/lib/event-page-overrides';
 
 export const dynamic = 'force-dynamic';
 const EVENT_TIMEZONE = 'Asia/Kolkata';
@@ -118,6 +119,7 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
   }
 
   const safeTitle = event.title?.trim() || 'Untitled Event';
+  const pageOverride = await getEventPageOverride(slug);
   const imageUrl = normalizeEventImageUrl(event.image);
   const lightSponsorLogo = event.sponsorLogoLightUrl || event.sponsorLogoUrl;
   const darkSponsorLogo = event.sponsorLogoDarkUrl || event.sponsorLogoLightUrl || event.sponsorLogoUrl;
@@ -253,6 +255,25 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                   Registration unavailable
                 </div>
               )}
+
+              {pageOverride?.body ? (
+                <section className="rounded-xl border border-border bg-background/50 p-4">
+                  <h2 className="mb-2 text-lg font-semibold text-foreground">
+                    {pageOverride.heading || 'Additional Event Details'}
+                  </h2>
+                  <p className="whitespace-pre-line text-sm text-foreground/75">{pageOverride.body}</p>
+                  {pageOverride.extraCtaLabel && pageOverride.extraCtaUrl ? (
+                    <a
+                      href={pageOverride.extraCtaUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-4 inline-flex items-center rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition-all hover:border-[#dc2626] hover:bg-[#dc2626] hover:text-white"
+                    >
+                      {pageOverride.extraCtaLabel}
+                    </a>
+                  ) : null}
+                </section>
+              ) : null}
             </div>
           </article>
         </div>
