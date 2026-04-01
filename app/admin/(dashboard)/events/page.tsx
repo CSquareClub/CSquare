@@ -53,11 +53,6 @@ type EventFormState = {
   image: string;
   sponsors: Sponsor[];
   communityPartners: CommunityPartnerDraft[];
-  sponsorTitle: string;
-  sponsorLogoLightUrl: string;
-  sponsorLogoDarkUrl: string;
-  devfolioApplyLogoLightUrl: string;
-  devfolioApplyLogoDarkUrl: string;
   isPublished: boolean;
   registrationUrl: string;
 };
@@ -73,14 +68,37 @@ const defaultForm: EventFormState = {
   image: "",
   sponsors: [],
   communityPartners: [],
-  sponsorTitle: "",
-  sponsorLogoLightUrl: "",
-  sponsorLogoDarkUrl: "",
-  devfolioApplyLogoLightUrl: "",
-  devfolioApplyLogoDarkUrl: "",
   isPublished: true,
   registrationUrl: "",
 };
+
+function isDevfolioSponsor(title: string | null | undefined): boolean {
+  return title?.trim().toLowerCase() === "devfolio";
+}
+
+function normalizeSponsorsForEdit(event: EventItem): Sponsor[] {
+  if (event.sponsors && event.sponsors.length > 0) {
+    return event.sponsors;
+  }
+
+  const hasLegacySponsor = Boolean(event.sponsorTitle || event.sponsorLogoLightUrl || event.sponsorLogoDarkUrl || event.sponsorLogoUrl);
+  if (!hasLegacySponsor) {
+    return [];
+  }
+
+  return [
+    {
+      title: event.sponsorTitle || "Sponsor",
+      logoUrl: null,
+      logoLightUrl: event.sponsorLogoLightUrl || event.sponsorLogoUrl || null,
+      logoDarkUrl: event.sponsorLogoDarkUrl || event.sponsorLogoLightUrl || event.sponsorLogoUrl || null,
+      devfolioApplyLogoLightUrl: event.devfolioApplyLogoLightUrl || null,
+      devfolioApplyLogoDarkUrl: event.devfolioApplyLogoDarkUrl || null,
+      instagramUrl: null,
+      linkedinUrl: null,
+    },
+  ];
+}
 
 function toInputDateValue(isoDate: string) {
   const date = new Date(isoDate);
@@ -119,40 +137,30 @@ export default function AdminEventsPage() {
     loadEvents();
   }, []);
 
-  function handleLogoFileChange(file: File | null, mode: "light" | "dark", variant: "sponsor" | "apply", sponsorIdx?: number) {
+  function handleLogoFileChange(
+    file: File | null,
+    mode: "light" | "dark" | "applyLight" | "applyDark",
+    sponsorIdx: number
+  ) {
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
       if (typeof result === "string") {
-        if (variant === "sponsor") {
-          if (sponsorIdx !== undefined) {
-            // Handle sponsor logo file upload
-            setForm((prev) => {
-              const updated = [...prev.sponsors];
-              if (mode === "light") {
-                updated[sponsorIdx].logoLightUrl = result;
-              } else {
-                updated[sponsorIdx].logoDarkUrl = result;
-              }
-              return { ...prev, sponsors: updated };
-            });
-          } else {
-            // Handle legacy single sponsor
-            if (mode === "light") {
-              setForm((prev) => ({ ...prev, sponsorLogoLightUrl: result }));
-            } else {
-              setForm((prev) => ({ ...prev, sponsorLogoDarkUrl: result }));
-            }
-          }
-        } else if (variant === "apply") {
+        setForm((prev) => {
+          const updated = [...prev.sponsors];
           if (mode === "light") {
-            setForm((prev) => ({ ...prev, devfolioApplyLogoLightUrl: result }));
+            updated[sponsorIdx].logoLightUrl = result;
+          } else if (mode === "dark") {
+            updated[sponsorIdx].logoDarkUrl = result;
+          } else if (mode === "applyLight") {
+            updated[sponsorIdx].devfolioApplyLogoLightUrl = result;
           } else {
-            setForm((prev) => ({ ...prev, devfolioApplyLogoDarkUrl: result }));
+            updated[sponsorIdx].devfolioApplyLogoDarkUrl = result;
           }
-        }
+          return { ...prev, sponsors: updated };
+        });
       }
     };
     reader.readAsDataURL(file);
@@ -169,25 +177,20 @@ export default function AdminEventsPage() {
     setError(null);
     setStatus(null);
 
-    const isDevfolioSponsor = form.sponsorTitle.trim().toLowerCase() === "devfolio";
-    if (isDevfolioSponsor) {
-      if (!form.sponsorLogoLightUrl.trim() || !form.sponsorLogoDarkUrl.trim()) {
-        setError("For Devfolio sponsor, both light and dark Devfolio logos are required.");
-        setSubmitting(false);
-        return;
-      }
+    const invalidDevfolioSponsor = form.sponsors.find((sponsor) => {
+      if (!isDevfolioSponsor(sponsor.title)) return false;
+      return (
+        !sponsor.logoLightUrl?.trim() ||
+        !sponsor.logoDarkUrl?.trim() ||
+        !sponsor.devfolioApplyLogoLightUrl?.trim() ||
+        !sponsor.devfolioApplyLogoDarkUrl?.trim()
+      );
+    });
 
-      if (!form.devfolioApplyLogoLightUrl.trim() || !form.devfolioApplyLogoDarkUrl.trim()) {
-        setError("For Devfolio sponsor, both light and dark Apply with Devfolio logos are required.");
-        setSubmitting(false);
-        return;
-      }
-
-      if (!form.registrationUrl.trim()) {
-        setError("For Devfolio sponsor, registration URL is required.");
-        setSubmitting(false);
-        return;
-      }
+    if (invalidDevfolioSponsor) {
+      setError("For Devfolio sponsor, upload light/dark logos and light/dark Apply with Devfolio button logos.");
+      setSubmitting(false);
+      return;
     }
 
     const payload = {
@@ -201,7 +204,7 @@ export default function AdminEventsPage() {
       image: form.image.trim() || null,
       sponsors: form.sponsors.filter(s => s.title.trim()).map(s => ({
         title: s.title.trim(),
-        logoUrl: s.logoUrl?.trim() || null,
+        logoUrl: null,
         logoLightUrl: s.logoLightUrl?.trim() || null,
         logoDarkUrl: s.logoDarkUrl?.trim() || null,
         devfolioApplyLogoLightUrl: s.devfolioApplyLogoLightUrl?.trim() || null,
@@ -216,11 +219,11 @@ export default function AdminEventsPage() {
         instagramUrl: partner.instagramUrl?.trim() || null,
         linkedinUrl: partner.linkedinUrl?.trim() || null,
       })),
-      sponsorTitle: form.sponsorTitle || null,
-      sponsorLogoLightUrl: form.sponsorLogoLightUrl || null,
-      sponsorLogoDarkUrl: form.sponsorLogoDarkUrl || null,
-      devfolioApplyLogoLightUrl: form.devfolioApplyLogoLightUrl || null,
-      devfolioApplyLogoDarkUrl: form.devfolioApplyLogoDarkUrl || null,
+      sponsorTitle: null,
+      sponsorLogoLightUrl: null,
+      sponsorLogoDarkUrl: null,
+      devfolioApplyLogoLightUrl: null,
+      devfolioApplyLogoDarkUrl: null,
       isPublished: form.isPublished,
       registrationUrl: form.registrationUrl || null,
     };
@@ -258,13 +261,8 @@ export default function AdminEventsPage() {
       attendees: typeof event.attendees === "number" ? String(event.attendees) : "",
       category: event.category || "",
       image: event.image || "",
-      sponsors: event.sponsors || [],
+      sponsors: normalizeSponsorsForEdit(event),
       communityPartners: event.communityPartners || [],
-      sponsorTitle: event.sponsorTitle || "",
-      sponsorLogoLightUrl: event.sponsorLogoLightUrl || event.sponsorLogoUrl || "",
-      sponsorLogoDarkUrl: event.sponsorLogoDarkUrl || event.sponsorLogoUrl || "",
-      devfolioApplyLogoLightUrl: event.devfolioApplyLogoLightUrl || "",
-      devfolioApplyLogoDarkUrl: event.devfolioApplyLogoDarkUrl || "",
       isPublished: event.isPublished,
       registrationUrl: event.registrationUrl || "",
     });
@@ -343,60 +341,6 @@ export default function AdminEventsPage() {
           className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
         />
         <input
-          placeholder="Sponsor title (optional)"
-          value={form.sponsorTitle}
-          onChange={(e) => setForm((prev) => ({ ...prev, sponsorTitle: e.target.value }))}
-          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
-        />
-        {form.sponsorTitle.trim().toLowerCase() === "devfolio" ? (
-          <p className="text-xs text-primary font-medium md:col-span-2">
-            Devfolio sponsor requires: Devfolio logo (light and dark), Apply with Devfolio logo (light and dark), and a registration URL.
-          </p>
-        ) : null}
-        <div className="md:col-span-2">
-          <label className="mb-1 block text-sm font-medium">Sponsor Logo Light (Light mode)</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "light", "sponsor")}
-            className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base"
-          />
-        </div>
-        <div className="md:col-span-2">
-          <label className="mb-1 block text-sm font-medium">Sponsor Logo Dark (Dark mode)</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "dark", "sponsor")}
-            className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base"
-          />
-        </div>
-        {form.sponsorTitle.trim().toLowerCase() === "devfolio" ? (
-          <>
-            <div className="md:col-span-2 rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4 text-sm text-foreground/70">
-              Devfolio sponsor detected. Upload both Devfolio logos and both Apply with Devfolio button images below.
-            </div>
-            <div className="md:col-span-2">
-              <label className="mb-1 block text-sm font-medium">Apply with Devfolio Logo Light</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "light", "apply")}
-                className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="mb-1 block text-sm font-medium">Apply with Devfolio Logo Dark</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "dark", "apply")}
-                className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base"
-              />
-            </div>
-          </>
-        ) : null}
-        <input
           placeholder="Registration URL (optional)"
           value={form.registrationUrl}
           onChange={(e) => setForm((prev) => ({ ...prev, registrationUrl: e.target.value }))}
@@ -406,7 +350,7 @@ export default function AdminEventsPage() {
         {/* Multiple Sponsors Management */}
         <div className="md:col-span-2">
           <div className="mb-2 flex items-center justify-between">
-            <label className="text-base font-semibold text-primary">Additional Sponsors</label>
+            <label className="text-base font-semibold text-primary">Sponsors</label>
             <button
               type="button"
               onClick={() => {
@@ -469,7 +413,7 @@ export default function AdminEventsPage() {
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "light", "sponsor", idx)}
+                        onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "light", idx)}
                         className="block w-full text-xs text-foreground/60
                           file:mr-3 file:px-3 file:py-1.5 file:rounded file:border-0
                           file:text-xs file:font-medium file:bg-primary/20 file:text-primary
@@ -492,7 +436,7 @@ export default function AdminEventsPage() {
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "dark", "sponsor", idx)}
+                        onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "dark", idx)}
                         className="block w-full text-xs text-foreground/60
                           file:mr-3 file:px-3 file:py-1.5 file:rounded file:border-0
                           file:text-xs file:font-medium file:bg-primary/20 file:text-primary
@@ -509,6 +453,54 @@ export default function AdminEventsPage() {
                       )}
                     </div>
                   </div>
+
+                  {isDevfolioSponsor(sponsor.title) ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-foreground/80">Apply Button Light (Devfolio)</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "applyLight", idx)}
+                          className="block w-full text-xs text-foreground/60
+                            file:mr-3 file:px-3 file:py-1.5 file:rounded file:border-0
+                            file:text-xs file:font-medium file:bg-primary/20 file:text-primary
+                            hover:file:bg-primary/30 cursor-pointer"
+                        />
+                        {sponsor.devfolioApplyLogoLightUrl ? (
+                          <div className="mt-2 p-2 bg-white rounded border border-border">
+                            <img
+                              src={sponsor.devfolioApplyLogoLightUrl}
+                              alt="Devfolio apply light preview"
+                              className="max-h-12 max-w-full object-contain"
+                            />
+                          </div>
+                        ) : null}
+                      </div>
+
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-foreground/80">Apply Button Dark (Devfolio)</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "applyDark", idx)}
+                          className="block w-full text-xs text-foreground/60
+                            file:mr-3 file:px-3 file:py-1.5 file:rounded file:border-0
+                            file:text-xs file:font-medium file:bg-primary/20 file:text-primary
+                            hover:file:bg-primary/30 cursor-pointer"
+                        />
+                        {sponsor.devfolioApplyLogoDarkUrl ? (
+                          <div className="mt-2 p-2 bg-gray-900 rounded border border-border">
+                            <img
+                              src={sponsor.devfolioApplyLogoDarkUrl}
+                              alt="Devfolio apply dark preview"
+                              className="max-h-12 max-w-full object-contain"
+                            />
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  ) : null}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>

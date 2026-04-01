@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     // Process sponsors array if provided
     const sponsors = body.sponsors ? body.sponsors.map((sponsor: any) => ({
       title: sponsor.title,
-      logoUrl: sponsor.logoUrl || null,
+      logoUrl: null,
       logoLightUrl: sponsor.logoLightUrl || null,
       logoDarkUrl: sponsor.logoDarkUrl || null,
       devfolioApplyLogoLightUrl: sponsor.devfolioApplyLogoLightUrl || null,

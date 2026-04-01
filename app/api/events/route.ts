@@ -54,7 +54,6 @@ export async function POST(req: Request) {
       prizes: body?.prizes ? String(body.prizes).trim() : undefined,
       rules: body?.rules ? String(body.rules).trim() : undefined,
       schedule: body?.schedule ? String(body.schedule).trim() : undefined,
-      sponsors: body?.sponsors ? String(body.sponsors).trim() : undefined,
       status: body?.status,
       slug: body?.slug ? String(body.slug).trim() : slugify(String(body?.title ?? "")),
     });
@@ -97,7 +96,6 @@ export async function POST(req: Request) {
       input.prizes ? `**Prizes & Benefits**\n${input.prizes}` : null,
       input.rules ? `**Rules**\n${input.rules}` : null,
       input.schedule ? `**Timeline / Schedule**\n${input.schedule}` : null,
-      input.sponsors ? `**Sponsors**\n${input.sponsors}` : null,
     ].filter(Boolean);
 
     const fullDescription = detailLines.length
@@ -105,15 +103,30 @@ export async function POST(req: Request) {
       : input.description;
 
     // Parse sponsors array if provided
-    const sponsorsArray: any[] = input.sponsors && Array.isArray(input.sponsors)
-      ? input.sponsors.filter(s => s.title && s.title.trim()).map(s => ({
-          title: s.title || "",
+    const sponsorsArray: any[] = Array.isArray(body?.sponsors)
+      ? body.sponsors.filter((s: any) => s?.title && String(s.title).trim()).map((s: any) => ({
+          title: String(s.title).trim(),
           logoUrl: null,
           logoLightUrl: s.logoLightUrl || null,
           logoDarkUrl: s.logoDarkUrl || null,
-          devfolioApplyLogoLightUrl: null,
-          devfolioApplyLogoDarkUrl: null,
+          devfolioApplyLogoLightUrl: s.devfolioApplyLogoLightUrl || null,
+          devfolioApplyLogoDarkUrl: s.devfolioApplyLogoDarkUrl || null,
+          instagramUrl: s.instagramUrl || null,
+          linkedinUrl: s.linkedinUrl || null,
         }))
+      : [];
+
+    const communityPartnersArray: any[] = Array.isArray(body?.communityPartners)
+      ? body.communityPartners
+          .filter((p: any) => p?.name && String(p.name).trim())
+          .map((p: any) => ({
+            name: String(p.name).trim(),
+            logoUrl: p.logoUrl || null,
+            logoLightUrl: p.logoLightUrl || null,
+            logoDarkUrl: p.logoDarkUrl || null,
+            instagramUrl: p.instagramUrl || null,
+            linkedinUrl: p.linkedinUrl || null,
+          }))
       : [];
 
     const created = await createEvent({
@@ -134,6 +147,7 @@ export async function POST(req: Request) {
       isPublished: input.status === "published",
       registrationUrl: input.registrationLink,
       sponsors: sponsorsArray,
+      communityPartners: communityPartnersArray,
     });
 
     return NextResponse.json({ ...created, slug: input.slug, status: input.status }, { status: 201 });

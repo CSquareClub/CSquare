@@ -26,7 +26,7 @@ export async function PATCH(req: Request, context: RouteContext) {
     // Process sponsors array if provided
     const sponsors = body.sponsors !== undefined ? body.sponsors.map((sponsor: any) => ({
       title: sponsor.title,
-      logoUrl: sponsor.logoUrl || null,
+      logoUrl: null,
       logoLightUrl: sponsor.logoLightUrl || null,
       logoDarkUrl: sponsor.logoDarkUrl || null,
       devfolioApplyLogoLightUrl: sponsor.devfolioApplyLogoLightUrl || null,
