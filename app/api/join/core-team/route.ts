@@ -100,20 +100,20 @@ async function sendOtpEmail(collegeEmail: string, otp: string, fullName?: string
   await ses.send(command);
 }
 
-async function sendWelcomeEmail(personalEmail: string, fullName: string) {
-  const whatsappLink = 'https://chat.whatsapp.com/KVcAI2nE6ZR0AyXurBor6O';
+async function sendWelcomeEmail(collegeEmail: string, fullName: string) {
+  const whatsappLink = 'https://chat.whatsapp.com/EnANNl7izAm0hcr7Pn6yu5?mode=gi_t';
   const sourceEmail = process.env.AWS_SES_FROM_EMAIL || 'csquareclub@cumail.in';
 
-  if (!personalEmail || !personalEmail.includes('@')) return;
+  if (!collegeEmail || !collegeEmail.includes('@')) return;
 
   const command = new SendEmailCommand({
     Source: sourceEmail,
-    Destination: { ToAddresses: [personalEmail] },
+    Destination: { ToAddresses: [collegeEmail] },
     Message: {
-      Subject: { Data: 'Welcome to C Square Core Team! 🎉' },
+      Subject: { Data: 'Thanks for your interest in C Square Core Team' },
       Body: {
         Text: {
-          Data: `Hi ${fullName},\n\nThank you for applying to C Square Core Team! We're excited to have you on board.\n\nPlease join our WhatsApp group for further updates and discussions:\n${whatsappLink}\n\nBest regards,\nC Square Club`,
+          Data: `Hi ${fullName},\n\nThanks for your interest in joining the C Square Core Team.\nPlease join this group while we go through your profile:\n${whatsappLink}\n\nBest regards,\nC Square Club`,
         },
         Html: {
           Data: `
@@ -166,13 +166,13 @@ async function sendWelcomeEmail(personalEmail: string, fullName: string) {
   <tr>
     <td class="padding text" style="padding:40px 30px; color:#333; line-height:1.6; font-size:16px;">
       <p style="font-size:18px; margin-top:0;">Hi <b>${fullName}</b>,</p>
-      <p>Thank you for applying to the C Square Core Team! We're excited to have you on board. 🎉</p>
+      <p>Thanks for your interest in joining the C Square Core Team.</p>
       <!-- Highlight Box -->
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; margin:25px 0;">
         <tr>
           <td style="padding:20px; text-align:center;">
             <p style="font-size:15px; color:#7f1d1d;">
-              Please join our official WhatsApp group for updates and discussions:
+              Please join this group while we go through your profile:
             </p>
             <!-- Button -->
             <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin-top:10px;">
@@ -432,8 +432,8 @@ export async function POST(req: Request) {
       whyJoin,
     });
 
-    // Send welcome email with WhatsApp group link
-    await sendWelcomeEmail(personalEmail, fullName);
+    // Send acknowledgement email with WhatsApp group link to CUCHD email
+    await sendWelcomeEmail(collegeEmail, fullName);
     await markCoreTeamOtpUsed(uid);
 
     return NextResponse.json({ success: true, id: record.id }, { status: 201 });
