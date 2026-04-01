@@ -4,6 +4,15 @@ import {
   hasCoreTeamDuplicate,
   hasCoreTeamMembershipDuplicate,
 } from '@/lib/core-team-applications-store';
+import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+
+const ses = new SESClient({
+  region: process.env.AWS_REGION || 'us-east-1',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+  },
+});
 
 const MEMBERSHIP_ID_REGEX = /^[A-Za-z0-9-]{5,24}$/;
 const DEPARTMENTS = new Set([
@@ -37,6 +46,135 @@ function isValidUrl(value: string): boolean {
     return url.protocol === 'http:' || url.protocol === 'https:';
   } catch {
     return false;
+  }
+}
+
+async function sendWelcomeEmail(cuEmail: string, fullName: string) {
+  const whatsappLink = 'https://chat.whatsapp.com/KVcAI2nE6ZR0AyXurBor6O';
+  const sourceEmail = process.env.AWS_SES_FROM_EMAIL || 'csquareclub@cumail.in';
+
+  if (!cuEmail || !cuEmail.includes('@')) return;
+
+  const command = new SendEmailCommand({
+    Source: sourceEmail,
+    Destination: { ToAddresses: [cuEmail] },
+    Message: {
+      Subject: { Data: 'Welcome to C Square Core Team! 🎉' },
+      Body: {
+        Text: {
+          Data: `Hi ${fullName},\n\nThank you for applying to C Square Core Team! We're excited to have you on board.\n\nPlease join our WhatsApp group for further updates and discussions:\n${whatsappLink}\n\nBest regards,\nC Square Club`,
+        },
+        Html: {
+          Data: `
+            <!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+@media only screen and (max-width: 480px) {
+  .container {
+    width: 100% !important;
+  }
+  .padding {
+    padding: 20px !important;
+  }
+  .logo-left {
+    height: 40px !important;
+  }
+  .logo-right {
+    width: 110px !important;
+    height: auto !important;
+  }
+  .text {
+    font-size: 15px !important;
+  }
+}
+</style>
+</head>
+<body style="margin:0; padding:0; background-color:#f9f9f9; font-family: Helvetica, Arial, sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9f9f9; padding:20px;">
+<tr>
+<td align="center">
+<table class="container" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #eaeaea;">
+  <!-- Header -->
+  <tr>
+    <td class="padding" style="padding:25px 20px; border-bottom:1px solid #f0f0f0;">
+      <table width="100%">
+        <tr>
+          <td align="left">
+            <img src="https://www.csquareclub.co.in/c-square-text.png"
+                 class="logo-left"
+                 style="height:60px; display:block;" />
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <!-- Body -->
+  <tr>
+    <td class="padding text" style="padding:40px 30px; color:#333; line-height:1.6; font-size:16px;">
+      <p style="font-size:18px; margin-top:0;">Hi <b>${fullName}</b>,</p>
+      <p>Thank you for applying to the C Square Core Team! We're excited to have you on board. 🎉</p>
+      <!-- Highlight Box -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; margin:25px 0;">
+        <tr>
+          <td style="padding:20px; text-align:center;">
+            <p style="font-size:15px; color:#7f1d1d;">
+              Please join our official WhatsApp group for updates and discussions:
+            </p>
+            <!-- Button -->
+            <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin-top:10px;">
+              <tr>
+                <td align="center" bgcolor="#ef4444" style="border-radius:6px;">
+                  <a href="${whatsappLink}"
+                     style="
+                       display:block;
+                       padding:12px 20px;
+                       color:#ffffff;
+                       text-decoration:none;
+                       font-weight:bold;
+                       font-size:16px;
+                     ">
+                    Join WhatsApp Group
+                  </a>
+                </td>
+              </tr>
+            </table>
+            <p style="font-size:13px; margin-top:15px; color:#991b1b; word-break:break-all;">
+              Or copy: <a href="${whatsappLink}" style="color:#ef4444;">${whatsappLink}</a>
+            </p>
+          </td>
+        </tr>
+      </table>
+      <p>Best regards,<br><strong style="color:#ef4444;">C Square Club</strong></p>
+    </td>
+  </tr>
+  <!-- Footer -->
+  <tr>
+    <td style="background:#fafafa; padding:20px; text-align:center; font-size:13px; color:#888;">
+      <p style="margin:0;">C Square Club - Chandigarh University</p>
+      <p style="margin:5px 0;">
+        <a href="https://www.csquareclub.co.in" style="color:#888;">www.csquareclub.co.in</a>
+      </p>
+    </td>
+  </tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>
+          `,
+        },
+      },
+    },
+  });
+
+  try {
+    await ses.send(command);
+  } catch (err) {
+    console.error('Failed to send welcome email to Core Team applicant', err);
   }
 }
 
@@ -146,6 +284,9 @@ export async function POST(req: Request) {
       portfolioUrl,
       whyJoin,
     });
+
+    // Send welcome email with WhatsApp group link
+    await sendWelcomeEmail(uid, fullName);
 
     return NextResponse.json({ success: true, id: record.id }, { status: 201 });
   } catch (error) {
