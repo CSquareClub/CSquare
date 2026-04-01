@@ -80,6 +80,7 @@ const exportColumns: Record<
 function asSheetValue(value: unknown): string | number | boolean {
   if (value === null || value === undefined) return "";
   if (value instanceof Date) return value.toISOString();
+  if (typeof value === "boolean") return value ? "Yes" : "No";
   if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
     return value;
   }

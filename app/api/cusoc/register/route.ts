@@ -11,6 +11,24 @@ const ses = new SESClient({
   },
 });
 
+const preferenceLabelMap: Record<string, string> = {
+  web: "Web Development",
+  app: "App Development",
+  backend: "Backend",
+  opensource: "Open Source",
+  dsa_cp: "DSA / CP",
+  dsa: "DSA",
+};
+
+function normalizePreferenceString(value: string): string {
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((token) => preferenceLabelMap[token] ?? token)
+    .join(", ");
+}
+
 async function sendWelcomeEmail(emails: string[], fullName: string, track: string, uid:string) {
   const whatsappLink = "https://chat.whatsapp.com/KVcAI2nE6ZR0AyXurBor6O";
   const sourceEmail = process.env.AWS_SES_FROM_EMAIL || "csquareclub@cumail.in";
@@ -252,13 +270,16 @@ export async function POST(req: NextRequest) {
 
     if (track === "2026") {
       const data = schema2026.parse(body);
-    
-      
+
       const { track: _, ...fields } = data;
+      const normalizedFields = {
+        ...fields,
+        domainOrder: normalizePreferenceString(fields.domainOrder),
+      };
 
       // Check duplicate
       const existing = await prisma.cusocRegistration2026.findUnique({
-        where: { cuEmail: fields.cuEmail },
+        where: { cuEmail: normalizedFields.cuEmail },
       });
       if (existing) {
         return NextResponse.json(
@@ -267,9 +288,14 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      await prisma.cusocRegistration2026.create({ data: fields });
+      await prisma.cusocRegistration2026.create({ data: normalizedFields });
       // Send Welcome Email
-      await sendWelcomeEmail([fields.cuEmail, fields.personalEmail], fields.fullName, "2026", fields.rollNumber);
+      await sendWelcomeEmail(
+        [normalizedFields.cuEmail, normalizedFields.personalEmail],
+        normalizedFields.fullName,
+        "2026",
+        normalizedFields.rollNumber
+      );
 
       return NextResponse.json({ success: true });
     }
@@ -277,9 +303,13 @@ export async function POST(req: NextRequest) {
     if (track === "2027") {
       const data = schema2027.parse(body);
       const { track: _, ...fields } = data;
+      const normalizedFields = {
+        ...fields,
+        interestArea: normalizePreferenceString(fields.interestArea),
+      };
 
       const existing = await prisma.cusocRegistration2027.findUnique({
-        where: { cuEmail: fields.cuEmail },
+        where: { cuEmail: normalizedFields.cuEmail },
       });
       if (existing) {
         return NextResponse.json(
@@ -288,9 +318,14 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      await prisma.cusocRegistration2027.create({ data: fields });
+      await prisma.cusocRegistration2027.create({ data: normalizedFields });
       // Send Welcome Email
-      await sendWelcomeEmail([fields.cuEmail, fields.personalEmail], fields.fullName, "2027-28", fields.rollNumber);
+      await sendWelcomeEmail(
+        [normalizedFields.cuEmail, normalizedFields.personalEmail],
+        normalizedFields.fullName,
+        "2027-28",
+        normalizedFields.rollNumber
+      );
 
       return NextResponse.json({ success: true });
     }
