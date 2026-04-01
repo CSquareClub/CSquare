@@ -146,8 +146,9 @@ function rowToEvent(row: EventRow, sponsors: Sponsor[] = []): ClubEvent {
   const sponsorLogoLightUrl = row.sponsor_logo_light_url ?? row.sponsor_logo_url;
   const sponsorLogoDarkUrl = row.sponsor_logo_dark_url ?? sponsorLogoLightUrl;
   
-  // Check if registration should be open (event hasn't ended yet)
-  const isRegistrationOpen = !endDate || endDate > new Date();
+  // Registration stays open only until event end; if end date is missing, use start date.
+  const registrationCutoff = endDate ?? startDate;
+  const isRegistrationOpen = !registrationCutoff || registrationCutoff > new Date();
 
   return {
     id: row.id,

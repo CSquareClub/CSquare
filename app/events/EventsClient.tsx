@@ -10,12 +10,36 @@ interface EventsClientProps {
 }
 
 export default function EventsClient({ allEvents }: EventsClientProps) {
-  const sortedEvents = useMemo(() => {
-    return [...allEvents].sort((a, b) => {
+  const { upcomingEvents, pastEvents } = useMemo(() => {
+    const now = Date.now();
+    const upcoming: ClubEvent[] = [];
+    const past: ClubEvent[] = [];
+
+    for (const event of allEvents) {
+      const startMs = new Date(event.startDate || event.date || 0).getTime();
+      const endMs = new Date(event.endDate || event.startDate || event.date || 0).getTime();
+      const cutoff = Number.isNaN(endMs) ? startMs : endMs;
+
+      if (!Number.isNaN(cutoff) && cutoff < now) {
+        past.push(event);
+      } else {
+        upcoming.push(event);
+      }
+    }
+
+    upcoming.sort((a, b) => {
       const aDate = new Date(a.startDate || a.date || 0).getTime();
       const bDate = new Date(b.startDate || b.date || 0).getTime();
       return aDate - bDate;
     });
+
+    past.sort((a, b) => {
+      const aDate = new Date(a.startDate || a.date || 0).getTime();
+      const bDate = new Date(b.startDate || b.date || 0).getTime();
+      return bDate - aDate;
+    });
+
+    return { upcomingEvents: upcoming, pastEvents: past };
   }, [allEvents]);
 
   return (
@@ -25,22 +49,53 @@ export default function EventsClient({ allEvents }: EventsClientProps) {
           <div className="mb-8">
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">All Events</h1>
             <p className="mt-2 text-foreground/65">
-              {sortedEvents.length > 0
-                ? `Explore ${sortedEvents.length} upcoming and past events from C Square`
+              {allEvents.length > 0
+                ? `Explore ${upcomingEvents.length} upcoming and ${pastEvents.length} past events from C Square`
                 : 'No events available at the moment'}
             </p>
           </div>
 
-          {sortedEvents.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {sortedEvents.map((event) => (
-                <EventCard
-                  key={event.id}
-                  {...event}
-                  date={formatEventDate(event.startDate || event.date)}
-                  time={formatEventTime(event.startDate || event.date, event.endDate || event.startDate || event.date)}
-                />
-              ))}
+          {allEvents.length > 0 ? (
+            <div className="space-y-12">
+              <section>
+                <h2 className="mb-5 text-2xl font-semibold tracking-tight">Upcoming Events</h2>
+                {upcomingEvents.length > 0 ? (
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {upcomingEvents.map((event) => (
+                      <EventCard
+                        key={event.id}
+                        {...event}
+                        date={formatEventDate(event.startDate || event.date)}
+                        time={formatEventTime(event.startDate || event.date, event.endDate || event.startDate || event.date)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-border bg-card/60 p-8 text-center text-foreground/65">
+                    No upcoming events.
+                  </div>
+                )}
+              </section>
+
+              <section>
+                <h2 className="mb-5 text-2xl font-semibold tracking-tight">Past Events</h2>
+                {pastEvents.length > 0 ? (
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {pastEvents.map((event) => (
+                      <EventCard
+                        key={event.id}
+                        {...event}
+                        date={formatEventDate(event.startDate || event.date)}
+                        time={formatEventTime(event.startDate || event.date, event.endDate || event.startDate || event.date)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-border bg-card/60 p-8 text-center text-foreground/65">
+                    No past events yet.
+                  </div>
+                )}
+              </section>
             </div>
           ) : (
             <div className="rounded-xl border border-border bg-card/60 p-12 text-center">
