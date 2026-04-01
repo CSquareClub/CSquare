@@ -113,7 +113,7 @@ export default function AdminEventsPage() {
     loadEvents();
   }, []);
 
-  function handleLogoFileChange(file: File | null, mode: "light" | "dark", variant: "sponsor" | "apply") {
+  function handleLogoFileChange(file: File | null, mode: "light" | "dark", variant: "sponsor" | "apply", sponsorIdx?: number) {
     if (!file) return;
 
     const reader = new FileReader();
@@ -121,10 +121,24 @@ export default function AdminEventsPage() {
       const result = reader.result as string;
       if (typeof result === "string") {
         if (variant === "sponsor") {
-          if (mode === "light") {
-            setForm((prev) => ({ ...prev, sponsorLogoLightUrl: result }));
+          if (sponsorIdx !== undefined) {
+            // Handle sponsor logo file upload
+            setForm((prev) => {
+              const updated = [...prev.sponsors];
+              if (mode === "light") {
+                updated[sponsorIdx].logoLightUrl = result;
+              } else {
+                updated[sponsorIdx].logoDarkUrl = result;
+              }
+              return { ...prev, sponsors: updated };
+            });
           } else {
-            setForm((prev) => ({ ...prev, sponsorLogoDarkUrl: result }));
+            // Handle legacy single sponsor
+            if (mode === "light") {
+              setForm((prev) => ({ ...prev, sponsorLogoLightUrl: result }));
+            } else {
+              setForm((prev) => ({ ...prev, sponsorLogoDarkUrl: result }));
+            }
           }
         } else {
           if (mode === "light") {
@@ -438,26 +452,54 @@ export default function AdminEventsPage() {
                       <Trash2 size={16} />
                     </button>
                   </div>
-                  <input
-                    placeholder="Logo Light URL"
-                    value={sponsor.logoLightUrl || ""}
-                    onChange={(e) => {
-                      const updated = [...form.sponsors];
-                      updated[idx].logoLightUrl = e.target.value || null;
-                      setForm((prev) => ({ ...prev, sponsors: updated }));
-                    }}
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
-                  />
-                  <input
-                    placeholder="Logo Dark URL"
-                    value={sponsor.logoDarkUrl || ""}
-                    onChange={(e) => {
-                      const updated = [...form.sponsors];
-                      updated[idx].logoDarkUrl = e.target.value || null;
-                      setForm((prev) => ({ ...prev, sponsors: updated }));
-                    }}
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
-                  />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {/* Light Logo */}
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-foreground/80">Logo Light (Light mode)</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "light", "sponsor", idx)}
+                        className="block w-full text-xs text-foreground/60
+                          file:mr-3 file:px-3 file:py-1.5 file:rounded file:border-0
+                          file:text-xs file:font-medium file:bg-primary/20 file:text-primary
+                          hover:file:bg-primary/30 cursor-pointer"
+                      />
+                      {sponsor.logoLightUrl && (
+                        <div className="mt-2 p-2 bg-white rounded border border-border">
+                          <img
+                            src={sponsor.logoLightUrl}
+                            alt="Light logo preview"
+                            className="max-h-12 max-w-full object-contain"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Dark Logo */}
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-foreground/80">Logo Dark (Dark mode)</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleLogoFileChange(e.target.files?.[0] || null, "dark", "sponsor", idx)}
+                        className="block w-full text-xs text-foreground/60
+                          file:mr-3 file:px-3 file:py-1.5 file:rounded file:border-0
+                          file:text-xs file:font-medium file:bg-primary/20 file:text-primary
+                          hover:file:bg-primary/30 cursor-pointer"
+                      />
+                      {sponsor.logoDarkUrl && (
+                        <div className="mt-2 p-2 bg-gray-900 rounded border border-border">
+                          <img
+                            src={sponsor.logoDarkUrl}
+                            alt="Dark logo preview"
+                            className="max-h-12 max-w-full object-contain"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
