@@ -16,7 +16,6 @@ import {
   Briefcase,
   Building2,
   Target,
-  Clock,
   FileText,
   Brain,
   Loader2,
@@ -45,7 +44,7 @@ const steps2026 = [
   { label: 'Experience', icon: Briefcase },
   { label: 'Target Org', icon: Building2 },
   { label: 'Goals', icon: Target },
-  { label: 'Commitment', icon: Clock },
+  { label: 'Commitment', icon: Flame },
   { label: 'Mini Proposal', icon: FileText },
   { label: 'Screening', icon: Brain },
 ];
