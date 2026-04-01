@@ -51,6 +51,7 @@ export default function RootLayout({
           attribute="class"
           defaultTheme="dark"
           enableSystem={false}
+          storageKey="csquare-theme-v2"
           disableTransitionOnChange
         >
           <PageImpressionTracker />
