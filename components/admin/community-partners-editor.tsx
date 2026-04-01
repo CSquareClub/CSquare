@@ -1,6 +1,7 @@
 'use client';
 
-import { Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { GripVertical, Plus, Trash2 } from 'lucide-react';
 
 export type CommunityPartnerDraft = {
   name: string;
@@ -37,8 +38,19 @@ export default function CommunityPartnersEditor({
   addLabel = 'Add Partner',
   emptyLabel = 'No community partners added yet',
 }: CommunityPartnersEditorProps) {
+  const [draggedPartnerIndex, setDraggedPartnerIndex] = useState<number | null>(null);
+
   function updateItem(index: number, updater: (item: CommunityPartnerDraft) => CommunityPartnerDraft) {
     const next = items.map((item, itemIndex) => (itemIndex === index ? updater(item) : item));
+    onChange(next);
+  }
+
+  function reorderItems(fromIndex: number, toIndex: number) {
+    if (fromIndex === toIndex) return;
+    const next = [...items];
+    const [moved] = next.splice(fromIndex, 1);
+    if (!moved) return;
+    next.splice(toIndex, 0, moved);
     onChange(next);
   }
 
@@ -89,8 +101,28 @@ export default function CommunityPartnersEditor({
       {items.length > 0 ? (
         <div className="space-y-3 rounded-lg border border-border bg-background/50 p-4">
           {items.map((item, index) => (
-            <div key={index} className="space-y-2 rounded-lg border border-border bg-card p-4 shadow-sm">
+            <div
+              key={index}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => {
+                if (draggedPartnerIndex === null) return;
+                reorderItems(draggedPartnerIndex, index);
+                setDraggedPartnerIndex(null);
+              }}
+              className={`space-y-2 rounded-lg border bg-card p-4 shadow-sm ${draggedPartnerIndex === index ? 'border-primary/60' : 'border-border'}`}
+            >
               <div className="flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  draggable
+                  onDragStart={() => setDraggedPartnerIndex(index)}
+                  onDragEnd={() => setDraggedPartnerIndex(null)}
+                  className="rounded-md border border-border bg-background p-2 text-foreground/70 hover:text-foreground"
+                  aria-label="Drag to reorder partner"
+                  title="Drag to reorder partner"
+                >
+                  <GripVertical size={14} />
+                </button>
                 <input
                   placeholder="Partner name"
                   value={item.name}
