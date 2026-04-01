@@ -141,7 +141,7 @@ export default function CusocRegistrationsPage() {
     if (fromQuery && fromQuery !== source) {
       setSource(fromQuery);
     }
-  }, [searchParams, source]);
+  }, [searchParams]);
 
   // Fetch data on track change
   useEffect(() => {
@@ -267,19 +267,31 @@ export default function CusocRegistrationsPage() {
     { key: "fullName", label: "Name" },
     { key: "rollNumber", label: "Roll No" },
     { key: "cuEmail", label: "Email" },
+    { key: "personalEmail", label: "Personal Email" },
+    { key: "phone", label: "Phone" },
     { key: "department", label: "Dept" },
     { key: "year", label: "Year" },
+    { key: "languages", label: "Languages" },
     { key: "domainOrder", label: "Domain" },
     { key: "dsaLevel", label: "DSA" },
+    { key: "devExperience", label: "Dev Exp" },
+    { key: "projectCount", label: "Projects" },
+    { key: "targetOrgs", label: "Target Orgs" },
+    { key: "hoursPerWeek", label: "Hours/Week" },
   ];
   const cols2027 = [
     { key: "fullName", label: "Name" },
     { key: "rollNumber", label: "Roll No" },
     { key: "cuEmail", label: "Email" },
+    { key: "personalEmail", label: "Personal Email" },
+    { key: "phone", label: "Phone" },
     { key: "department", label: "Dept" },
     { key: "year", label: "Year" },
     { key: "skillLevel", label: "Skill" },
+    { key: "languages", label: "Languages" },
     { key: "interestArea", label: "Interest" },
+    { key: "hoursPerWeek", label: "Hours/Week" },
+    { key: "whyJoin", label: "Why Join" },
   ];
   const colsOutside = [
     { key: "fullName", label: "Name" },
@@ -294,8 +306,14 @@ export default function CusocRegistrationsPage() {
     { key: "fullName", label: "Name" },
     { key: "uid", label: "UID" },
     { key: "department", label: "Department" },
+    { key: "course", label: "Course" },
     { key: "year", label: "Year" },
+    { key: "semester", label: "Semester" },
     { key: "rolesInterested", label: "Roles" },
+    { key: "resumeLink", label: "Resume" },
+    { key: "linkedinUrl", label: "LinkedIn" },
+    { key: "portfolioUrl", label: "Portfolio" },
+    { key: "whyJoin", label: "Why Join" },
   ];
   const cols =
     source === "cusoc-2026"
@@ -376,10 +394,12 @@ export default function CusocRegistrationsPage() {
       fields: [
         ["Full Name", "fullName"],
         ["Roll Number", "rollNumber"],
-        ["Email", "cuEmail"],
+        ["CU Email", "cuEmail"],
+        ["Personal Email", "personalEmail"],
         ["Phone", "phone"],
         ["Department", "department"],
         ["Year", "year"],
+        ["Registered At", "createdAt"],
       ],
     },
     {
