@@ -4,6 +4,9 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import {
+  ArrowUpRight,
+  CalendarPlus,
+  ChevronDown,
   LayoutDashboard,
   Users,
   CalendarDays,
@@ -16,7 +19,7 @@ import {
   Shield,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 const navItems = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -37,6 +40,7 @@ export default function AdminSidebar({ mobileOpen, onClose }: AdminSidebarProps)
   const searchParams = useSearchParams();
   const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(false);
+  const [quickActionsOpen, setQuickActionsOpen] = useState(true);
 
   const source = searchParams.get("source") || "";
   const registrationsRootActive = pathname.startsWith("/admin/registrations");
@@ -44,6 +48,22 @@ export default function AdminSidebar({ mobileOpen, onClose }: AdminSidebarProps)
   const outsideRegistrationsActive = registrationsRootActive && source === "outside-all";
   const ambassadorActive = registrationsRootActive && source.includes("outside-ambassadors");
   const coreTeamActive = registrationsRootActive && source === "core-team";
+
+  const activeSection = useMemo(() => {
+    if (pathname.startsWith("/admin/events")) return "Events";
+    if (pathname.startsWith("/admin/gallery")) return "Gallery";
+    if (pathname.startsWith("/admin/team")) return "Team";
+    if (pathname.startsWith("/admin/registrations")) return "Registrations";
+    if (pathname.startsWith("/admin/dashboard") || pathname === "/admin") return "Dashboard";
+    return "Admin";
+  }, [pathname]);
+
+  const quickActions = [
+    { label: "New Event", href: "/admin/events/create", icon: CalendarPlus },
+    { label: "Open Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+    { label: "Open Gallery", href: "/admin/gallery", icon: Image },
+    { label: "Registrations", href: "/admin/registrations?source=outside-all", icon: Users },
+  ];
 
   return (
     <>
@@ -95,6 +115,47 @@ export default function AdminSidebar({ mobileOpen, onClose }: AdminSidebarProps)
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {!collapsed ? (
+          <div className="mb-4 rounded-2xl border border-white/10 bg-white/20 p-3 backdrop-blur-xl dark:border-white/[0.06] dark:bg-white/[0.03]">
+            <button
+              type="button"
+              onClick={() => setQuickActionsOpen((prev) => !prev)}
+              className="flex w-full items-center justify-between gap-3 rounded-xl px-2 py-1.5 text-left"
+            >
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-black/45 dark:text-white/35">
+                  Quick Actions
+                </p>
+                <p className="mt-1 text-sm font-medium text-black/75 dark:text-white/75">
+                  {activeSection} workspace
+                </p>
+              </div>
+              <ChevronDown
+                className={`h-4 w-4 text-black/35 dark:text-white/35 transition-transform ${quickActionsOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {quickActionsOpen ? (
+              <div className="mt-3 grid gap-2">
+                {quickActions.map((action) => (
+                  <Link
+                    key={action.label}
+                    href={action.href}
+                    onClick={onClose}
+                    className="group flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/45 px-3 py-2.5 text-sm font-medium text-black/70 transition-all hover:border-red-200 hover:bg-red-50/70 hover:text-red-700 dark:border-white/[0.05] dark:bg-white/[0.04] dark:text-white/70 dark:hover:border-red-500/20 dark:hover:bg-red-500/10 dark:hover:text-red-300"
+                  >
+                    <span className="flex items-center gap-2">
+                      <action.icon className="h-4 w-4" />
+                      {action.label}
+                    </span>
+                    <ArrowUpRight className="h-3.5 w-3.5 opacity-60 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  </Link>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
         <div className="mb-2">
           <Link
             href="/admin/registrations?source=outside-all"
@@ -196,6 +257,9 @@ export default function AdminSidebar({ mobileOpen, onClose }: AdminSidebarProps)
                 }`}
               />
               {!collapsed && <span>{item.label}</span>}
+              {!collapsed && isActive ? (
+                <span className="ml-auto inline-flex h-2.5 w-2.5 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.45)]" />
+              ) : null}
             </Link>
           );
         })}

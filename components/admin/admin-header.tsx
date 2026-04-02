@@ -2,7 +2,9 @@
 
 import { useTheme } from "next-themes";
 import { useSession, signOut } from "next-auth/react";
-import { LogOut, Menu, Moon, Sun } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { ArrowRight, CalendarDays, LogOut, Menu, Moon, RefreshCw, Sun, Users } from "lucide-react";
+import Link from "next/link";
 
 interface AdminHeaderProps {
   onMenuToggle?: () => void;
@@ -11,6 +13,28 @@ interface AdminHeaderProps {
 export default function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
   const { data: session } = useSession();
   const { theme, setTheme } = useTheme();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const activeSection = pathname.startsWith("/admin/events")
+    ? "Events"
+    : pathname.startsWith("/admin/gallery")
+      ? "Gallery"
+      : pathname.startsWith("/admin/team")
+        ? "Team"
+        : pathname.startsWith("/admin/registrations")
+          ? "Registrations"
+          : pathname.startsWith("/admin/dashboard") || pathname === "/admin"
+            ? "Dashboard"
+            : "Admin";
+
+  const quickAction = pathname.startsWith("/admin/events")
+    ? { label: "New Event", href: "/admin/events/create" }
+    : pathname.startsWith("/admin/gallery")
+      ? { label: "Add Image", href: "/admin/gallery" }
+      : pathname.startsWith("/admin/registrations")
+        ? { label: "Open Dashboard", href: "/admin/dashboard" }
+        : { label: "Open Events", href: "/admin/events" };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/10 bg-white/35 dark:border-white/[0.06] dark:bg-black/28 backdrop-blur-2xl backdrop-saturate-150 px-6">
@@ -36,6 +60,28 @@ export default function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
 
       {/* Right */}
       <div className="flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2 rounded-full border border-white/10 bg-white/28 px-3 py-1.5 text-xs font-medium text-black/55 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-white/45">
+          <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(34,197,94,0.45)]" />
+          {activeSection}
+        </div>
+
+        <Link
+          href={quickAction.href}
+          className="hidden sm:inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50/80 px-3 py-2 text-xs font-semibold text-red-700 transition-all hover:border-red-300 hover:bg-red-100/80 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300 dark:hover:border-red-500/30 dark:hover:bg-red-500/15"
+        >
+          {quickAction.label}
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+
+        <button
+          onClick={() => router.refresh()}
+          className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/35 text-black/50 backdrop-blur-md hover:bg-white/50 hover:text-black/80 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-white/40 dark:hover:bg-white/[0.06] dark:hover:text-white/70 transition-colors"
+          aria-label="Refresh dashboard"
+          title="Refresh dashboard"
+        >
+          <RefreshCw className="h-4 w-4" />
+        </button>
+
         {/* Theme Toggle */}
         <button
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Trash2, Plus, GripVertical } from "lucide-react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { ArrowUpDown, ExternalLink, Filter, Plus, GripVertical, Search, Trash2, X } from "lucide-react";
 import { formatEventDateTime } from "@/lib/event-time-utils";
 import CommunityPartnersEditor, { type CommunityPartnerDraft } from "@/components/admin/community-partners-editor";
 
@@ -122,6 +122,23 @@ function reorderSponsors(list: Sponsor[], fromIndex: number, toIndex: number): S
   return updated;
 }
 
+function slugifyTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+function formatMoney(value: number | null | undefined): string {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "—";
+  }
+
+  return value === 0 ? "Nada" : `Rs ${value.toLocaleString("en-IN")}`;
+}
+
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -131,9 +148,24 @@ export default function AdminEventsPage() {
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<EventFormState>(defaultForm);
   const [draggedSponsorIndex, setDraggedSponsorIndex] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
+  const [feeFilter, setFeeFilter] = useState<"all" | "paid" | "free">("all");
+  const [sortBy, setSortBy] = useState<"recent" | "oldest" | "title" | "fee">("recent");
   const isChandigarhUniversityVenue = /chandigarh university/i.test(form.location);
+  const deferredSearchTerm = useDeferredValue(searchTerm);
 
   const isEditing = useMemo(() => editingId !== null, [editingId]);
+
+  const eventStats = useMemo(() => {
+    const total = events.length;
+    const published = events.filter((event) => event.isPublished).length;
+    const drafts = total - published;
+    const paid = events.filter((event) => typeof event.eventFee === "number" && event.eventFee > 0).length;
+    const free = events.filter((event) => event.eventFee === 0).length;
+
+    return { total, published, drafts, paid, free };
+  }, [events]);
 
   async function loadEvents() {
     try {
@@ -166,6 +198,45 @@ export default function AdminEventsPage() {
       return { ...prev, accommodationFee: "500" };
     });
   }, [isChandigarhUniversityVenue]);
+
+  const visibleEvents = useMemo(() => {
+    const normalizedSearch = deferredSearchTerm.trim().toLowerCase();
+
+    let nextEvents = events.filter((event) => {
+      const matchesSearch = !normalizedSearch || [
+        event.title,
+        event.description,
+        event.location,
+        event.category,
+        event.sponsorTitle,
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(normalizedSearch));
+
+      const matchesStatus =
+        statusFilter === "all" || (statusFilter === "published" ? event.isPublished : !event.isPublished);
+
+      const matchesFee =
+        feeFilter === "all" ||
+        (feeFilter === "paid"
+          ? typeof event.eventFee === "number" && event.eventFee > 0
+          : event.eventFee === 0);
+
+      return matchesSearch && matchesStatus && matchesFee;
+    });
+
+    nextEvents = [...nextEvents].sort((a, b) => {
+      const aDate = new Date(a.startDate || a.date || 0).getTime();
+      const bDate = new Date(b.startDate || b.date || 0).getTime();
+
+      if (sortBy === "oldest") return aDate - bDate;
+      if (sortBy === "title") return (a.title || "").localeCompare(b.title || "");
+      if (sortBy === "fee") return (a.eventFee ?? Number.POSITIVE_INFINITY) - (b.eventFee ?? Number.POSITIVE_INFINITY);
+      return bDate - aDate;
+    });
+
+    return nextEvents;
+  }, [deferredSearchTerm, events, feeFilter, sortBy, statusFilter]);
 
   function handleLogoFileChange(
     file: File | null,
@@ -331,6 +402,68 @@ export default function AdminEventsPage() {
       <div className="flex flex-col gap-2 mb-2">
         <h1 className="text-4xl font-extrabold tracking-tight text-primary drop-shadow-sm">Events Dashboard</h1>
         <p className="text-base text-muted-foreground">Create and manage events shown on the public Events page.</p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        {[
+          { label: "Total Events", value: eventStats.total },
+          { label: "Published", value: eventStats.published },
+          { label: "Drafts", value: eventStats.drafts },
+          { label: "Paid", value: eventStats.paid },
+          { label: "Free", value: eventStats.free },
+        ].map((stat) => (
+          <div key={stat.label} className="rounded-2xl border border-white/10 bg-card/60 p-4 shadow-sm backdrop-blur-md transition-transform hover:-translate-y-0.5">
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{stat.label}</p>
+            <p className="mt-2 text-3xl font-bold text-foreground">{stat.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="rounded-2xl border border-white/10 bg-card/55 p-4 shadow-[0_12px_32px_rgba(0,0,0,0.08)] backdrop-blur-2xl">
+        <div className="grid gap-3 lg:grid-cols-[1.3fr_repeat(3,minmax(0,1fr))]">
+          <label className="flex items-center gap-3 rounded-xl border border-border bg-background/70 px-4 py-3">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search events, venues, sponsors..."
+              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            />
+            {searchTerm ? (
+              <button type="button" onClick={() => setSearchTerm("")} className="text-muted-foreground transition hover:text-foreground" aria-label="Clear search">
+                <X className="h-4 w-4" />
+              </button>
+            ) : null}
+          </label>
+
+          <label className="flex items-center gap-3 rounded-xl border border-border bg-background/70 px-4 py-3 text-sm">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)} className="w-full bg-transparent outline-none">
+              <option value="all">All statuses</option>
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+            </select>
+          </label>
+
+          <label className="flex items-center gap-3 rounded-xl border border-border bg-background/70 px-4 py-3 text-sm">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <select value={feeFilter} onChange={(e) => setFeeFilter(e.target.value as typeof feeFilter)} className="w-full bg-transparent outline-none">
+              <option value="all">All fees</option>
+              <option value="paid">Paid</option>
+              <option value="free">Free</option>
+            </select>
+          </label>
+
+          <label className="flex items-center gap-3 rounded-xl border border-border bg-background/70 px-4 py-3 text-sm lg:col-span-1">
+            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} className="w-full bg-transparent outline-none">
+              <option value="recent">Most recent</option>
+              <option value="oldest">Oldest</option>
+              <option value="title">Title A-Z</option>
+              <option value="fee">Fee low to high</option>
+            </select>
+          </label>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="grid gap-6 rounded-2xl border border-white/10 bg-card/45 p-8 shadow-[0_18px_50px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150 md:grid-cols-2">
@@ -671,15 +804,34 @@ export default function AdminEventsPage() {
       <div className="rounded-2xl border border-border bg-card/90 shadow-lg mt-8">
         <div className="border-b border-border px-8 py-5 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-primary">All Events</h2>
+          <p className="text-sm text-muted-foreground">Showing {visibleEvents.length} of {events.length}</p>
         </div>
         {loading ? (
           <p className="px-8 py-6 text-base text-muted-foreground">Loading events...</p>
         ) : events.length === 0 ? (
           <p className="px-8 py-6 text-base text-muted-foreground">No events created yet.</p>
+        ) : visibleEvents.length === 0 ? (
+          <div className="px-8 py-10 text-center text-muted-foreground">
+            <p className="text-base font-medium text-foreground">No events match your filters.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setSearchTerm("");
+                setStatusFilter("all");
+                setFeeFilter("all");
+                setSortBy("recent");
+              }}
+              className="mt-3 rounded-lg border border-primary bg-primary/10 px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary/20"
+            >
+              Reset filters
+            </button>
+          </div>
         ) : (
           <div className="divide-y divide-border">
-            {events.map((event) => (
-              <div key={event.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-8 py-6 bg-card hover:bg-muted/30 transition rounded-xl my-2 shadow-sm">
+            {visibleEvents.map((event) => {
+              const publicHref = `/events/${encodeURIComponent(slugifyTitle(event.title || `event-${event.id}`))}`;
+              return (
+              <div key={event.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-8 py-6 bg-card hover:bg-muted/30 transition rounded-xl my-2 shadow-sm group">
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-lg text-foreground truncate">{event.title || "Untitled Event"}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
@@ -690,12 +842,22 @@ export default function AdminEventsPage() {
                   <p className="mt-1 text-sm text-muted-foreground">
                     {event.category || "Uncategorized"}
                     {typeof event.attendees === "number" ? ` • Capacity: ${event.attendees}` : ""}
-                    {typeof event.eventFee === "number" ? ` • Event Fee: Rs ${event.eventFee}` : ""}
-                    {typeof event.accommodationFee === "number" ? ` • Accommodation Fee: Rs ${event.accommodationFee}` : ""}
+                    {typeof event.eventFee === "number" ? ` • Event Fee: ${formatMoney(event.eventFee)}` : ""}
+                    {typeof event.accommodationFee === "number" ? ` • Accommodation Fee: ${formatMoney(event.accommodationFee)}` : ""}
                     {` • ${event.isPublished ? "Published" : "Draft"}`}
                   </p>
                 </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
+                <div className="flex items-center gap-3 flex-shrink-0 flex-wrap">
+                  <a
+                    href={publicHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary"
+                    aria-label={`Open public page for ${event.title || 'event'}`}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    View
+                  </a>
                   <button
                     type="button"
                     onClick={() => startEdit(event)}
@@ -712,7 +874,8 @@ export default function AdminEventsPage() {
                   </button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

@@ -8,6 +8,9 @@ import {
   BarChart3,
   Eye,
   Users2,
+  RefreshCw,
+  Pause,
+  Play,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
@@ -51,9 +54,13 @@ export default function AdminDashboardPage() {
   const [data, setData] = useState<DashboardPayload | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
   const [statsError, setStatsError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   async function loadDashboardData() {
     try {
+      setRefreshing(true);
       setStatsError(null);
       const res = await fetch("/api/admin/dashboard", { cache: "no-store" });
       const payload = await res.json();
@@ -61,10 +68,12 @@ export default function AdminDashboardPage() {
         throw new Error(payload?.error || "Failed to load dashboard stats");
       }
       setData(payload);
+      setLastUpdated(new Date());
     } catch (error) {
       setStatsError(error instanceof Error ? error.message : "Failed to load dashboard stats");
     } finally {
       setLoadingStats(false);
+      setRefreshing(false);
     }
   }
 
@@ -72,10 +81,12 @@ export default function AdminDashboardPage() {
     if (status !== "authenticated") return;
 
     loadDashboardData();
+    if (!autoRefresh) return;
+
     const interval = setInterval(loadDashboardData, 30000);
 
     return () => clearInterval(interval);
-  }, [status]);
+  }, [status, autoRefresh]);
 
   const stats = useMemo(
     () => [
@@ -116,6 +127,9 @@ export default function AdminDashboardPage() {
   );
 
   const maxViews = Math.max(...(data?.analytics.impressionsLast7Days.map((item) => item.views) ?? [1]));
+  const lastUpdatedLabel = lastUpdated
+    ? lastUpdated.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+    : "Not updated yet";
 
   if (status === "loading") {
     return (
@@ -142,12 +156,38 @@ export default function AdminDashboardPage() {
         <main className="flex-1 overflow-y-auto p-6 lg:p-8">
           {/* Page title */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-black dark:text-white tracking-tight">
-              Dashboard
-            </h1>
-            <p className="text-sm text-black/50 dark:text-white/30 mt-1">
-              Overview of your admin panel
-            </p>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-black dark:text-white tracking-tight">
+                  Dashboard
+                </h1>
+                <p className="text-sm text-black/50 dark:text-white/30 mt-1">
+                  Overview of your admin panel
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="rounded-full border border-white/10 bg-white/28 px-3 py-1.5 text-xs font-medium text-black/55 backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-white/40">
+                  Last updated: {loadingStats ? "…" : lastUpdatedLabel}
+                </div>
+                <button
+                  type="button"
+                  onClick={loadDashboardData}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/30 px-3 py-1.5 text-xs font-semibold text-black/70 transition hover:border-red-200 hover:bg-red-50/70 hover:text-red-700 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-white/60 dark:hover:border-red-500/20 dark:hover:bg-red-500/10 dark:hover:text-red-300"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`} />
+                  Refresh now
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAutoRefresh((prev) => !prev)}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/30 px-3 py-1.5 text-xs font-semibold text-black/70 transition hover:border-red-200 hover:bg-red-50/70 hover:text-red-700 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-white/60 dark:hover:border-red-500/20 dark:hover:bg-red-500/10 dark:hover:text-red-300"
+                >
+                  {autoRefresh ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                  {autoRefresh ? "Pause auto-refresh" : "Resume auto-refresh"}
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Stat cards */}
@@ -222,7 +262,7 @@ export default function AdminDashboardPage() {
           {/* Recent activity placeholder */}
           <div>
             <h2 className="text-lg font-semibold text-black/80 dark:text-white/80 mb-4">
-              Analytics Snapshot
+              Live Analytics Snapshot
             </h2>
             <div className="rounded-2xl border border-white/10 bg-white/28 backdrop-blur-2xl backdrop-saturate-150 dark:border-white/[0.06] dark:bg-white/[0.03] p-8">
               {!data ? (
@@ -245,13 +285,16 @@ export default function AdminDashboardPage() {
                         <p className="text-sm text-black/40 dark:text-white/40">No impressions recorded yet.</p>
                       ) : (
                         data.analytics.topPages.map((page) => (
-                          <div
+                          <a
                             key={page.path}
-                            className="flex items-center justify-between rounded-lg border border-white/10 bg-white/35 px-3 py-2 text-sm backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.03]"
+                            href={page.path}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="group flex items-center justify-between rounded-lg border border-white/10 bg-white/35 px-3 py-2 text-sm backdrop-blur-md transition hover:border-red-200 hover:bg-red-50/60 dark:border-white/[0.06] dark:bg-white/[0.03] dark:hover:border-red-500/20 dark:hover:bg-red-500/10"
                           >
-                            <span className="truncate text-black/70 dark:text-white/70">{page.path}</span>
-                            <span className="ml-3 font-semibold text-black/80 dark:text-white/80">{page.views}</span>
-                          </div>
+                            <span className="truncate text-black/70 transition group-hover:text-red-700 dark:text-white/70 dark:group-hover:text-red-300">{page.path}</span>
+                            <span className="ml-3 font-semibold text-black/80 transition group-hover:text-red-700 dark:text-white/80 dark:group-hover:text-red-300">{page.views}</span>
+                          </a>
                         ))
                       )}
                     </div>
@@ -270,7 +313,12 @@ export default function AdminDashboardPage() {
                         });
 
                         return (
-                          <div key={item.date}>
+                          <button
+                            key={item.date}
+                            type="button"
+                            onClick={loadDashboardData}
+                            className="w-full text-left"
+                          >
                             <div className="mb-1 flex items-center justify-between text-xs text-black/60 dark:text-white/50">
                               <span>{dateLabel}</span>
                               <span>{item.views}</span>
@@ -281,7 +329,7 @@ export default function AdminDashboardPage() {
                                 style={{ width: `${widthPercent}%` }}
                               />
                             </div>
-                          </div>
+                          </button>
                         );
                       })}
                     </div>
