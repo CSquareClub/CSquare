@@ -408,7 +408,7 @@ export default function CoreTeamRegistrationForm() {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-[34px] border border-white/12 bg-black/45 p-6 shadow-[0_0_90px_rgba(220,38,38,0.14)] backdrop-blur-xl sm:p-8">
+    <div className="relative overflow-hidden rounded-[34px] border border-border bg-card/45 p-6 shadow-[0_0_90px_rgba(220,38,38,0.14)] backdrop-blur-xl sm:p-8">
       <div className="pointer-events-none absolute -left-10 top-0 h-44 w-44 rounded-full bg-red-400/15 blur-3xl" />
       <div className="pointer-events-none absolute -right-10 bottom-0 h-44 w-44 rounded-full bg-rose-400/10 blur-3xl" />
 

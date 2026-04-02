@@ -176,9 +176,9 @@ function Toggle({ id, label }: { id: string; label: string }) {
 /* ─── COMPONENT ──────────────────────────────────────────── */
 
 export default function CusocForm() {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const dk = mounted ? theme !== 'light' : true; // default to dark visually before hydrate, or compute actual
+  const dk = mounted ? resolvedTheme !== 'light' : true; // default to dark visually before hydrate, or compute actual
 
   useEffect(() => setMounted(true), []);
 
@@ -1160,7 +1160,7 @@ export default function CusocForm() {
       <div className="pointer-events-none absolute -right-10 bottom-0 h-44 w-44 rounded-full bg-rose-400/10 blur-3xl" />
 
       {/* Header */}
-      <div className="relative mb-6 flex flex-col gap-4 border-b border-white/10 pb-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative mb-6 flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="mb-2 text-xs text-foreground/60">* All fields are compulsory unless explicitly marked optional.</p>
           <div className="flex items-center gap-2 mb-2">

@@ -1,10 +1,18 @@
 'use client';
 
 import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
 
 export default function GridBackground() {
   const { resolvedTheme } = useTheme();
-  const isDarkTheme = resolvedTheme !== 'light';
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Before hydration, default to dark (matches defaultTheme="dark" in layout)
+  const isDarkTheme = mounted ? resolvedTheme !== 'light' : true;
 
   const baseBg = isDarkTheme ? 'rgba(6, 6, 6, 0.18)' : 'rgba(250, 246, 240, 0.2)';
   const gridLine = isDarkTheme ? 'rgba(251,146,60,0.07)' : 'rgba(194,65,12,0.06)';

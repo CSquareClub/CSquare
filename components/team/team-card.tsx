@@ -26,12 +26,12 @@ export default function TeamCard({
   const [currentImage, setCurrentImage] = useState(image || fallbackImage);
 
   return (
-    <div className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/42 shadow-[0_16px_45px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150 transition-all duration-300 hover:border-primary hover:bg-card/55 hover:shadow-[0_20px_55px_rgba(0,0,0,0.16)]">
+    <div className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-border bg-card/42 shadow-[0_16px_45px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150 transition-all duration-300 hover:border-primary hover:bg-card/55 hover:shadow-[0_20px_55px_rgba(0,0,0,0.16)]">
       {/* Subtle top highlight on hover */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#dc2626]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20" />
 
       {/* Image Banner */}
-      <div className="relative h-48 w-full flex-shrink-0 overflow-hidden bg-white/10">
+      <div className="relative h-48 w-full flex-shrink-0 overflow-hidden bg-card/40">
         <img
           src={currentImage}
           className="w-full h-full object-cover object-[center_30%] transition-transform duration-500 group-hover:scale-[1.02]"

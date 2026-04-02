@@ -78,9 +78,9 @@ export default function Hero() {
 
           {/* Right Column: Code Window */}
           <div className="relative animate-fade-in-up mx-auto lg:mx-0 lg:ml-auto w-full max-w-[500px] min-w-0" style={{ animationDelay: '0.4s' }}>
-            <div className="relative z-10 w-full overflow-hidden rounded-xl border border-white/10 bg-card/42 shadow-[0_18px_60px_rgba(0,0,0,0.16)] backdrop-blur-2xl backdrop-saturate-150">
+            <div className="relative z-10 w-full overflow-hidden rounded-xl border border-border bg-card/42 shadow-[0_18px_60px_rgba(0,0,0,0.16)] backdrop-blur-2xl backdrop-saturate-150">
               {/* Window Header */}
-              <div className="flex min-w-0 items-center border-b border-white/10 bg-white/10 px-4 py-3">
+              <div className="flex min-w-0 items-center border-b border-border bg-card/50 px-4 py-3">
                 <div className="flex gap-2.5 flex-shrink-0">
                   <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
                   <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
@@ -92,7 +92,7 @@ export default function Hero() {
               </div>
               
               {/* Code Content */}
-              <div className="w-full overflow-x-auto whitespace-pre p-4 font-mono text-[10px] leading-relaxed text-foreground sm:p-6 sm:text-sm dark:text-[#e6e6e6]">
+              <div className="w-full overflow-x-auto whitespace-pre p-4 font-mono text-[10px] leading-relaxed text-foreground sm:p-6 sm:text-sm">
                 <div><span className="text-[#ff7b72]">#include</span> <span className="text-[#7ee787]">&lt;iostream&gt;</span></div>
                 <div><span className="text-[#ff7b72]">#include</span> <span className="text-[#7ee787]">&lt;club_resources&gt;</span></div>
                 <br />

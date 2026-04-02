@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -64,8 +64,13 @@ const countFilled = (data: Partial<RegistrationFormData>) => {
 };
 
 export default function JoinForm() {
-  const { theme } = useTheme();
-  const isDarkTheme = theme !== 'light';
+  const { resolvedTheme } = useTheme();
+  const [mountedTheme, setMountedTheme] = useState(false);
+  const isDarkTheme = mountedTheme ? resolvedTheme !== 'light' : true;
+
+  useEffect(() => {
+    setMountedTheme(true);
+  }, []);
   const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -144,7 +149,7 @@ export default function JoinForm() {
         </div>
       )}
 
-      <div className="mb-8 flex flex-col gap-4 border-b border-white/10 pb-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-8 flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className={`mb-2 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] ${isDarkTheme ? 'border-red-400/30 bg-red-400/10 text-red-200' : 'border-red-300 bg-red-50 text-red-700'}`}>
             <Sparkles className="h-3.5 w-3.5" />

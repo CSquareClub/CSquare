@@ -7,9 +7,9 @@ import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 
 export default function Footer() {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const isDark = theme !== 'light';
+  const isDark = mounted ? resolvedTheme !== 'light' : true;
 
   useEffect(() => {
     setMounted(true);

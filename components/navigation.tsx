@@ -61,7 +61,7 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-white/20 bg-background/20 backdrop-blur-3xl backdrop-saturate-200">
+    <nav className="sticky top-0 z-40 border-b border-border bg-background/20 backdrop-blur-3xl backdrop-saturate-200">
       <div className="absolute left-0 top-0 h-[2px] w-full bg-border/40">
         <div
           className="h-full bg-primary transition-[width] duration-150"
@@ -98,7 +98,7 @@ export default function Navigation() {
             <button
               type="button"
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className="inline-flex items-center justify-center rounded-full border border-white/20 bg-card/45 p-2 text-foreground/70 shadow-sm backdrop-blur-md transition-colors hover:bg-card/70 hover:text-primary"
+              className="inline-flex items-center justify-center rounded-full border border-border bg-card/45 p-2 text-foreground/70 shadow-sm backdrop-blur-md transition-colors hover:bg-card/70 hover:text-primary"
               aria-label="Toggle theme"
             >
               {mounted && isDark ? <Sun size={16} /> : <Moon size={16} />}
@@ -107,7 +107,7 @@ export default function Navigation() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden rounded-lg border border-white/20 bg-card/45 p-2 text-foreground/80 backdrop-blur-md"
+            className="md:hidden rounded-lg border border-border bg-card/45 p-2 text-foreground/80 backdrop-blur-md"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
             aria-expanded={isOpen}
@@ -120,7 +120,7 @@ export default function Navigation() {
         {/* Mobile Navigation */}
         {isOpen && (
           <div id="mobile-navigation" className="animate-fade-in-up md:hidden pb-4 pt-2">
-            <div className="space-y-2 rounded-2xl border border-white/10 bg-card/45 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150">
+            <div className="space-y-2 rounded-2xl border border-border bg-card/45 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)} className={`block rounded-xl px-4 py-3 transition-colors ${pathname === item.href ? 'bg-primary/10 text-primary font-semibold' : 'text-foreground/70 hover:text-foreground hover:bg-background/70'}`}>
                 {item.label}
