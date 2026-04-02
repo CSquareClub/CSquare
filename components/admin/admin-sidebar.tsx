@@ -59,7 +59,7 @@ export default function AdminSidebar({ mobileOpen, onClose }: AdminSidebarProps)
   }, [pathname]);
 
   const quickActions = [
-    { label: "New Event", href: "/admin/events/create", icon: CalendarPlus },
+    { label: "Open Events", href: "/admin/events", icon: CalendarPlus },
     { label: "Open Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Open Gallery", href: "/admin/gallery", icon: Image },
     { label: "Registrations", href: "/admin/registrations?source=outside-all", icon: Users },

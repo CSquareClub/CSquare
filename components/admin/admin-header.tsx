@@ -29,7 +29,7 @@ export default function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
             : "Admin";
 
   const quickAction = pathname.startsWith("/admin/events")
-    ? { label: "New Event", href: "/admin/events/create" }
+    ? { label: "Open Events", href: "/admin/events" }
     : pathname.startsWith("/admin/gallery")
       ? { label: "Add Image", href: "/admin/gallery" }
       : pathname.startsWith("/admin/registrations")
