@@ -27,6 +27,8 @@ type EventItem = {
   time: string | null;
   location: string | null;
   attendees: number | null;
+  eventFee: number | null;
+  accommodationFee: number | null;
   category: string | null;
   image: string | null;
   sponsors?: Sponsor[];
@@ -49,6 +51,8 @@ type EventFormState = {
   endDate: string;
   location: string;
   attendees: string;
+  eventFee: string;
+  accommodationFee: string;
   category: string;
   image: string;
   sponsors: Sponsor[];
@@ -64,6 +68,8 @@ const defaultForm: EventFormState = {
   endDate: "",
   location: "",
   attendees: "",
+  eventFee: "",
+  accommodationFee: "",
   category: "",
   image: "",
   sponsors: [],
@@ -125,6 +131,7 @@ export default function AdminEventsPage() {
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<EventFormState>(defaultForm);
   const [draggedSponsorIndex, setDraggedSponsorIndex] = useState<number | null>(null);
+  const isChandigarhUniversityVenue = /chandigarh university/i.test(form.location);
 
   const isEditing = useMemo(() => editingId !== null, [editingId]);
 
@@ -146,6 +153,19 @@ export default function AdminEventsPage() {
   useEffect(() => {
     loadEvents();
   }, []);
+
+  useEffect(() => {
+    if (!isChandigarhUniversityVenue) {
+      return;
+    }
+
+    setForm((prev) => {
+      if (prev.accommodationFee === "500") {
+        return prev;
+      }
+      return { ...prev, accommodationFee: "500" };
+    });
+  }, [isChandigarhUniversityVenue]);
 
   function handleLogoFileChange(
     file: File | null,
@@ -210,6 +230,12 @@ export default function AdminEventsPage() {
       endDate: form.endDate ? new Date(form.endDate).toISOString() : null,
       location: form.location.trim() || null,
       attendees: form.attendees ? Number(form.attendees) : null,
+      eventFee: form.eventFee ? Number(form.eventFee) : null,
+      accommodationFee: isChandigarhUniversityVenue
+        ? 500
+        : form.accommodationFee
+          ? Number(form.accommodationFee)
+          : null,
       category: form.category.trim() || null,
       image: form.image.trim() || null,
       sponsors: form.sponsors.filter(s => s.title.trim()).map(s => ({
@@ -269,6 +295,8 @@ export default function AdminEventsPage() {
       endDate: event.endDate || event.date ? toInputDateValue(event.endDate || event.date || "") : "",
       location: event.location || "",
       attendees: typeof event.attendees === "number" ? String(event.attendees) : "",
+      eventFee: typeof event.eventFee === "number" ? String(event.eventFee) : "",
+      accommodationFee: typeof event.accommodationFee === "number" ? String(event.accommodationFee) : "",
       category: event.category || "",
       image: event.image || "",
       sponsors: normalizeSponsorsForEdit(event),
@@ -344,6 +372,28 @@ export default function AdminEventsPage() {
           onChange={(e) => setForm((prev) => ({ ...prev, attendees: e.target.value }))}
           className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition"
         />
+        <input
+          type="number"
+          min={0}
+          placeholder="Event Fee (INR)"
+          value={form.eventFee}
+          onChange={(e) => setForm((prev) => ({ ...prev, eventFee: e.target.value }))}
+          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition"
+        />
+        <div>
+          <input
+            type="number"
+            min={0}
+            placeholder="Accommodation Fee (INR)"
+            value={form.accommodationFee}
+            disabled={isChandigarhUniversityVenue}
+            onChange={(e) => setForm((prev) => ({ ...prev, accommodationFee: e.target.value }))}
+            className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition disabled:cursor-not-allowed disabled:opacity-70"
+          />
+          {isChandigarhUniversityVenue ? (
+            <p className="mt-1 text-xs text-muted-foreground">For Chandigarh University venue, accommodation is fixed at Rs 500 per day per person (including 3 meals).</p>
+          ) : null}
+        </div>
         <input
           placeholder="Image URL"
           value={form.image}
@@ -640,6 +690,8 @@ export default function AdminEventsPage() {
                   <p className="mt-1 text-sm text-muted-foreground">
                     {event.category || "Uncategorized"}
                     {typeof event.attendees === "number" ? ` • Capacity: ${event.attendees}` : ""}
+                    {typeof event.eventFee === "number" ? ` • Event Fee: Rs ${event.eventFee}` : ""}
+                    {typeof event.accommodationFee === "number" ? ` • Accommodation Fee: Rs ${event.accommodationFee}` : ""}
                     {` • ${event.isPublished ? "Published" : "Draft"}`}
                   </p>
                 </div>

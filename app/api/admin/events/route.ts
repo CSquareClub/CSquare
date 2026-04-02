@@ -26,6 +26,8 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
+    const locationValue = typeof body.location === "string" ? body.location : "";
+    const isChandigarhUniversityVenue = /chandigarh university/i.test(locationValue);
 
     // Process sponsors array if provided
     const sponsors = body.sponsors ? body.sponsors.map((sponsor: any) => ({
@@ -63,6 +65,19 @@ export async function POST(req: Request) {
           ? body.attendees
           : typeof body.attendees === "string" && body.attendees.trim() !== ""
             ? Number(body.attendees)
+            : null,
+      eventFee:
+        typeof body.eventFee === "number"
+          ? body.eventFee
+          : typeof body.eventFee === "string" && body.eventFee.trim() !== ""
+            ? Number(body.eventFee)
+            : null,
+      accommodationFee: isChandigarhUniversityVenue
+        ? 500
+        : typeof body.accommodationFee === "number"
+          ? body.accommodationFee
+          : typeof body.accommodationFee === "string" && body.accommodationFee.trim() !== ""
+            ? Number(body.accommodationFee)
             : null,
       category: body.category,
       image: body.image,

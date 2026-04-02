@@ -22,6 +22,8 @@ export async function PATCH(req: Request, context: RouteContext) {
     }
 
     const body = await req.json();
+    const locationValue = typeof body.location === "string" ? body.location : "";
+    const isChandigarhUniversityVenue = /chandigarh university/i.test(locationValue);
 
     // Process sponsors array if provided
     const sponsors = body.sponsors !== undefined ? body.sponsors.map((sponsor: any) => ({
@@ -60,6 +62,20 @@ export async function PATCH(req: Request, context: RouteContext) {
           : body.attendees === null || body.attendees === ""
             ? null
             : Number(body.attendees),
+      eventFee:
+        typeof body.eventFee === "undefined"
+          ? undefined
+          : body.eventFee === null || body.eventFee === ""
+            ? null
+            : Number(body.eventFee),
+      accommodationFee:
+        isChandigarhUniversityVenue
+          ? 500
+          : typeof body.accommodationFee === "undefined"
+            ? undefined
+            : body.accommodationFee === null || body.accommodationFee === ""
+              ? null
+              : Number(body.accommodationFee),
       category: body.category,
       image: body.image,
       sponsorTitle: typeof body.sponsorTitle !== "undefined" ? body.sponsorTitle || null : undefined,
