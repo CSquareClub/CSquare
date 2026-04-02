@@ -13,6 +13,8 @@ interface EventCardProps {
   time: string | null;
   location: string | null;
   attendees: number | null;
+  eventFee: number | null;
+  accommodationFee: number | null;
   category: string | null;
   image: string | null;
   registrationUrl?: string | null;
@@ -70,6 +72,18 @@ function isDevfolioLink(url: string | null | undefined): boolean {
   return /devfolio\.(co|in|com)/i.test(url);
 }
 
+function formatCurrency(value: number | null | undefined): string | null {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return null;
+  }
+
+  if (value === 0) {
+    return 'Nada';
+  }
+
+  return `Rs ${value.toLocaleString('en-IN')}`;
+}
+
 export default function EventCard({
   id,
   slug,
@@ -79,6 +93,8 @@ export default function EventCard({
   time,
   location,
   attendees,
+  eventFee,
+  accommodationFee,
   category,
   image,
   registrationUrl,
@@ -98,6 +114,8 @@ export default function EventCard({
   const [currentImage, setCurrentImage] = useState(normalizedImage || fallbackImage);
   const [imageError, setImageError] = useState(false);
   const registrationButtonLabel = isDevfolioLink(registrationUrl) ? 'Apply with Devfolio' : 'Register Now';
+  const eventFeeLabel = formatCurrency(eventFee);
+  const accommodationFeeLabel = formatCurrency(accommodationFee);
 
   useEffect(() => {
     setCurrentImage(normalizedImage || fallbackImage);
@@ -194,7 +212,7 @@ export default function EventCard({
           </Link>
         </h3>
 
-        {time || location || typeof attendees === 'number' ? (
+        {time || location || typeof attendees === 'number' || eventFeeLabel || accommodationFeeLabel ? (
           <div className="space-y-3 mb-6 text-sm text-foreground/60">
             {time ? (
               <div className="flex items-center gap-2">
@@ -212,6 +230,22 @@ export default function EventCard({
               <div className="flex items-center gap-2">
                 <Users size={16} className="text-[#dc2626]" />
                 <span>Capacity: {attendees}</span>
+              </div>
+            ) : null}
+            {eventFeeLabel ? (
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[#dc2626]/40 text-[10px] font-semibold text-[#dc2626]">
+                  ₹
+                </span>
+                <span>Registration Fee: {eventFeeLabel}</span>
+              </div>
+            ) : null}
+            {accommodationFeeLabel ? (
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[#dc2626]/40 text-[10px] font-semibold text-[#dc2626]">
+                  A
+                </span>
+                <span>Accommodation Fee: {accommodationFeeLabel}</span>
               </div>
             ) : null}
           </div>
