@@ -4,24 +4,24 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: rgba(255, 255, 255, 0.42);
+  --background: rgba(255, 255, 255, 0.2);
   --foreground: #000000;
-  --card: rgba(255, 255, 255, 0.3);
+  --card: rgba(255, 255, 255, 0.14);
   --card-foreground: #000000;
-  --popover: rgba(255, 255, 255, 0.34);
+  --popover: rgba(255, 255, 255, 0.18);
   --popover-foreground: #000000;
   --primary: #dc2626;
   --primary-foreground: #ffffff;
   --secondary: #000000;
   --secondary-foreground: #ffffff;
-  --muted: rgba(244, 244, 244, 0.36);
+  --muted: rgba(244, 244, 244, 0.22);
   --muted-foreground: #222222;
   --accent: #dc2626;
   --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: rgba(0, 0, 0, 0.1);
-  --input: rgba(255, 255, 255, 0.28);
+  --input: rgba(255, 255, 255, 0.16);
   --ring: #dc2626;
   --chart-1: #dc2626;
   --chart-2: #000000;
@@ -40,24 +40,24 @@
 }
 
 .dark {
-  --background: rgba(6, 6, 6, 0.4);
+  --background: rgba(6, 6, 6, 0.2);
   --foreground: #ffffff;
-  --card: rgba(17, 17, 17, 0.28);
+  --card: rgba(17, 17, 17, 0.14);
   --card-foreground: #ffffff;
-  --popover: rgba(17, 17, 17, 0.34);
+  --popover: rgba(17, 17, 17, 0.18);
   --popover-foreground: #ffffff;
   --primary: #dc2626;
   --primary-foreground: #ffffff;
   --secondary: #ffffff;
   --secondary-foreground: #000000;
-  --muted: rgba(34, 34, 34, 0.34);
+  --muted: rgba(34, 34, 34, 0.2);
   --muted-foreground: #f4f4f4;
   --accent: #dc2626;
   --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: rgba(255, 255, 255, 0.12);
-  --input: rgba(17, 17, 17, 0.26);
+  --input: rgba(17, 17, 17, 0.14);
   --ring: #dc2626;
   --chart-1: #dc2626;
   --chart-2: #ffffff;
@@ -135,9 +135,10 @@
   body {
     @apply bg-background text-foreground;
     background-image:
-      radial-gradient(circle at 12% 14%, color-mix(in oklab, var(--primary) 10%, transparent) 0, transparent 34%),
-      radial-gradient(circle at 84% 0%, color-mix(in oklab, var(--accent) 12%, transparent) 0, transparent 36%),
-      linear-gradient(180deg, color-mix(in oklab, var(--background) 92%, black) 0%, var(--background) 45%, color-mix(in oklab, var(--background) 95%, black) 100%);
+      radial-gradient(circle at 8% 12%, color-mix(in oklab, var(--primary) 32%, transparent) 0, transparent 34%),
+      radial-gradient(circle at 92% 0%, color-mix(in oklab, var(--accent) 30%, transparent) 0, transparent 38%),
+      radial-gradient(circle at 45% 120%, color-mix(in oklab, #06b6d4 24%, transparent) 0, transparent 48%),
+      linear-gradient(180deg, color-mix(in oklab, var(--background) 78%, black) 0%, var(--background) 45%, color-mix(in oklab, var(--background) 82%, black) 100%);
     min-height: 100vh;
     overflow-x: clip;
     background-attachment: fixed;
@@ -153,10 +154,10 @@
     pointer-events: none;
     z-index: 0;
     background:
-      linear-gradient(180deg, color-mix(in oklab, var(--background) 10%, transparent), transparent 22%, color-mix(in oklab, var(--background) 16%, transparent)),
-      radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--primary) 14%, transparent) 0, transparent 30%),
-      radial-gradient(circle at 0% 100%, color-mix(in oklab, var(--accent) 12%, transparent) 0, transparent 34%);
-    backdrop-filter: blur(26px) saturate(150%);
+      linear-gradient(180deg, color-mix(in oklab, var(--background) 6%, transparent), transparent 22%, color-mix(in oklab, var(--background) 10%, transparent)),
+      radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--primary) 20%, transparent) 0, transparent 32%),
+      radial-gradient(circle at 0% 100%, color-mix(in oklab, var(--accent) 18%, transparent) 0, transparent 36%);
+    backdrop-filter: blur(34px) saturate(165%);
   }
 
   body > * {

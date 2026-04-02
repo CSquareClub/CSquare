@@ -61,7 +61,7 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-border/50 bg-background/38 backdrop-blur-2xl backdrop-saturate-150">
+    <nav className="sticky top-0 z-40 border-b border-white/20 bg-background/20 backdrop-blur-3xl backdrop-saturate-200">
       <div className="absolute left-0 top-0 h-[2px] w-full bg-border/40">
         <div
           className="h-full bg-primary transition-[width] duration-150"
@@ -98,7 +98,7 @@ export default function Navigation() {
             <button
               type="button"
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className="inline-flex items-center justify-center rounded-full border border-border bg-card/65 p-2 text-foreground/70 shadow-sm transition-colors hover:bg-card hover:text-primary"
+              className="inline-flex items-center justify-center rounded-full border border-white/20 bg-card/45 p-2 text-foreground/70 shadow-sm backdrop-blur-md transition-colors hover:bg-card/70 hover:text-primary"
               aria-label="Toggle theme"
             >
               {mounted && isDark ? <Sun size={16} /> : <Moon size={16} />}
@@ -107,7 +107,7 @@ export default function Navigation() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden rounded-lg border border-border bg-card/65 p-2 text-foreground/80"
+            className="md:hidden rounded-lg border border-white/20 bg-card/45 p-2 text-foreground/80 backdrop-blur-md"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
             aria-expanded={isOpen}
