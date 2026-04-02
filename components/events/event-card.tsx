@@ -263,7 +263,7 @@ export default function EventCard({
                 <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[#dc2626]/40 text-[10px] font-semibold text-[#dc2626]">
                   E
                 </span>
-                <span>Accommodation Access: {accommodationAccess === 'chandigarh-university-only' ? 'CU only' : 'Open to all'}</span>
+                <span>Accommodation For: {accommodationAccess === 'chandigarh-university-only' ? 'CU only' : 'Open to all'}</span>
               </div>
             ) : null}
           </div>

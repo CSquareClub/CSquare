@@ -203,7 +203,7 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                     ) : null}
                     {showAccommodationAccess ? (
                       <p>
-                        Accommodation Access: {event.accommodationAccess === 'chandigarh-university-only' ? 'CU only' : 'Open to all'}
+                        Accommodation For: {event.accommodationAccess === 'chandigarh-university-only' ? 'CU only' : 'Open to all'}
                       </p>
                     ) : null}
                   </div>
