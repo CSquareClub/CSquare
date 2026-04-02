@@ -4,6 +4,8 @@ import { eventSchema } from "@/lib/event-schema";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const events = await listPublicEvents();

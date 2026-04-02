@@ -4,6 +4,8 @@ import GridBackground from '@/components/grid-background';
 import EventsClient from './EventsClient';
 import { listPublicEvents } from '@/lib/events-store';
 
+export const dynamic = 'force-dynamic';
+
 export default async function EventsPage() {
   const allEvents = await listPublicEvents();
   return (
