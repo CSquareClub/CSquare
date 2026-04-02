@@ -51,6 +51,10 @@ function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
 }
 
+function normalizeUid(value: string): string {
+  return value.trim().toLowerCase();
+}
+
 function deriveCollegeEmail(uid: string): string {
   const trimmed = uid.trim().toLowerCase();
   if (!trimmed) return '';
@@ -289,7 +293,7 @@ export async function POST(req: Request) {
     const action = String(body.action || '').trim().toLowerCase();
 
     if (action === 'send-otp') {
-      const uid = String(body.uid || '').trim();
+      const uid = normalizeUid(String(body.uid || ''));
       const fullName = String(body.fullName || '').trim();
       const collegeEmail = deriveCollegeEmail(uid);
 
@@ -336,7 +340,7 @@ export async function POST(req: Request) {
     }
 
     if (action === 'verify-otp') {
-      const uid = String(body.uid || '').trim();
+      const uid = normalizeUid(String(body.uid || ''));
       const otp = String(body.otp || '').trim();
 
       if (!uid || !otp) {
@@ -366,7 +370,7 @@ export async function POST(req: Request) {
 
     const membershipId = String(body.membershipId || '').trim();
     const fullName = String(body.fullName || '').trim();
-    const uid = String(body.uid || '').trim();
+    const uid = normalizeUid(String(body.uid || ''));
     const personalEmail = normalizeEmail(String(body.personalEmail || ''));
     const collegeEmail = deriveCollegeEmail(uid);
     const department = String(body.department || '').trim();
