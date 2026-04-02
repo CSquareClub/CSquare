@@ -92,7 +92,7 @@ export default function ClubDescription() {
               C Square Club is a builder-first coding community where students ship projects,
               review code, and grow through collaborative engineering.
             </p>
-            <p className="mt-4 rounded-lg border border-border bg-background/60 p-3 text-sm font-medium text-foreground/80">
+            <p className="mt-4 rounded-lg border border-white/10 bg-background/35 p-3 text-sm font-medium text-foreground/80 backdrop-blur-xl">
               C Square Club is a platform where beginners become coders, coders become competitors,
               and competitors become builders.
             </p>

@@ -132,7 +132,7 @@ export default function EventCard({
 
   return (
     <div
-      className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-primary/30 bg-card/80 shadow-md transition-all duration-300 hover:border-primary hover:bg-card hover:shadow-lg"
+      className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/42 shadow-[0_16px_45px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150 transition-all duration-300 hover:border-primary hover:bg-card/55 hover:shadow-[0_20px_55px_rgba(0,0,0,0.16)]"
       role="link"
       tabIndex={0}
       onClick={handleCardClick}
@@ -143,7 +143,7 @@ export default function EventCard({
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#dc2626]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20" />
       
       {/* Image Banner */}
-      <div className="relative min-h-52 w-full flex-shrink-0 overflow-hidden bg-card/80 p-3 flex items-center justify-center">
+      <div className="relative min-h-52 w-full flex-shrink-0 overflow-hidden bg-white/10 p-3 flex items-center justify-center">
         {imageError ? (
           <div className="flex flex-col items-center justify-center w-full h-full text-foreground/50">
             <AlertCircle size={48} className="mb-2 text-foreground/40" />
@@ -164,7 +164,7 @@ export default function EventCard({
               }}
             />
             {/* Gradient Overlay for Text Polish */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background/55 via-background/10 to-transparent opacity-90" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-background/12 to-transparent opacity-90" />
           </>
         )}
         
@@ -179,7 +179,7 @@ export default function EventCard({
       <div className="p-6 flex flex-col flex-grow relative z-10 -mt-8">
         {date ? (
           <div className="flex items-start justify-between mb-4">
-            <span className="rounded-md border border-border bg-card/80 px-2 py-1 text-sm font-medium text-foreground/60 backdrop-blur-sm">{date}</span>
+            <span className="rounded-md border border-white/10 bg-white/20 px-2 py-1 text-sm font-medium text-foreground/60 backdrop-blur-sm">{date}</span>
           </div>
         ) : null}
 

@@ -55,14 +55,14 @@ export default function AdminSidebar({ mobileOpen, onClose }: AdminSidebarProps)
       />
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col border-r border-black/5 bg-gray-50/95 shadow-xl transition-all duration-300 dark:border-white/[0.06] dark:bg-[#060606]/95 lg:static lg:z-auto lg:shadow-none ${
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col border-r border-white/10 bg-white/42 shadow-[0_18px_60px_rgba(0,0,0,0.16)] backdrop-blur-2xl backdrop-saturate-150 transition-all duration-300 dark:border-white/[0.08] dark:bg-black/30 lg:static lg:z-auto lg:shadow-none ${
           collapsed ? "w-[72px]" : "w-[260px]"
         } ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
       >
       {/* Toggle button */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-7 z-10 hidden h-6 w-6 items-center justify-center rounded-full border border-black/10 bg-white text-black/40 transition-colors hover:border-black/20 hover:text-black/70 dark:border-white/[0.08] dark:bg-[#0a0a0a] dark:text-white/40 dark:hover:border-white/[0.15] dark:hover:text-white/70 lg:flex"
+        className="absolute -right-3 top-7 z-10 hidden h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-white/60 text-black/40 backdrop-blur-md transition-colors hover:border-black/20 hover:text-black/70 dark:border-white/[0.08] dark:bg-white/5 dark:text-white/40 dark:hover:border-white/[0.15] dark:hover:text-white/70 lg:flex"
       >
         {collapsed ? (
           <ChevronRight className="w-3 h-3" />
@@ -72,7 +72,7 @@ export default function AdminSidebar({ mobileOpen, onClose }: AdminSidebarProps)
       </button>
 
       {/* Brand */}
-      <div className="flex items-center justify-between gap-3 border-b border-black/5 px-5 py-6 dark:border-white/[0.04]">
+      <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-6 dark:border-white/[0.04]">
         <div className="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-red-500 to-red-700 shadow-md shadow-red-500/15">
           <Shield className="w-4.5 h-4.5 text-white" />
         </div>
@@ -202,7 +202,7 @@ export default function AdminSidebar({ mobileOpen, onClose }: AdminSidebarProps)
       </nav>
 
       {/* User / Sign Out */}
-      <div className="border-t border-black/5 dark:border-white/[0.04] px-3 py-4">
+      <div className="border-t border-white/10 dark:border-white/[0.04] px-3 py-4">
         {!collapsed && session?.user && (
           <div className="px-3 mb-3">
             <p className="text-xs font-medium text-black/70 dark:text-white/50 truncate">

@@ -13,7 +13,7 @@ export default function AdminShell({ children }: AdminShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-transparent">
       <AdminSidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
       <main className="flex-1 min-w-0">
         <AdminHeader onMenuToggle={() => setMobileOpen((prev) => !prev)} />

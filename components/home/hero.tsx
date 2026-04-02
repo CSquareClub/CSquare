@@ -34,7 +34,7 @@ export default function Hero() {
           {/* Left Column content */}
           <div className="max-w-2xl">
             {/* Badge */}
-            <div className="mb-8 inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-card/80 px-5 py-2.5 shadow-md animate-fade-in-up">
+            <div className="mb-8 inline-flex items-center gap-2 rounded-xl border border-primary/25 bg-card/40 px-5 py-2.5 shadow-[0_12px_35px_rgba(0,0,0,0.08)] backdrop-blur-xl animate-fade-in-up">
               <span className="text-sm font-mono text-foreground/80">~ ./start_club.sh</span>
             </div>
 
@@ -78,9 +78,9 @@ export default function Hero() {
 
           {/* Right Column: Code Window */}
           <div className="relative animate-fade-in-up mx-auto lg:mx-0 lg:ml-auto w-full max-w-[500px] min-w-0" style={{ animationDelay: '0.4s' }}>
-            <div className="relative z-10 w-full overflow-hidden rounded-xl border border-border bg-card/80 shadow-xl">
+            <div className="relative z-10 w-full overflow-hidden rounded-xl border border-white/10 bg-card/42 shadow-[0_18px_60px_rgba(0,0,0,0.16)] backdrop-blur-2xl backdrop-saturate-150">
               {/* Window Header */}
-              <div className="flex min-w-0 items-center border-b border-border/70 bg-card px-4 py-3">
+              <div className="flex min-w-0 items-center border-b border-white/10 bg-white/10 px-4 py-3">
                 <div className="flex gap-2.5 flex-shrink-0">
                   <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
                   <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>

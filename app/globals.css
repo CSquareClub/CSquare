@@ -146,6 +146,24 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      linear-gradient(180deg, color-mix(in oklab, var(--background) 18%, transparent), transparent 24%, color-mix(in oklab, var(--background) 28%, transparent)),
+      radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--primary) 8%, transparent) 0, transparent 28%),
+      radial-gradient(circle at 0% 100%, color-mix(in oklab, var(--accent) 7%, transparent) 0, transparent 30%);
+    backdrop-filter: blur(18px) saturate(135%);
+  }
+
+  body > * {
+    position: relative;
+    z-index: 1;
+  }
+
   :focus-visible {
     outline: 2px solid color-mix(in oklab, var(--ring) 78%, white);
     outline-offset: 2px;

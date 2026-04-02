@@ -305,36 +305,36 @@ export default function AdminEventsPage() {
         <p className="text-base text-muted-foreground">Create and manage events shown on the public Events page.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid gap-6 rounded-2xl border border-border bg-card/90 shadow-lg p-8 md:grid-cols-2">
+      <form onSubmit={handleSubmit} className="grid gap-6 rounded-2xl border border-white/10 bg-card/45 p-8 shadow-[0_18px_50px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150 md:grid-cols-2">
         <input
           placeholder="Event title"
           value={form.title}
           onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition"
+          className="rounded-lg border border-white/10 bg-white/25 px-4 py-3 text-base backdrop-blur-md focus:ring-2 focus:ring-primary/30 transition"
         />
         <input
           type="datetime-local"
           value={form.startDate}
           onChange={(e) => setForm((prev) => ({ ...prev, startDate: e.target.value }))}
-          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition"
+          className="rounded-lg border border-white/10 bg-white/25 px-4 py-3 text-base backdrop-blur-md focus:ring-2 focus:ring-primary/30 transition"
         />
         <input
           type="datetime-local"
           value={form.endDate}
           onChange={(e) => setForm((prev) => ({ ...prev, endDate: e.target.value }))}
-          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition"
+          className="rounded-lg border border-white/10 bg-white/25 px-4 py-3 text-base backdrop-blur-md focus:ring-2 focus:ring-primary/30 transition"
         />
         <input
           placeholder="Location"
           value={form.location}
           onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
-          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition"
+          className="rounded-lg border border-white/10 bg-white/25 px-4 py-3 text-base backdrop-blur-md focus:ring-2 focus:ring-primary/30 transition"
         />
         <input
           placeholder="Category"
           value={form.category}
           onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
-          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition"
+          className="rounded-lg border border-white/10 bg-white/25 px-4 py-3 text-base backdrop-blur-md focus:ring-2 focus:ring-primary/30 transition"
         />
         <input
           type="number"
@@ -348,13 +348,13 @@ export default function AdminEventsPage() {
           placeholder="Image URL"
           value={form.image}
           onChange={(e) => setForm((prev) => ({ ...prev, image: e.target.value }))}
-          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
+          className="rounded-lg border border-white/10 bg-white/25 px-4 py-3 text-base backdrop-blur-md focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
         />
         <input
           placeholder="Registration URL (optional)"
           value={form.registrationUrl}
           onChange={(e) => setForm((prev) => ({ ...prev, registrationUrl: e.target.value }))}
-          className="rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
+          className="rounded-lg border border-white/10 bg-white/25 px-4 py-3 text-base backdrop-blur-md focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
         />
 
         {/* Multiple Sponsors Management */}

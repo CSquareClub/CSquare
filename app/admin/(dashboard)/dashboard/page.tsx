@@ -155,7 +155,7 @@ export default function AdminDashboardPage() {
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className="group relative rounded-2xl border border-black/5 bg-white/60 dark:border-white/[0.06] dark:bg-white/[0.02] p-5 transition-all duration-300 hover:border-black/10 hover:bg-white dark:hover:border-white/[0.1] dark:hover:bg-white/[0.03]"
+                className="group relative rounded-2xl border border-white/10 bg-white/28 backdrop-blur-2xl backdrop-saturate-150 dark:border-white/[0.06] dark:bg-white/[0.03] p-5 transition-all duration-300 hover:border-black/10 hover:bg-white/40 dark:hover:border-white/[0.1] dark:hover:bg-white/[0.05]"
               >
                 {/* Glow on hover */}
                 <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-5 dark:group-hover:opacity-[0.03] transition-opacity duration-300`} />
@@ -201,7 +201,7 @@ export default function AdminDashboardPage() {
                 <a
                   key={action.label}
                   href={action.href}
-                  className="group relative rounded-2xl border border-black/5 bg-white/60 dark:border-white/[0.06] dark:bg-white/[0.02] p-5 transition-all duration-300 hover:border-red-200 hover:bg-red-50/50 dark:hover:border-red-500/20 dark:hover:bg-white/[0.03] cursor-pointer"
+                  className="group relative rounded-2xl border border-white/10 bg-white/28 backdrop-blur-2xl backdrop-saturate-150 dark:border-white/[0.06] dark:bg-white/[0.03] p-5 transition-all duration-300 hover:border-red-200 hover:bg-red-50/40 dark:hover:border-red-500/20 dark:hover:bg-white/[0.05] cursor-pointer"
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-black/5 dark:bg-white/[0.04] group-hover:bg-red-100 dark:group-hover:bg-red-500/10 transition-colors duration-200">
@@ -224,7 +224,7 @@ export default function AdminDashboardPage() {
             <h2 className="text-lg font-semibold text-black/80 dark:text-white/80 mb-4">
               Analytics Snapshot
             </h2>
-            <div className="rounded-2xl border border-black/5 bg-white/60 dark:border-white/[0.06] dark:bg-white/[0.02] p-8">
+            <div className="rounded-2xl border border-white/10 bg-white/28 backdrop-blur-2xl backdrop-saturate-150 dark:border-white/[0.06] dark:bg-white/[0.03] p-8">
               {!data ? (
                 <div className="flex flex-col items-center justify-center text-center py-8">
                   <div className="w-12 h-12 rounded-full bg-black/5 dark:bg-white/[0.04] flex items-center justify-center mb-4">
@@ -247,7 +247,7 @@ export default function AdminDashboardPage() {
                         data.analytics.topPages.map((page) => (
                           <div
                             key={page.path}
-                            className="flex items-center justify-between rounded-lg border border-black/5 bg-white/70 px-3 py-2 text-sm dark:border-white/[0.06] dark:bg-white/[0.02]"
+                            className="flex items-center justify-between rounded-lg border border-white/10 bg-white/35 px-3 py-2 text-sm backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.03]"
                           >
                             <span className="truncate text-black/70 dark:text-white/70">{page.path}</span>
                             <span className="ml-3 font-semibold text-black/80 dark:text-white/80">{page.views}</span>
