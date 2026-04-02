@@ -61,7 +61,7 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-border/60 bg-background/75 backdrop-blur-xl">
+    <nav className="sticky top-0 z-40 border-b border-border/50 bg-background/38 backdrop-blur-2xl backdrop-saturate-150">
       <div className="absolute left-0 top-0 h-[2px] w-full bg-border/40">
         <div
           className="h-full bg-primary transition-[width] duration-150"
@@ -83,15 +83,15 @@ export default function Navigation() {
                 href={item.href}
                 className={`rounded-full px-3 py-1.5 text-sm transition-all ${
                   pathname === item.href
-                    ? 'bg-primary/10 text-primary font-semibold shadow-[0_0_0_1px_color-mix(in_oklab,var(--primary)_35%,transparent)]'
-                    : 'text-foreground/70 hover:bg-card/80 hover:text-foreground'
+                    ? 'bg-primary/12 text-primary font-semibold shadow-[0_0_0_1px_color-mix(in_oklab,var(--primary)_35%,transparent)]'
+                    : 'text-foreground/70 hover:bg-card/55 hover:text-foreground'
                 }`}
               >
                 {item.label}
               </Link>
             ))}
 
-            <JoinNowModal className="inline-flex items-center justify-center rounded-full border-2 border-primary bg-primary/15 px-5 py-2 font-mono text-xs font-semibold uppercase tracking-[0.15em] text-primary transition-all hover:scale-[1.005] hover:bg-primary/25 hover:shadow-[0_0_14px_color-mix(in_oklab,var(--primary)_24%,transparent)]">
+            <JoinNowModal className="inline-flex items-center justify-center rounded-full border border-primary/45 bg-primary/12 px-5 py-2 font-mono text-xs font-semibold uppercase tracking-[0.15em] text-primary backdrop-blur-md transition-all hover:scale-[1.005] hover:bg-primary/20 hover:shadow-[0_0_14px_color-mix(in_oklab,var(--primary)_24%,transparent)]">
               Join Now
             </JoinNowModal>
             

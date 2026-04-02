@@ -18,7 +18,7 @@ export default function Footer() {
   const logoSrc = mounted && !isDark ? '/c-square.png' : '/c-square-white.png';
 
   return (
-    <footer className="relative z-10 mt-20 border-t border-border bg-gradient-to-b from-transparent via-background/80 to-background">
+    <footer className="relative z-10 mt-20 border-t border-border/50 bg-gradient-to-b from-transparent via-background/40 to-background/55 backdrop-blur-2xl backdrop-saturate-150">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/45 to-transparent" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
@@ -101,7 +101,7 @@ export default function Footer() {
                 href="https://www.linkedin.com/company/csquare-club/"
                 target='_blank'
                 rel="noopener noreferrer"
-                className="rounded-full border border-border p-2 text-foreground/40 transition-colors hover:border-primary/40 hover:text-[#dc2626]"
+                className="rounded-full border border-border/60 bg-background/35 p-2 text-foreground/40 backdrop-blur-md transition-colors hover:border-primary/40 hover:text-[#dc2626]"
                 aria-label="LinkedIn"
               >
                 <Linkedin size={20} />
@@ -115,7 +115,7 @@ export default function Footer() {
               </a> */}
               <a
                 href="mailto:csquareclub@cumail.in"
-                className="rounded-full border border-border p-2 text-foreground/40 transition-colors hover:border-primary/40 hover:text-[#dc2626]"
+                className="rounded-full border border-border/60 bg-background/35 p-2 text-foreground/40 backdrop-blur-md transition-colors hover:border-primary/40 hover:text-[#dc2626]"
                 aria-label="Email"
               >
                 <Mail size={20} />

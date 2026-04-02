@@ -23,13 +23,13 @@ const GOOGLE_SHEET_URLS = {
   "core-team": "https://docs.google.com/spreadsheets/d/1S6OQd0lXUxpPQc7DQrP6mx2Ic-W3YI14aNhlYw-c15c/edit",
 } as const;
 
-const GOOGLE_SHEET_BUTTONS: Array<{ source: RegistrationSource; label: string }> = [
-  { source: "cusoc-2026", label: "Open CUSoC 2026 Sheet" },
-  { source: "cusoc-2027", label: "Open CUSoC 2027-28 Sheet" },
-  { source: "outside-all", label: "Open Outside Sheet" },
-  { source: "outside-ambassadors", label: "Open Ambassadors Sheet" },
-  { source: "core-team", label: "Open Core Team Sheet" },
-];
+const GOOGLE_SHEET_LABELS: Record<RegistrationSource, string> = {
+  "cusoc-2026": "Open CUSoC 2026 Sheet",
+  "cusoc-2027": "Open CUSoC 2027-28 Sheet",
+  "outside-all": "Open Outside Sheet",
+  "outside-ambassadors": "Open Campus Ambassadors Sheet",
+  "core-team": "Open Core Team Sheet",
+};
 
 type CusocTrack = "2026" | "2027";
 type RegistrationSource =
@@ -76,6 +76,10 @@ export default function CusocRegistrationsPage() {
 
   function getGoogleSheetUrl(nextSource: RegistrationSource): string {
     return GOOGLE_SHEET_URLS[nextSource];
+  }
+
+  function getGoogleSheetLabel(nextSource: RegistrationSource): string {
+    return GOOGLE_SHEET_LABELS[nextSource];
   }
 
   function normalizeSourceParam(value: string | null): RegistrationSource | null {
@@ -531,20 +535,13 @@ export default function CusocRegistrationsPage() {
           </div>
           <div className="flex flex-col gap-2 lg:items-end">
             <div className="flex flex-wrap gap-2">
-              {GOOGLE_SHEET_BUTTONS.map((button) => (
-                <button
-                  key={button.source}
-                  onClick={() => window.open(getGoogleSheetUrl(button.source), "_blank", "noopener,noreferrer")}
-                  className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all ${
-                    button.source === source
-                      ? "border-blue-400 bg-blue-50 text-blue-700 dark:border-blue-500/40 dark:bg-blue-500/15 dark:text-blue-300"
-                      : "border-blue-200 bg-blue-50/60 text-blue-700 hover:bg-blue-100 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20"
-                  }`}
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  {button.label}
-                </button>
-              ))}
+              <button
+                onClick={() => window.open(getGoogleSheetUrl(source), "_blank", "noopener,noreferrer")}
+                className="flex items-center gap-2 rounded-xl border border-blue-300 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition-all hover:bg-blue-100 dark:border-blue-500/30 dark:bg-blue-500/15 dark:text-blue-300 dark:hover:bg-blue-500/25"
+              >
+                <ExternalLink className="w-4 h-4" />
+                {getGoogleSheetLabel(source)}
+              </button>
             </div>
 
             <div className="flex flex-wrap gap-2">
