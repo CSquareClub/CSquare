@@ -92,6 +92,18 @@ function isDevfolioSponsor(title: string | null | undefined): boolean {
   return title?.trim().toLowerCase() === 'devfolio';
 }
 
+function formatCurrency(value: number | null | undefined): string | null {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return null;
+  }
+
+  if (value === 0) {
+    return 'Nada';
+  }
+
+  return `Rs ${value.toLocaleString('en-IN')}`;
+}
+
 function formatEventDateTime(value: string | null | undefined): string {
   if (!value) return 'TBD';
   const date = new Date(value);
@@ -157,6 +169,8 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
   const sponsorLogoAlt = isDevfolio ? 'DEVFOLIO LOGO' : 'Sponsor logo';
   const registrationButtonLabel = isDevfolioLink(event.registrationLink) ? 'Apply with Devfolio' : 'Register Now';
   const hasDevfolioApplyLogos = Boolean(isDevfolio && event.registrationLink && applyLogoLight && applyLogoDark);
+  const eventFeeLabel = formatCurrency(event.eventFee);
+  const accommodationFeeLabel = formatCurrency(event.accommodationFee);
   const fallbackImage =
     'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80';
 
@@ -199,6 +213,30 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                   <div className="text-foreground/70">{renderFormattedDescription(event.description)}</div>
                 ) : null}
               </header>
+
+              {eventFeeLabel || accommodationFeeLabel ? (
+                <div className="grid gap-4 rounded-xl border border-border bg-background/50 p-4 text-sm text-foreground/75 md:grid-cols-2">
+                  {eventFeeLabel ? (
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#dc2626]/40 text-[10px] font-semibold text-[#dc2626]">
+                        ₹
+                      </span>
+                      <span>Registration Fee: {eventFeeLabel}</span>
+                    </div>
+                  ) : null}
+                  {accommodationFeeLabel ? (
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#dc2626]/40 text-[10px] font-semibold text-[#dc2626]">
+                        A
+                      </span>
+                      <span>
+                        Accommodation Fee: {accommodationFeeLabel}
+                        {event.location?.toLowerCase().includes('chandigarh university') ? ' per day per person, including 3 meals' : ''}
+                      </span>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
 
               {event.sponsors && event.sponsors.length > 0 ? (
                 <div className="rounded-xl border border-border bg-background/50 p-4">
