@@ -25,6 +25,19 @@ function buildLocation(venueName?: string | null, city?: string | null): string 
   return parts.length ? parts.join(", ") : null;
 }
 
+function parseNumberOrNull(value: unknown): number | null {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+}
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -83,6 +96,11 @@ export async function POST(req: Request) {
     const safeCategory = allowedCategories.includes(input.category) ? input.category : "Meetup";
 
     const location = input.eventType === "Online" ? input.onlineLink || "Online" : buildLocation(input.venueName, input.city);
+    const isChandigarhUniversityVenue = /chandigarh university/i.test(location || "");
+    const eventFee = parseNumberOrNull(body?.eventFee);
+    const accommodationFee = isChandigarhUniversityVenue
+      ? 500
+      : parseNumberOrNull(body?.accommodationFee);
 
     const detailLines = [
       input.tagline ? `**Tagline**\n${input.tagline}` : null,
@@ -138,6 +156,8 @@ export async function POST(req: Request) {
       endDate: input.endDateTime.toISOString(),
       location,
       attendees: null,
+      eventFee,
+      accommodationFee,
       category: safeCategory,
       image: input.bannerImage || null,
       sponsorTitle: null,
@@ -155,6 +175,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ ...created, slug: input.slug, status: input.status }, { status: 201 });
   } catch (error) {
     console.error("Failed to create event", error);
-    return NextResponse.json({ error: "Failed to create event" }, { status: 500 });
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Failed to create event" },
+      { status: 500 }
+    );
   }
 }
