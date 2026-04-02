@@ -189,12 +189,12 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                 ) : null}
               </header>
 
-              {eventFeeLabel || (isChandigarhUniversityMohaliVenue && accommodationFeeLabel) ? (
+              {eventFeeLabel || (isChandigarhUniversityMohaliVenue && accommodationFeeLabel && event.showAccommodationOnPage) ? (
                 <section className="rounded-xl border border-border bg-background/50 p-4 text-sm text-foreground/75">
                   <h2 className="mb-2 text-lg font-semibold text-foreground">Fee Details</h2>
                   <div className="space-y-1.5">
                     {eventFeeLabel ? <p>Registration Fee: {eventFeeLabel}</p> : null}
-                    {isChandigarhUniversityMohaliVenue && accommodationFeeLabel ? (
+                    {isChandigarhUniversityMohaliVenue && accommodationFeeLabel && event.showAccommodationOnPage ? (
                       <p>
                         Accommodation Fee: {accommodationFeeLabel} per person
                         {event.accommodationAccess === 'chandigarh-university-only' ? ' (Chandigarh University only)' : ' (Open to all)'}

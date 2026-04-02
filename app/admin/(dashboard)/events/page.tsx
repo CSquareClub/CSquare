@@ -32,6 +32,7 @@ type EventItem = {
   eventFee: number | null;
   accommodationFee: number | null;
   accommodationAccess: AccommodationAccess | null;
+  showAccommodationOnPage: boolean;
   category: string | null;
   image: string | null;
   sponsors?: Sponsor[];
@@ -57,6 +58,7 @@ type EventFormState = {
   eventFee: string;
   accommodationFee: string;
   accommodationAccess: AccommodationAccess;
+  showAccommodationOnPage: boolean;
   category: string;
   image: string;
   sponsors: Sponsor[];
@@ -75,6 +77,7 @@ const defaultForm: EventFormState = {
   eventFee: "",
   accommodationFee: "",
   accommodationAccess: "open-to-all",
+  showAccommodationOnPage: true,
   category: "",
   image: "",
   sponsors: [],
@@ -313,6 +316,7 @@ export default function AdminEventsPage() {
           ? Number(form.accommodationFee)
           : null,
       accommodationAccess: form.accommodationAccess,
+      showAccommodationOnPage: form.showAccommodationOnPage,
       category: form.category.trim() || null,
       image: form.image.trim() || null,
       sponsors: form.sponsors.filter(s => s.title.trim()).map(s => ({
@@ -375,6 +379,7 @@ export default function AdminEventsPage() {
       eventFee: typeof event.eventFee === "number" ? String(event.eventFee) : "",
       accommodationFee: typeof event.accommodationFee === "number" ? String(event.accommodationFee) : "",
       accommodationAccess: event.accommodationAccess === "chandigarh-university-only" ? "chandigarh-university-only" : "open-to-all",
+      showAccommodationOnPage: typeof event.showAccommodationOnPage === "boolean" ? event.showAccommodationOnPage : true,
       category: event.category || "",
       image: event.image || "",
       sponsors: normalizeSponsorsForEdit(event),
@@ -543,6 +548,17 @@ export default function AdminEventsPage() {
           >
             <option value="open-to-all">Open to all</option>
             <option value="chandigarh-university-only">Chandigarh University only</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-medium text-muted-foreground">Show Accommodation Fee On Event Page?</span>
+          <select
+            value={form.showAccommodationOnPage ? "yes" : "no"}
+            onChange={(e) => setForm((prev) => ({ ...prev, showAccommodationOnPage: e.target.value === "yes" }))}
+            className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base focus:ring-2 focus:ring-primary/30 transition"
+          >
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
           </select>
         </label>
         <input

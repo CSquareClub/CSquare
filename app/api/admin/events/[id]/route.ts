@@ -82,6 +82,10 @@ export async function PATCH(req: Request, context: RouteContext) {
           : body.accommodationAccess === "chandigarh-university-only"
             ? "chandigarh-university-only"
             : "open-to-all",
+      showAccommodationOnPage:
+        typeof body.showAccommodationOnPage === "undefined"
+          ? undefined
+          : Boolean(body.showAccommodationOnPage),
       category: body.category,
       image: body.image,
       sponsorTitle: typeof body.sponsorTitle !== "undefined" ? body.sponsorTitle || null : undefined,

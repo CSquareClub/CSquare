@@ -83,6 +83,10 @@ export async function POST(req: Request) {
         body.accommodationAccess === "chandigarh-university-only"
           ? "chandigarh-university-only"
           : "open-to-all",
+      showAccommodationOnPage:
+        typeof body.showAccommodationOnPage === "boolean"
+          ? body.showAccommodationOnPage
+          : true,
       category: body.category,
       image: body.image,
       sponsorTitle: body.sponsorTitle || null,

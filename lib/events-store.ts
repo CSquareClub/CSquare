@@ -39,6 +39,7 @@ export type ClubEvent = {
   eventFee: number | null;
   accommodationFee: number | null;
   accommodationAccess: "open-to-all" | "chandigarh-university-only" | null;
+  showAccommodationOnPage: boolean;
   category: string | null;
   image: string | null;
   sponsors: Sponsor[];
@@ -68,6 +69,7 @@ type EventRow = {
   event_fee: number | null;
   accommodation_fee: number | null;
   accommodation_access: string | null;
+  show_accommodation_on_page: boolean | null;
   category: string | null;
   image_url: string | null;
   sponsor_title: string | null;
@@ -113,6 +115,7 @@ async function ensureEventsTable() {
         event_fee INTEGER,
         accommodation_fee INTEGER,
         accommodation_access TEXT,
+        show_accommodation_on_page BOOLEAN NOT NULL DEFAULT TRUE,
         category TEXT NOT NULL,
         image_url TEXT NOT NULL,
         sponsor_title TEXT,
@@ -177,6 +180,7 @@ async function ensureEventsTable() {
     await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS event_fee INTEGER;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS accommodation_fee INTEGER;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS accommodation_access TEXT;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS show_accommodation_on_page BOOLEAN NOT NULL DEFAULT TRUE;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE event_sponsors ADD COLUMN IF NOT EXISTS instagram_url TEXT;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE event_sponsors ADD COLUMN IF NOT EXISTS linkedin_url TEXT;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE event_community_partners ADD COLUMN IF NOT EXISTS instagram_url TEXT;`);
@@ -256,6 +260,7 @@ function rowToEvent(
       row.accommodation_access === "chandigarh-university-only" || row.accommodation_access === "open-to-all"
         ? row.accommodation_access
         : "open-to-all",
+    showAccommodationOnPage: row.show_accommodation_on_page ?? true,
     category: row.category,
     image: row.image_url,
     sponsors,
@@ -308,7 +313,7 @@ async function getEventCommunityPartners(eventId: number): Promise<CommunityPart
 export async function listPublicEvents(): Promise<ClubEvent[]> {
   await ensureEventsTable();
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
-    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url
+    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, show_accommodation_on_page, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url
      FROM events
      WHERE is_published = TRUE
       ORDER BY COALESCE(start_at, event_date) ASC, id DESC;`
@@ -324,7 +329,7 @@ export async function listPublicEvents(): Promise<ClubEvent[]> {
 export async function getPublicEventById(id: number): Promise<ClubEvent | null> {
   await ensureEventsTable();
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
-    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url
+    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, show_accommodation_on_page, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url
      FROM events
      WHERE id = $1
        AND is_published = TRUE
@@ -341,7 +346,7 @@ export async function getPublicEventById(id: number): Promise<ClubEvent | null> 
 export async function listAdminEvents(): Promise<ClubEvent[]> {
   await ensureEventsTable();
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
-    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url
+    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, show_accommodation_on_page, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url
      FROM events
       ORDER BY COALESCE(start_at, event_date) DESC, id DESC;`
   );
@@ -401,12 +406,14 @@ export async function createEvent(input: CreateEventInput): Promise<ClubEvent> {
     input.accommodationAccess === "chandigarh-university-only"
       ? "chandigarh-university-only"
       : "open-to-all";
+  const normalizedShowAccommodationOnPage =
+    typeof input.showAccommodationOnPage === "boolean" ? input.showAccommodationOnPage : true;
 
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
     `INSERT INTO events
-      (title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
-     RETURNING id, title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url;`,
+      (title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, show_accommodation_on_page, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)
+     RETURNING id, title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, show_accommodation_on_page, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url;`,
     input.title,
     input.description,
     safeStartDate,
@@ -418,6 +425,7 @@ export async function createEvent(input: CreateEventInput): Promise<ClubEvent> {
     normalizedEventFee,
     normalizedAccommodationFee,
     normalizedAccommodationAccess,
+    normalizedShowAccommodationOnPage,
     input.category,
     input.image,
     input.sponsorTitle,
@@ -455,7 +463,7 @@ export async function updateEvent(id: number, input: UpdateEventInput): Promise<
   await ensureEventsTable();
 
   const existing = await prisma.$queryRawUnsafe<EventRow[]>(
-    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url
+    `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, show_accommodation_on_page, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url
      FROM events
      WHERE id = $1;`,
     id
@@ -498,9 +506,10 @@ export async function updateEvent(id: number, input: UpdateEventInput): Promise<
          event_fee = $19,
          accommodation_fee = $20,
          accommodation_access = $21,
+         show_accommodation_on_page = $22,
          updated_at = NOW()
-       WHERE id = $22
-       RETURNING id, title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url;`,
+       WHERE id = $23
+       RETURNING id, title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, show_accommodation_on_page, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url;`,
     input.title ?? current.title,
     input.description ?? current.description,
     safeStartDate,
@@ -536,6 +545,9 @@ export async function updateEvent(id: number, input: UpdateEventInput): Promise<
     input.accommodationAccess === "chandigarh-university-only" || input.accommodationAccess === "open-to-all"
       ? input.accommodationAccess
       : current.accommodationAccess,
+    typeof input.showAccommodationOnPage === "boolean"
+      ? input.showAccommodationOnPage
+      : current.showAccommodationOnPage,
     id
   );
 

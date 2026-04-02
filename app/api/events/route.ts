@@ -104,6 +104,9 @@ export async function POST(req: Request) {
     const accommodationAccess = body?.accommodationAccess === "chandigarh-university-only"
       ? "chandigarh-university-only"
       : "open-to-all";
+    const showAccommodationOnPage = typeof body?.showAccommodationOnPage === "boolean"
+      ? body.showAccommodationOnPage
+      : true;
 
     const detailLines = [
       input.tagline ? `**Tagline**\n${input.tagline}` : null,
@@ -162,6 +165,7 @@ export async function POST(req: Request) {
       eventFee,
       accommodationFee,
       accommodationAccess,
+      showAccommodationOnPage,
       category: safeCategory,
       image: input.bannerImage || null,
       sponsorTitle: null,
