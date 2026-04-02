@@ -92,18 +92,6 @@ function isDevfolioSponsor(title: string | null | undefined): boolean {
   return title?.trim().toLowerCase() === 'devfolio';
 }
 
-function formatCurrency(value: number | null | undefined): string | null {
-  if (typeof value !== 'number' || Number.isNaN(value)) {
-    return null;
-  }
-
-  if (value === 0) {
-    return 'Nada';
-  }
-
-  return `Rs ${value.toLocaleString('en-IN')}`;
-}
-
 function formatEventDateTime(value: string | null | undefined): string {
   if (!value) return 'TBD';
   const date = new Date(value);
@@ -169,8 +157,6 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
   const sponsorLogoAlt = isDevfolio ? 'DEVFOLIO LOGO' : 'Sponsor logo';
   const registrationButtonLabel = isDevfolioLink(event.registrationLink) ? 'Apply with Devfolio' : 'Register Now';
   const hasDevfolioApplyLogos = Boolean(isDevfolio && event.registrationLink && applyLogoLight && applyLogoDark);
-  const eventFeeLabel = formatCurrency(event.eventFee);
-  const accommodationFeeLabel = formatCurrency(event.accommodationFee);
   const fallbackImage =
     'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80';
 
@@ -213,80 +199,6 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                   <div className="text-foreground/70">{renderFormattedDescription(event.description)}</div>
                 ) : null}
               </header>
-
-              {event.startDate || event.endDate || event.location || typeof event.attendees === 'number' || eventFeeLabel || accommodationFeeLabel || event.category ? (
-                <div className="grid gap-4 rounded-xl border border-border bg-background/50 p-4 text-sm text-foreground/75 md:grid-cols-2 xl:grid-cols-3">
-                  {event.startDate || event.endDate ? (
-                    <div className="flex items-center gap-2">
-                      <Calendar size={16} className="text-[#dc2626]" />
-                      <span>
-                        {formatEventDateTime(event.startDate)}
-                        {event.endDate ? ` - ${formatEventDateTime(event.endDate)}` : ''}
-                      </span>
-                    </div>
-                  ) : null}
-                  {event.location ? (
-                    <div className="flex items-center gap-2">
-                      <MapPin size={16} className="text-[#dc2626]" />
-                      <span>{event.location}</span>
-                    </div>
-                  ) : null}
-                  {typeof event.attendees === 'number' ? (
-                    <div className="flex items-center gap-2">
-                      <Users size={16} className="text-[#dc2626]" />
-                      <span>Capacity: {event.attendees}</span>
-                    </div>
-                  ) : null}
-                  {eventFeeLabel ? (
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[#dc2626]/40 text-[10px] font-semibold text-[#dc2626]">
-                        ₹
-                      </span>
-                      <span>Registration Fee: {eventFeeLabel}</span>
-                    </div>
-                  ) : null}
-                  {accommodationFeeLabel ? (
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[#dc2626]/40 text-[10px] font-semibold text-[#dc2626]">
-                        A
-                      </span>
-                      <span>
-                        Accommodation Fee: {accommodationFeeLabel}
-                        {event.location?.toLowerCase().includes('chandigarh university') ? ' per day per person, including 3 meals' : ''}
-                      </span>
-                    </div>
-                  ) : null}
-                  {event.category ? (
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[#dc2626]/40 text-[10px] font-semibold text-[#dc2626]">
-                        C
-                      </span>
-                      <span>Category: {event.category}</span>
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
-
-              {(event.registrationLink || pageOverride?.extraCtaLabel || pageOverride?.extraCtaUrl) ? (
-                <div className="grid gap-4 rounded-xl border border-border bg-background/50 p-4 text-sm text-foreground/75 md:grid-cols-2">
-                  {event.registrationLink ? (
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[#dc2626]/40 text-[10px] font-semibold text-[#dc2626]">
-                        R
-                      </span>
-                      <span>Registration link available</span>
-                    </div>
-                  ) : null}
-                  {pageOverride?.heading || pageOverride?.body ? (
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[#dc2626]/40 text-[10px] font-semibold text-[#dc2626]">
-                        D
-                      </span>
-                      <span>Additional details available</span>
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
 
               {event.sponsors && event.sponsors.length > 0 ? (
                 <div className="rounded-xl border border-border bg-background/50 p-4">
