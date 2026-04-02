@@ -15,7 +15,21 @@ import {
 import * as XLSX from "xlsx";
 import { useSearchParams } from "next/navigation";
 
-const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1S6OQd0lXUxpPQc7DQrP6mx2Ic-W3YI14aNhlYw-c15c/edit";
+const GOOGLE_SHEET_URLS = {
+  "cusoc-2026": "https://docs.google.com/spreadsheets/d/1Z-s5HxgSVzfXf4m9mV5WW8B-fTH1Fs7KYg0JvjConp4/edit",
+  "cusoc-2027": "https://docs.google.com/spreadsheets/d/1zvqnoc2JzUREzbuKtzgPKBiNXMpepqbzTxqjqa82vy0/edit",
+  "outside-all": "https://docs.google.com/spreadsheets/d/1S6OQd0lXUxpPQc7DQrP6mx2Ic-W3YI14aNhlYw-c15c/edit",
+  "outside-ambassadors": "https://docs.google.com/spreadsheets/d/1S6OQd0lXUxpPQc7DQrP6mx2Ic-W3YI14aNhlYw-c15c/edit",
+  "core-team": "https://docs.google.com/spreadsheets/d/1S6OQd0lXUxpPQc7DQrP6mx2Ic-W3YI14aNhlYw-c15c/edit",
+} as const;
+
+const GOOGLE_SHEET_BUTTONS: Array<{ source: RegistrationSource; label: string }> = [
+  { source: "cusoc-2026", label: "Open CUSoC 2026 Sheet" },
+  { source: "cusoc-2027", label: "Open CUSoC 2027-28 Sheet" },
+  { source: "outside-all", label: "Open Outside Sheet" },
+  { source: "outside-ambassadors", label: "Open Ambassadors Sheet" },
+  { source: "core-team", label: "Open Core Team Sheet" },
+];
 
 type CusocTrack = "2026" | "2027";
 type RegistrationSource =
@@ -59,6 +73,10 @@ export default function CusocRegistrationsPage() {
 
   const isCusocSource = source === "cusoc-2026" || source === "cusoc-2027";
   const track: CusocTrack = source === "cusoc-2026" ? "2026" : "2027";
+
+  function getGoogleSheetUrl(nextSource: RegistrationSource): string {
+    return GOOGLE_SHEET_URLS[nextSource];
+  }
 
   function normalizeSourceParam(value: string | null): RegistrationSource | null {
     if (!value) return null;
@@ -511,32 +529,43 @@ export default function CusocRegistrationsPage() {
               View, manage, and export CUSoC plus outside registrations in one place
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => window.open(GOOGLE_SHEET_URL, "_blank")}
-              className="flex items-center gap-2 rounded-xl border border-blue-300 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition-all hover:bg-blue-100 dark:border-blue-500/30 dark:bg-blue-500/15 dark:text-blue-300 dark:hover:bg-blue-500/25"
-            >
-              <ExternalLink className="w-4 h-4" />
-              Open Google Sheet
-            </button>
+          <div className="flex flex-col gap-2 lg:items-end">
+            <div className="flex flex-wrap gap-2">
+              {GOOGLE_SHEET_BUTTONS.map((button) => (
+                <button
+                  key={button.source}
+                  onClick={() => window.open(getGoogleSheetUrl(button.source), "_blank", "noopener,noreferrer")}
+                  className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all ${
+                    button.source === source
+                      ? "border-blue-400 bg-blue-50 text-blue-700 dark:border-blue-500/40 dark:bg-blue-500/15 dark:text-blue-300"
+                      : "border-blue-200 bg-blue-50/60 text-blue-700 hover:bg-blue-100 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20"
+                  }`}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  {button.label}
+                </button>
+              ))}
+            </div>
 
-            <button
-              onClick={syncToGoogleSheet}
-              disabled={exporting}
-              className="flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-all hover:bg-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25"
-            >
-              <RefreshCw className={`w-4 h-4 ${exporting ? "animate-spin" : ""}`} />
-              {exporting ? "Syncing..." : "Sync Google Sheet"}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={syncToGoogleSheet}
+                disabled={exporting}
+                className="flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-all hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25"
+              >
+                <RefreshCw className={`w-4 h-4 ${exporting ? "animate-spin" : ""}`} />
+                {exporting ? "Syncing..." : "Sync Google Sheet"}
+              </button>
 
-            <button
-              onClick={downloadExcel}
-              disabled={!data.length}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:shadow-xl hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <Download className="w-4 h-4" />
-              Export to Excel
-            </button>
+              <button
+                onClick={downloadExcel}
+                disabled={!data.length}
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:shadow-xl hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Download className="w-4 h-4" />
+                Export to Excel
+              </button>
+            </div>
           </div>
         </div>
 
