@@ -130,6 +130,10 @@ function reorderSponsors(list: Sponsor[], fromIndex: number, toIndex: number): S
   return updated;
 }
 
+function isImageFile(file: File): boolean {
+  return file.type.startsWith("image/");
+}
+
 function slugifyTitle(title: string): string {
   return title
     .toLowerCase()
@@ -270,6 +274,23 @@ export default function AdminEventsPage() {
           }
           return { ...prev, sponsors: updated };
         });
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handlePosterFileChange(file: File | null) {
+    if (!file) return;
+    if (!isImageFile(file)) {
+      setError("Please upload a valid image file for the event poster.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result === "string") {
+        setForm((prev) => ({ ...prev, image: result }));
       }
     };
     reader.readAsDataURL(file);
@@ -561,12 +582,31 @@ export default function AdminEventsPage() {
             <option value="no">No</option>
           </select>
         </label>
-        <input
-          placeholder="Image URL"
-          value={form.image}
-          onChange={(e) => setForm((prev) => ({ ...prev, image: e.target.value }))}
-          className="rounded-lg border border-white/10 bg-white/25 px-4 py-3 text-base backdrop-blur-md focus:ring-2 focus:ring-primary/30 transition md:col-span-2"
-        />
+        <div className="md:col-span-2">
+          <label className="mb-1 block text-sm font-medium text-foreground/80">Event Poster</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => handlePosterFileChange(e.target.files?.[0] || null)}
+            className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/30 transition"
+          />
+          {form.image ? (
+            <div className="mt-3 rounded-lg border border-border bg-background/60 p-3">
+              <img
+                src={form.image}
+                alt="Event poster preview"
+                className="max-h-56 w-full object-contain"
+              />
+              <button
+                type="button"
+                onClick={() => setForm((prev) => ({ ...prev, image: "" }))}
+                className="mt-3 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground/70 hover:bg-muted/50"
+              >
+                Remove Poster
+              </button>
+            </div>
+          ) : null}
+        </div>
         <input
           placeholder="Registration URL (optional)"
           value={form.registrationUrl}

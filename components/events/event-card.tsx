@@ -121,6 +121,7 @@ export default function EventCard({
   const eventFeeLabel = formatCurrency(eventFee);
   const accommodationFeeLabel = formatCurrency(accommodationFee);
   const isChandigarhUniversityMohaliVenue = /chandigarh university/i.test(location || '') && /mohali/i.test(location || '');
+  const showAccommodationAccess = Boolean(showAccommodationOnPage && accommodationAccess);
   const showAccommodationDetails = Boolean(showAccommodationOnPage && isChandigarhUniversityMohaliVenue && accommodationFeeLabel);
 
   useEffect(() => {
@@ -218,7 +219,7 @@ export default function EventCard({
           </Link>
         </h3>
 
-        {time || location || typeof attendees === 'number' || eventFeeLabel || showAccommodationDetails ? (
+        {time || location || typeof attendees === 'number' || eventFeeLabel || showAccommodationDetails || showAccommodationAccess ? (
           <div className="space-y-3 mb-6 text-sm text-foreground/60">
             {time ? (
               <div className="flex items-center gap-2">
@@ -255,6 +256,14 @@ export default function EventCard({
                   Accommodation Fee: {accommodationFeeLabel}
                   {accommodationAccess === 'chandigarh-university-only' ? ' (CU only)' : ' (Open to all)'}
                 </span>
+              </div>
+            ) : null}
+            {showAccommodationAccess ? (
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[#dc2626]/40 text-[10px] font-semibold text-[#dc2626]">
+                  E
+                </span>
+                <span>Accommodation Access: {accommodationAccess === 'chandigarh-university-only' ? 'CU only' : 'Open to all'}</span>
               </div>
             ) : null}
           </div>

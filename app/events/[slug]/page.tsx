@@ -146,6 +146,7 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
   const eventFeeLabel = formatCurrency(event.eventFee);
   const accommodationFeeLabel = formatCurrency(event.accommodationFee);
   const isChandigarhUniversityMohaliVenue = /chandigarh university/i.test(event.location || '') && /mohali/i.test(event.location || '');
+  const showAccommodationAccess = Boolean(event.showAccommodationOnPage && event.accommodationAccess);
   const fallbackImage =
     'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80';
 
@@ -189,7 +190,7 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                 ) : null}
               </header>
 
-              {eventFeeLabel || (isChandigarhUniversityMohaliVenue && accommodationFeeLabel && event.showAccommodationOnPage) ? (
+              {eventFeeLabel || (isChandigarhUniversityMohaliVenue && accommodationFeeLabel && event.showAccommodationOnPage) || showAccommodationAccess ? (
                 <section className="rounded-xl border border-border bg-background/50 p-4 text-sm text-foreground/75">
                   <h2 className="mb-2 text-lg font-semibold text-foreground">Fee Details</h2>
                   <div className="space-y-1.5">
@@ -198,6 +199,11 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                       <p>
                         Accommodation Fee: {accommodationFeeLabel} per person
                         {event.accommodationAccess === 'chandigarh-university-only' ? ' (Chandigarh University only)' : ' (Open to all)'}
+                      </p>
+                    ) : null}
+                    {showAccommodationAccess ? (
+                      <p>
+                        Accommodation Access: {event.accommodationAccess === 'chandigarh-university-only' ? 'CU only' : 'Open to all'}
                       </p>
                     ) : null}
                   </div>
