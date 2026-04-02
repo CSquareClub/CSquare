@@ -4,24 +4,24 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: rgba(255, 255, 255, 0.72);
+  --background: rgba(255, 255, 255, 0.42);
   --foreground: #000000;
-  --card: rgba(255, 255, 255, 0.58);
+  --card: rgba(255, 255, 255, 0.3);
   --card-foreground: #000000;
-  --popover: rgba(255, 255, 255, 0.68);
+  --popover: rgba(255, 255, 255, 0.34);
   --popover-foreground: #000000;
   --primary: #dc2626;
   --primary-foreground: #ffffff;
   --secondary: #000000;
   --secondary-foreground: #ffffff;
-  --muted: rgba(244, 244, 244, 0.62);
+  --muted: rgba(244, 244, 244, 0.36);
   --muted-foreground: #222222;
   --accent: #dc2626;
   --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: rgba(0, 0, 0, 0.12);
-  --input: rgba(255, 255, 255, 0.56);
+  --border: rgba(0, 0, 0, 0.1);
+  --input: rgba(255, 255, 255, 0.28);
   --ring: #dc2626;
   --chart-1: #dc2626;
   --chart-2: #000000;
@@ -29,7 +29,7 @@
   --chart-4: #dc2626;
   --chart-5: #000000;
   --radius: 0.625rem;
-  --sidebar: rgba(255, 255, 255, 0.55);
+  --sidebar: rgba(255, 255, 255, 0.3);
   --sidebar-foreground: #ffffff;
   --sidebar-primary: #dc2626;
   --sidebar-primary-foreground: #ffffff;
@@ -40,31 +40,31 @@
 }
 
 .dark {
-  --background: rgba(6, 6, 6, 0.72);
+  --background: rgba(6, 6, 6, 0.4);
   --foreground: #ffffff;
-  --card: rgba(17, 17, 17, 0.58);
+  --card: rgba(17, 17, 17, 0.28);
   --card-foreground: #ffffff;
-  --popover: rgba(17, 17, 17, 0.68);
+  --popover: rgba(17, 17, 17, 0.34);
   --popover-foreground: #ffffff;
   --primary: #dc2626;
   --primary-foreground: #ffffff;
   --secondary: #ffffff;
   --secondary-foreground: #000000;
-  --muted: rgba(34, 34, 34, 0.6);
+  --muted: rgba(34, 34, 34, 0.34);
   --muted-foreground: #f4f4f4;
   --accent: #dc2626;
   --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: rgba(255, 255, 255, 0.14);
-  --input: rgba(17, 17, 17, 0.56);
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(17, 17, 17, 0.26);
   --ring: #dc2626;
   --chart-1: #dc2626;
   --chart-2: #ffffff;
   --chart-3: #000000;
   --chart-4: #dc2626;
   --chart-5: #ffffff;
-  --sidebar: rgba(17, 17, 17, 0.62);
+  --sidebar: rgba(17, 17, 17, 0.3);
   --sidebar-foreground: #ffffff;
   --sidebar-primary: #dc2626;
   --sidebar-primary-foreground: #ffffff;
@@ -153,10 +153,10 @@
     pointer-events: none;
     z-index: 0;
     background:
-      linear-gradient(180deg, color-mix(in oklab, var(--background) 18%, transparent), transparent 24%, color-mix(in oklab, var(--background) 28%, transparent)),
-      radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--primary) 8%, transparent) 0, transparent 28%),
-      radial-gradient(circle at 0% 100%, color-mix(in oklab, var(--accent) 7%, transparent) 0, transparent 30%);
-    backdrop-filter: blur(18px) saturate(135%);
+      linear-gradient(180deg, color-mix(in oklab, var(--background) 10%, transparent), transparent 22%, color-mix(in oklab, var(--background) 16%, transparent)),
+      radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--primary) 14%, transparent) 0, transparent 30%),
+      radial-gradient(circle at 0% 100%, color-mix(in oklab, var(--accent) 12%, transparent) 0, transparent 34%);
+    backdrop-filter: blur(26px) saturate(150%);
   }
 
   body > * {

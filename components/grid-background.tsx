@@ -6,16 +6,16 @@ export default function GridBackground() {
   const { resolvedTheme } = useTheme();
   const isDarkTheme = resolvedTheme !== 'light';
 
-  const baseBg = isDarkTheme ? 'rgba(6, 6, 6, 0.35)' : 'rgba(250, 246, 240, 0.32)';
+  const baseBg = isDarkTheme ? 'rgba(6, 6, 6, 0.18)' : 'rgba(250, 246, 240, 0.2)';
   const gridLine = isDarkTheme ? 'rgba(251,146,60,0.07)' : 'rgba(194,65,12,0.06)';
-  const overlayMid = isDarkTheme ? 'rgba(23,17,11,0.2)' : 'rgba(245,232,214,0.18)';
-  const overlayEnd = isDarkTheme ? 'rgba(16,12,8,0.66)' : 'rgba(250,246,240,0.72)';
+  const overlayMid = isDarkTheme ? 'rgba(23,17,11,0.1)' : 'rgba(245,232,214,0.1)';
+  const overlayEnd = isDarkTheme ? 'rgba(16,12,8,0.38)' : 'rgba(250,246,240,0.42)';
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" style={{ backgroundColor: baseBg }}>
       {/* Lightweight grid pattern */}
       <div
-        className="absolute inset-0 opacity-[0.28] animate-grid"
+        className="absolute inset-0 opacity-[0.2] animate-grid"
         style={{
           backgroundImage: `
             linear-gradient(to right, ${gridLine} 1px, transparent 1px),
@@ -28,15 +28,15 @@ export default function GridBackground() {
       {/* Ambient glows */}
       <div
         className="absolute -top-24 left-1/2 h-[390px] w-[75%] -translate-x-1/2 rounded-full blur-3xl animate-drift-slow"
-        style={{ background: isDarkTheme ? 'rgba(251,146,60,0.1)' : 'rgba(249,115,22,0.09)' }}
+        style={{ background: isDarkTheme ? 'rgba(251,146,60,0.08)' : 'rgba(249,115,22,0.08)' }}
       />
       <div
         className="absolute bottom-[-50px] right-[-30px] h-[300px] w-[300px] rounded-full blur-3xl animate-orbit-float"
-        style={{ background: isDarkTheme ? 'rgba(220,38,38,0.08)' : 'rgba(234,88,12,0.08)' }}
+        style={{ background: isDarkTheme ? 'rgba(220,38,38,0.06)' : 'rgba(234,88,12,0.06)' }}
       />
       <div
         className="absolute bottom-[20%] left-[-50px] h-[220px] w-[220px] rounded-full blur-3xl animate-drift-slow"
-        style={{ background: isDarkTheme ? 'rgba(180,83,9,0.06)' : 'rgba(194,65,12,0.06)' }}
+        style={{ background: isDarkTheme ? 'rgba(180,83,9,0.05)' : 'rgba(194,65,12,0.05)' }}
       />
 
       <div className="absolute inset-0 opacity-[0.02]" style={{
