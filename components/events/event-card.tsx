@@ -15,6 +15,8 @@ interface EventCardProps {
   attendees: number | null;
   eventFee: number | null;
   accommodationFee: number | null;
+  accommodationAccess?: 'open-to-all' | 'chandigarh-university-only' | null;
+  showAccommodationOnPage?: boolean;
   category: string | null;
   image: string | null;
   registrationUrl?: string | null;
@@ -95,6 +97,8 @@ export default function EventCard({
   attendees,
   eventFee,
   accommodationFee,
+  accommodationAccess,
+  showAccommodationOnPage = true,
   category,
   image,
   registrationUrl,
@@ -116,6 +120,8 @@ export default function EventCard({
   const registrationButtonLabel = isDevfolioLink(registrationUrl) ? 'Apply with Devfolio' : 'Register Now';
   const eventFeeLabel = formatCurrency(eventFee);
   const accommodationFeeLabel = formatCurrency(accommodationFee);
+  const isChandigarhUniversityMohaliVenue = /chandigarh university/i.test(location || '') && /mohali/i.test(location || '');
+  const showAccommodationDetails = Boolean(showAccommodationOnPage && isChandigarhUniversityMohaliVenue && accommodationFeeLabel);
 
   useEffect(() => {
     setCurrentImage(normalizedImage || fallbackImage);
@@ -212,7 +218,7 @@ export default function EventCard({
           </Link>
         </h3>
 
-        {time || location || typeof attendees === 'number' || eventFeeLabel || accommodationFeeLabel ? (
+        {time || location || typeof attendees === 'number' || eventFeeLabel || showAccommodationDetails ? (
           <div className="space-y-3 mb-6 text-sm text-foreground/60">
             {time ? (
               <div className="flex items-center gap-2">
@@ -240,12 +246,15 @@ export default function EventCard({
                 <span>Registration Fee: {eventFeeLabel}</span>
               </div>
             ) : null}
-            {accommodationFeeLabel ? (
+            {showAccommodationDetails ? (
               <div className="flex items-center gap-2">
                 <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[#dc2626]/40 text-[10px] font-semibold text-[#dc2626]">
                   A
                 </span>
-                <span>Accommodation Fee: {accommodationFeeLabel}</span>
+                <span>
+                  Accommodation Fee: {accommodationFeeLabel}
+                  {accommodationAccess === 'chandigarh-university-only' ? ' (CU only)' : ' (Open to all)'}
+                </span>
               </div>
             ) : null}
           </div>
