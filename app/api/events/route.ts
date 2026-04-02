@@ -96,11 +96,14 @@ export async function POST(req: Request) {
     const safeCategory = allowedCategories.includes(input.category) ? input.category : "Meetup";
 
     const location = input.eventType === "Online" ? input.onlineLink || "Online" : buildLocation(input.venueName, input.city);
-    const isChandigarhUniversityVenue = /chandigarh university/i.test(location || "");
+    const isChandigarhUniversityMohaliVenue = /chandigarh university/i.test(location || "") && /mohali/i.test(location || "");
     const eventFee = parseNumberOrNull(body?.eventFee);
-    const accommodationFee = isChandigarhUniversityVenue
+    const accommodationFee = isChandigarhUniversityMohaliVenue
       ? 500
       : parseNumberOrNull(body?.accommodationFee);
+    const accommodationAccess = body?.accommodationAccess === "chandigarh-university-only"
+      ? "chandigarh-university-only"
+      : "open-to-all";
 
     const detailLines = [
       input.tagline ? `**Tagline**\n${input.tagline}` : null,
@@ -158,6 +161,7 @@ export async function POST(req: Request) {
       attendees: null,
       eventFee,
       accommodationFee,
+      accommodationAccess,
       category: safeCategory,
       image: input.bannerImage || null,
       sponsorTitle: null,

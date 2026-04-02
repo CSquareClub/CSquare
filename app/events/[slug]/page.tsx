@@ -1,13 +1,12 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Calendar, MapPin, Users, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 import Navigation from '@/components/navigation';
 import Footer from '@/components/footer';
 import GridBackground from '@/components/grid-background';
 import { getPublicEventById, listPublicEvents } from '@/lib/events-store';
 import { listGalleryItemsByEventId } from '@/lib/gallery-store';
-import { getEventPageOverride } from '@/lib/event-page-overrides';
 import { Instagram, Linkedin } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -97,31 +96,7 @@ function formatCurrency(value: number | null | undefined): string | null {
     return null;
   }
 
-  if (value === 0) {
-    return 'Nada';
-  }
-
-  return `Rs ${value.toLocaleString('en-IN')}`;
-}
-
-function formatEventDateTime(value: string | null | undefined): string {
-  if (!value) return 'TBD';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'TBD';
-  // Format as dd/mm/yyyy, hh:mm AM/PM in IST
-  const dateStr = date.toLocaleDateString('en-GB', {
-    timeZone: 'Asia/Kolkata',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
-  const timeStr = date.toLocaleTimeString('en-US', {
-    timeZone: 'Asia/Kolkata',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-  return `${dateStr}, ${timeStr}`;
+  return value === 0 ? 'Nada' : `Rs ${value.toLocaleString('en-IN')}`;
 }
 
 type EventDetailsPageProps = {
@@ -159,7 +134,6 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
   }
 
   const safeTitle = event.title?.trim() || 'Untitled Event';
-  const pageOverride = await getEventPageOverride(slug);
   const imageUrl = normalizeEventImageUrl(event.image);
   const lightSponsorLogo = event.sponsorLogoLightUrl || event.sponsorLogoUrl;
   const darkSponsorLogo = event.sponsorLogoDarkUrl || event.sponsorLogoLightUrl || event.sponsorLogoUrl;
@@ -169,6 +143,9 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
   const sponsorLogoAlt = isDevfolio ? 'DEVFOLIO LOGO' : 'Sponsor logo';
   const registrationButtonLabel = isDevfolioLink(event.registrationLink) ? 'Apply with Devfolio' : 'Register Now';
   const hasDevfolioApplyLogos = Boolean(isDevfolio && event.registrationLink && applyLogoLight && applyLogoDark);
+  const eventFeeLabel = formatCurrency(event.eventFee);
+  const accommodationFeeLabel = formatCurrency(event.accommodationFee);
+  const isChandigarhUniversityMohaliVenue = /chandigarh university/i.test(event.location || '') && /mohali/i.test(event.location || '');
   const fallbackImage =
     'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80';
 
@@ -211,6 +188,21 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                   <div className="text-foreground/70">{renderFormattedDescription(event.description)}</div>
                 ) : null}
               </header>
+
+              {eventFeeLabel || (isChandigarhUniversityMohaliVenue && accommodationFeeLabel) ? (
+                <section className="rounded-xl border border-border bg-background/50 p-4 text-sm text-foreground/75">
+                  <h2 className="mb-2 text-lg font-semibold text-foreground">Fee Details</h2>
+                  <div className="space-y-1.5">
+                    {eventFeeLabel ? <p>Registration Fee: {eventFeeLabel}</p> : null}
+                    {isChandigarhUniversityMohaliVenue && accommodationFeeLabel ? (
+                      <p>
+                        Accommodation Fee: {accommodationFeeLabel} per person
+                        {event.accommodationAccess === 'chandigarh-university-only' ? ' (Chandigarh University only)' : ' (Open to all)'}
+                      </p>
+                    ) : null}
+                  </div>
+                </section>
+              ) : null}
 
               {event.sponsors && event.sponsors.length > 0 ? (
                 <div className="rounded-xl border border-border bg-background/50 p-4">
@@ -392,24 +384,6 @@ export default async function EventDetailsPage({ params, searchParams }: EventDe
                 </div>
               )}
 
-              {pageOverride?.body ? (
-                <section className="rounded-xl border border-border bg-background/50 p-4">
-                  <h2 className="mb-2 text-lg font-semibold text-foreground">
-                    {pageOverride.heading || 'Additional Event Details'}
-                  </h2>
-                  <p className="whitespace-pre-line text-sm text-foreground/75">{pageOverride.body}</p>
-                  {pageOverride.extraCtaLabel && pageOverride.extraCtaUrl ? (
-                    <a
-                      href={pageOverride.extraCtaUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-4 inline-flex items-center rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition-all hover:border-[#dc2626] hover:bg-[#dc2626] hover:text-white"
-                    >
-                      {pageOverride.extraCtaLabel}
-                    </a>
-                  ) : null}
-                </section>
-              ) : null}
             </div>
           </article>
         </div>
