@@ -81,16 +81,21 @@ function rowToGalleryItem(row: GalleryRow): GalleryItem {
 }
 
 export async function listPublicGalleryItems(): Promise<GalleryItem[]> {
-  await ensureGalleryTable();
+  try {
+    await ensureGalleryTable();
 
-  const rows = await prisma.$queryRawUnsafe<GalleryRow[]>(
-    `SELECT id, title, event_id, event_name, image_url, description, is_published, created_at
-     FROM event_gallery
-     WHERE is_published = TRUE
-     ORDER BY created_at DESC;`
-  );
+    const rows = await prisma.$queryRawUnsafe<GalleryRow[]>(
+      `SELECT id, title, event_id, event_name, image_url, description, is_published, created_at
+       FROM event_gallery
+       WHERE is_published = TRUE
+       ORDER BY created_at DESC;`
+    );
 
-  return rows.map(rowToGalleryItem);
+    return rows.map(rowToGalleryItem);
+  } catch (error) {
+    console.error("Failed to fetch public gallery items", error);
+    return [];
+  }
 }
 
 export async function listAdminGalleryItems(): Promise<GalleryItem[]> {
@@ -168,17 +173,22 @@ export async function deleteGalleryItem(id: number): Promise<boolean> {
 }
 
 export async function listGalleryItemsByEventId(eventId: number): Promise<GalleryItem[]> {
-  await ensureGalleryTable();
+  try {
+    await ensureGalleryTable();
 
-  const rows = await prisma.$queryRawUnsafe<GalleryRow[]>(
-    `SELECT id, title, event_id, event_name, image_url, description, is_published, created_at
-     FROM event_gallery
-     WHERE event_id = $1 AND is_published = TRUE
-     ORDER BY created_at DESC;`,
-    eventId
-  );
+    const rows = await prisma.$queryRawUnsafe<GalleryRow[]>(
+      `SELECT id, title, event_id, event_name, image_url, description, is_published, created_at
+       FROM event_gallery
+       WHERE event_id = $1 AND is_published = TRUE
+       ORDER BY created_at DESC;`,
+      eventId
+    );
 
-  return rows.map(rowToGalleryItem);
+    return rows.map(rowToGalleryItem);
+  } catch (error) {
+    console.error("Failed to fetch gallery items for event", eventId, error);
+    return [];
+  }
 }
 
 export async function listAdminGalleryItemsByEventId(eventId: number): Promise<GalleryItem[]> {
