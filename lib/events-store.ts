@@ -171,6 +171,14 @@ async function ensureEventsTable() {
 
     await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS start_at TIMESTAMPTZ;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS end_at TIMESTAMPTZ;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS event_date TIMESTAMPTZ;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS time_text TEXT;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS location TEXT;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS attendees INTEGER;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS category TEXT;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS image_url TEXT;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS is_published BOOLEAN NOT NULL DEFAULT TRUE;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS registration_url TEXT;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_title TEXT;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_url TEXT;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsor_logo_light_url TEXT;`);
@@ -185,6 +193,7 @@ async function ensureEventsTable() {
     await prisma.$executeRawUnsafe(`ALTER TABLE event_sponsors ADD COLUMN IF NOT EXISTS linkedin_url TEXT;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE event_community_partners ADD COLUMN IF NOT EXISTS instagram_url TEXT;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE event_community_partners ADD COLUMN IF NOT EXISTS linkedin_url TEXT;`);
+    await prisma.$executeRawUnsafe(`UPDATE events SET event_date = COALESCE(start_at, end_at, event_date, NOW()) WHERE event_date IS NULL;`);
     await prisma.$executeRawUnsafe(`UPDATE events SET start_at = event_date WHERE start_at IS NULL;`);
     await prisma.$executeRawUnsafe(`UPDATE events SET end_at = event_date WHERE end_at IS NULL;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE events ALTER COLUMN title DROP NOT NULL;`);
