@@ -9,9 +9,19 @@ import EventCard from '@/components/events/event-card';
 import { listPublicEvents } from '@/lib/events-store';
 import { toEpoch, formatEventDate, formatEventTime } from '@/lib/event-time-utils';
 import Link from 'next/link';
+import type { ClubEvent } from '@/lib/events-store';
+
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const allEvents = await listPublicEvents();
+  let allEvents: ClubEvent[] = [];
+
+  try {
+    allEvents = await listPublicEvents();
+  } catch (error) {
+    console.error('Failed to load home page events', error);
+  }
+
   const now = Date.now();
   const currentEvents = allEvents
     .filter((event) => {
