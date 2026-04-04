@@ -54,7 +54,7 @@ export default function RootLayout({
           storageKey="csquare-theme-v2"
           disableTransitionOnChange
         >
-          <PageImpressionTracker />
+          {/* <PageImpressionTracker /> */}
           {children}
         </ThemeProvider>
         <Analytics />
