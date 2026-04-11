@@ -6,50 +6,48 @@ import { useEffect, useState } from 'react';
 export default function GridBackground() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Before hydration, default to dark (matches defaultTheme="dark" in layout)
   const isDarkTheme = mounted ? resolvedTheme !== 'light' : true;
 
-  const baseBg = isDarkTheme ? 'rgba(6, 6, 6, 0.18)' : 'rgba(250, 246, 240, 0.2)';
-  const gridLine = isDarkTheme ? 'rgba(251,146,60,0.07)' : 'rgba(194,65,12,0.06)';
-  const overlayMid = isDarkTheme ? 'rgba(23,17,11,0.1)' : 'rgba(245,232,214,0.1)';
-  const overlayEnd = isDarkTheme ? 'rgba(16,12,8,0.38)' : 'rgba(250,246,240,0.42)';
+  const baseBg = isDarkTheme ? '#050505' : '#080808';
+  const gridLine = isDarkTheme ? 'rgba(255, 210, 50, 0.09)' : 'rgba(255, 210, 50, 0.08)';
+  const overlayMid = isDarkTheme ? 'rgba(8, 8, 8, 0.35)' : 'rgba(8, 8, 8, 0.34)';
+  const overlayEnd = isDarkTheme ? 'rgba(5, 5, 5, 0.96)' : 'rgba(6, 6, 6, 0.95)';
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" style={{ backgroundColor: baseBg }}>
       {/* Lightweight grid pattern */}
       <div
-        className="absolute inset-0 opacity-[0.2] animate-grid"
+        className="absolute inset-0 opacity-[0.62] animate-grid"
         style={{
           backgroundImage: `
             linear-gradient(to right, ${gridLine} 1px, transparent 1px),
             linear-gradient(to bottom, ${gridLine} 1px, transparent 1px)
           `,
-          backgroundSize: '52px 52px',
+          backgroundSize: '46px 46px',
         }}
       />
 
-      {/* Ambient glows */}
+      {/* Ambient glow */}
       <div
-        className="absolute -top-24 left-1/2 h-[390px] w-[75%] -translate-x-1/2 rounded-full blur-3xl animate-drift-slow"
-        style={{ background: isDarkTheme ? 'rgba(251,146,60,0.08)' : 'rgba(249,115,22,0.08)' }}
+        className="absolute -top-20 left-1/2 h-[360px] w-[70%] -translate-x-1/2 rounded-full blur-3xl animate-drift-slow"
+        style={{ background: 'rgba(255, 210, 50, 0.11)' }}
       />
       <div
-        className="absolute bottom-[-50px] right-[-30px] h-[300px] w-[300px] rounded-full blur-3xl animate-orbit-float"
-        style={{ background: isDarkTheme ? 'rgba(220,38,38,0.06)' : 'rgba(234,88,12,0.06)' }}
+        className="absolute right-[-80px] top-1/4 h-[320px] w-[320px] rounded-full blur-3xl animate-orbit-float"
+        style={{ background: 'rgba(255, 210, 50, 0.08)' }}
       />
       <div
-        className="absolute bottom-[20%] left-[-50px] h-[220px] w-[220px] rounded-full blur-3xl animate-drift-slow"
-        style={{ background: isDarkTheme ? 'rgba(180,83,9,0.05)' : 'rgba(194,65,12,0.05)' }}
+        className="absolute bottom-[12%] left-[-60px] h-[260px] w-[260px] rounded-full blur-3xl animate-drift-slow"
+        style={{ background: 'rgba(255, 210, 50, 0.06)' }}
       />
 
-      <div className="absolute inset-0 opacity-[0.02]" style={{
+      <div className="absolute inset-0 opacity-[0.04]" style={{
         backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-        backgroundSize: '18px 18px',
+        backgroundSize: '20px 20px',
       }} />
       
       <div

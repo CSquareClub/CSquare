@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -13,6 +12,7 @@ export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [nowLabel, setNowLabel] = useState('');
   const { resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme !== 'light';
 
@@ -26,12 +26,25 @@ export default function Navigation() {
       setScrollProgress(progress);
     };
 
+    const updateNowLabel = () => {
+      const now = new Date();
+      setNowLabel(
+        now.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      );
+    };
+
     updateScrollProgress();
+    updateNowLabel();
 
     window.addEventListener('scroll', updateScrollProgress, { passive: true });
+    const timer = window.setInterval(updateNowLabel, 30000);
 
     return () => {
       window.removeEventListener('scroll', updateScrollProgress);
+      window.clearInterval(timer);
     };
   }, []);
 
@@ -51,54 +64,57 @@ export default function Navigation() {
     };
   }, [isOpen]);
 
-  const logoSrc = mounted && !isDark ? '/c-square.png' : '/c-square-white.png';
-
   const navItems = [
-    { href: '/', label: 'Home' },
-    { href: '/events', label: 'Events' },
-    { href: '/team', label: 'Team' },
-    { href: '/cusoc', label: 'Register for CUSoC' },
+    { href: '/events', label: 'Contests' },
+    { href: '/team', label: 'Problems' },
+    { href: '/cusoc', label: 'Leaderboard' },
   ];
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-border bg-background/20 backdrop-blur-3xl backdrop-saturate-200">
-      <div className="absolute left-0 top-0 h-[2px] w-full bg-border/40">
+    <nav className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-xl">
+      <div className="absolute left-0 top-0 h-px w-full bg-border/50">
         <div
           className="h-full bg-primary transition-[width] duration-150"
           style={{ width: `${scrollProgress}%` }}
         />
       </div>
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-95">
-            <Image src={logoSrc} alt="C Square Club" width={160} height={36} className="h-9 w-auto object-contain" priority />
-            <span className="font-mono text-lg font-bold tracking-tight text-foreground/90">&lt;C_Square/&gt;</span>
+      <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-10">
+        <div className="flex h-16 items-center justify-between">
+          <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-90">
+            <div className="grid h-8 w-8 place-items-center bg-primary font-mono text-xs font-semibold text-primary-foreground">c2</div>
+            <span className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">
+              CSQUARE
+              <span className="ml-2 text-foreground/65">/ CODEWAR</span>
+            </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-4 lg:gap-5">
+          <div className="hidden items-center gap-7 md:flex">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`rounded-full px-3 py-1.5 text-sm transition-all ${
-                  pathname === item.href
-                    ? 'bg-primary/12 text-primary font-semibold shadow-[0_0_0_1px_color-mix(in_oklab,var(--primary)_35%,transparent)]'
-                    : 'text-foreground/70 hover:bg-card/55 hover:text-foreground'
+                className={`text-sm uppercase tracking-[0.14em] transition-colors ${
+                  pathname === item.href ? 'text-primary' : 'text-foreground/68 hover:text-foreground'
                 }`}
               >
                 {item.label}
               </Link>
             ))}
+          </div>
 
-            <JoinNowModal className="inline-flex items-center justify-center rounded-full border border-primary/45 bg-primary/12 px-5 py-2 font-mono text-xs font-semibold uppercase tracking-[0.15em] text-primary backdrop-blur-md transition-all hover:scale-[1.005] hover:bg-primary/20 hover:shadow-[0_0_14px_color-mix(in_oklab,var(--primary)_24%,transparent)]">
-              Join Now
+          <div className="hidden items-center gap-4 md:flex">
+            <span className="font-mono text-xs uppercase tracking-[0.16em] text-foreground/60">
+              LIVE {nowLabel || '--:--'}
+            </span>
+
+            <JoinNowModal className="inline-flex items-center justify-center border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary-foreground transition-colors hover:bg-primary/90">
+              Dashboard
             </JoinNowModal>
-            
+
             <button
               type="button"
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className="inline-flex items-center justify-center rounded-full border border-border bg-card/45 p-2 text-foreground/70 shadow-sm backdrop-blur-md transition-colors hover:bg-card/70 hover:text-primary"
+              className="inline-flex items-center justify-center border border-border bg-card px-2.5 py-2 text-foreground/70 transition-colors hover:text-primary"
               aria-label="Toggle theme"
             >
               {mounted && isDark ? <Sun size={16} /> : <Moon size={16} />}
@@ -107,7 +123,7 @@ export default function Navigation() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden rounded-lg border border-border bg-card/45 p-2 text-foreground/80 backdrop-blur-md"
+            className="rounded-sm border border-border bg-card p-2 text-foreground/80 md:hidden"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
             aria-expanded={isOpen}
@@ -120,23 +136,23 @@ export default function Navigation() {
         {/* Mobile Navigation */}
         {isOpen && (
           <div id="mobile-navigation" className="animate-fade-in-up md:hidden pb-4 pt-2">
-            <div className="space-y-2 rounded-2xl border border-border bg-card/45 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150">
+            <div className="space-y-2 border border-border bg-card p-3">
             {navItems.map((item) => (
-              <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)} className={`block rounded-xl px-4 py-3 transition-colors ${pathname === item.href ? 'bg-primary/10 text-primary font-semibold' : 'text-foreground/70 hover:text-foreground hover:bg-background/70'}`}>
+              <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)} className={`block px-4 py-3 text-sm uppercase tracking-[0.14em] transition-colors ${pathname === item.href ? 'bg-primary/12 text-primary' : 'text-foreground/70 hover:text-foreground hover:bg-background/80'}`}>
                 {item.label}
               </Link>
             ))}
             <div onClick={() => setIsOpen(false)}>
               <JoinNowModal
-                className="mt-2 inline-flex w-full items-center justify-center rounded-xl border-2 border-primary bg-primary/10 px-4 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-primary transition-all hover:bg-primary/20"
+                className="mt-2 inline-flex w-full items-center justify-center border border-primary bg-primary px-4 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-colors hover:bg-primary/90"
               >
-                Join Now
+                Dashboard
               </JoinNowModal>
             </div>
             <button
               type="button"
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card/40 px-4 py-3 text-sm text-foreground/80 hover:bg-card hover:text-foreground transition-colors"
+              className="mt-2 inline-flex w-full items-center justify-center gap-2 border border-border bg-background px-4 py-3 text-sm text-foreground/80 transition-colors hover:bg-card hover:text-foreground"
               aria-label="Toggle theme"
             >
               {mounted && isDark ? <Sun size={16} /> : <Moon size={16} />}

@@ -1,119 +1,60 @@
-'use client';
-
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
-import JoinNowModal from '@/components/join/join-now-modal';
-import { useEffect, useState } from 'react';
 
 export default function Hero() {
-  const dynamicWords = ['Compete', 'Create', 'Collaborate', 'Contribute'];
-  const [activeWord, setActiveWord] = useState(dynamicWords[0]);
-  const [wordVisible, setWordVisible] = useState(true);
-
-  useEffect(() => {
-    let index = 0;
-
-    const interval = window.setInterval(() => {
-      setWordVisible(false);
-
-      window.setTimeout(() => {
-        index = (index + 1) % dynamicWords.length;
-        setActiveWord(dynamicWords[index]);
-        setWordVisible(true);
-      }, 140);
-    }, 3200);
-
-    return () => window.clearInterval(interval);
-  }, []);
-
   return (
-    <section className="relative py-20 lg:py-32 xl:py-40 overflow-hidden">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-          
-          {/* Left Column content */}
-          <div className="max-w-2xl">
-            {/* Badge */}
-            <div className="mb-8 inline-flex items-center gap-2 rounded-xl border border-primary/25 bg-card/40 px-5 py-2.5 shadow-[0_12px_35px_rgba(0,0,0,0.08)] backdrop-blur-xl animate-fade-in-up">
-              <span className="text-sm font-mono text-foreground/80">~ ./start_club.sh</span>
-            </div>
-
-            {/* Main Heading */}
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold mb-8 tracking-tight animate-fade-in-up md:leading-[1.1] text-primary drop-shadow-lg" style={{ animationDelay: '0.1s' }}>
-              Learn.{' '}
-              <span
-                className={`text-primary inline-block min-w-[6.5ch] transition-all duration-300 ${wordVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-0.5'}`}
-              >
-                {activeWord}.
-              </span>
-              <br />
-              Build.
-            </h1>
-
-            {/* Subheading */}
-            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-xl animate-fade-in-up leading-relaxed" style={{ animationDelay: '0.2s' }}>
-              C Square Club is a coding community where students practice DSA, build production-style
-              projects, and level up through contests, teamwork, and code reviews.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              <JoinNowModal className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-7 py-3 font-semibold text-primary-foreground shadow-md transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
-                Join the Club <ArrowRight size={18} />
-              </JoinNowModal>
-              <Link
-                href="/core-team"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-7 py-3 font-semibold text-foreground shadow-sm transition-all duration-300 hover:bg-primary/20 hover:scale-[1.01] hover:shadow-md"
-              >
-                Join Core Team
-              </Link>
-              <Link
-                href="/events"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-card/80 px-7 py-3 font-semibold text-foreground shadow-sm transition-all duration-300 hover:bg-card hover:scale-[1.01] hover:shadow-md"
-              >
-                Explore Events
-              </Link>
-            </div>
+    <section className="relative overflow-hidden pb-10 pt-16 md:pt-24 lg:pt-28">
+      <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-10">
+        <div className="max-w-4xl animate-fade-in-up">
+          <div className="mb-8 flex items-center gap-4 text-xs font-semibold uppercase tracking-[0.36em] text-primary/90">
+            <span className="h-px w-10 bg-primary" />
+            C Square Presents
+            <span className="h-px w-10 bg-primary" />
           </div>
 
-          {/* Right Column: Code Window */}
-          <div className="relative animate-fade-in-up mx-auto lg:mx-0 lg:ml-auto w-full max-w-[500px] min-w-0" style={{ animationDelay: '0.4s' }}>
-            <div className="relative z-10 w-full overflow-hidden rounded-xl border border-border bg-card/42 shadow-[0_18px_60px_rgba(0,0,0,0.16)] backdrop-blur-2xl backdrop-saturate-150">
-              {/* Window Header */}
-              <div className="flex min-w-0 items-center border-b border-border bg-card/50 px-4 py-3">
-                <div className="flex gap-2.5 flex-shrink-0">
-                  <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
-                  <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
-                  <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
-                </div>
-                <div className="flex-1 text-center text-xs text-foreground/50 font-mono pr-8 truncate">
-                  main.cpp - C_Square_Club
-                </div>
-              </div>
-              
-              {/* Code Content */}
-              <div className="w-full overflow-x-auto whitespace-pre p-4 font-mono text-[10px] leading-relaxed text-foreground sm:p-6 sm:text-sm">
-                <div><span className="text-[#ff7b72]">#include</span> <span className="text-[#7ee787]">&lt;iostream&gt;</span></div>
-                <div><span className="text-[#ff7b72]">#include</span> <span className="text-[#7ee787]">&lt;club_resources&gt;</span></div>
-                <br />
-                <div><span className="text-[#79c0ff]">int</span> main() {'{'}</div>
-                <div className="pl-4"><span className="text-[#79c0ff]">Club</span>* c_square <span className="text-[#ff7b72]">=</span> <span className="text-[#ff7b72]">new</span> <span className="text-[#79c0ff]">Club</span>(<span className="text-[#ffab70]">"Chandigarh University"</span>);</div>
-                <br />
-                <div className="pl-4"><span className="text-[#ff7b72]">if</span> (student.isPassionate()) {'{'}</div>
-                <div className="pl-8">c_square<span className="text-[#ff7b72]">-&gt;</span>addMember(student);</div>
-                <div className="pl-8">student.learnSkills({'{'}<span className="text-[#ffab70]">"Dev"</span>, <span className="text-[#ffab70]">"DSA"</span>, <span className="text-[#ffab70]">"AI"</span>{'}'});</div>
-                <div className="pl-4">{'}'}</div>
-                <br />
-                <div className="pl-4">c_square<span className="text-[#ff7b72]">-&gt;</span>hostHackathon(<span className="text-[#ffab70]">"Zinnovatio 3.0"</span>);</div>
-                <div className="pl-4"><span className="text-[#ff7b72]">return</span> <span className="text-[#79c0ff]">0</span>;</div>
-                <div>{'}'}</div>
-              </div>
-            </div>
-            
-            {/* Decorative glow behind code window */}
-            <div className="absolute -inset-1 bg-gradient-to-tr from-primary/25 to-accent/20 opacity-40 blur-xl -z-10 rounded-[2rem]"></div>
-          </div>
+          <h1 className="text-[3.2rem] font-semibold uppercase leading-[0.92] tracking-[0.02em] text-foreground sm:text-[4.7rem] md:text-[6.2rem] lg:text-[7.4rem]">
+            Code
+            <span className="text-primary">war</span>
+          </h1>
 
+          <p className="mt-5 font-mono text-lg uppercase tracking-[0.24em] text-foreground/80 sm:text-2xl">
+            Hybrid ICPC x Hackathon
+          </p>
+          <p className="mt-5 max-w-3xl text-base leading-relaxed text-foreground/52 sm:text-xl">
+            Compete. Solve. Rank. The ultimate competitive programming arena combining algorithmic precision with hackathon creativity.
+          </p>
+
+          <div className="mt-11 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <Link
+              href="/events"
+              className="inline-flex items-center justify-center border border-primary bg-primary px-7 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              View Contests
+            </Link>
+            <Link
+              href="/cusoc"
+              className="inline-flex items-center justify-center border border-transparent px-2 py-3 font-mono text-sm uppercase tracking-[0.14em] text-foreground/72 transition-colors hover:text-foreground"
+            >
+              Leaderboard {'>'}
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-14 border-y border-border py-8">
+          <div className="grid grid-cols-2 gap-y-7 text-left sm:grid-cols-4 sm:gap-6">
+            {[
+              ['2', 'Participants'],
+              ['4', 'Problems'],
+              ['2', 'Submissions'],
+              ['Live', 'Status'],
+            ].map(([value, label]) => (
+              <div key={label}>
+                <p className="font-mono text-4xl font-semibold uppercase text-foreground sm:text-5xl">
+                  <span className={value === 'Live' ? 'text-primary' : ''}>{value}</span>
+                </p>
+                <p className="mt-2 text-xs uppercase tracking-[0.24em] text-foreground/46">{label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

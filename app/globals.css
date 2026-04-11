@@ -4,74 +4,74 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: rgba(255, 255, 255, 0.2);
-  --foreground: #000000;
-  --card: rgba(255, 255, 255, 0.14);
-  --card-foreground: #000000;
-  --popover: rgba(255, 255, 255, 0.18);
-  --popover-foreground: #000000;
-  --primary: #dc2626;
-  --primary-foreground: #ffffff;
-  --secondary: #000000;
-  --secondary-foreground: #ffffff;
-  --muted: rgba(244, 244, 244, 0.22);
-  --muted-foreground: #222222;
-  --accent: #dc2626;
-  --accent-foreground: #ffffff;
-  --destructive: #dc2626;
+  --background: #050505;
+  --foreground: #f4f4f4;
+  --card: #0c0c0c;
+  --card-foreground: #f4f4f4;
+  --popover: #0c0c0c;
+  --popover-foreground: #f4f4f4;
+  --primary: #ffd232;
+  --primary-foreground: #0b0b0b;
+  --secondary: #171717;
+  --secondary-foreground: #e9e9e9;
+  --muted: #121212;
+  --muted-foreground: #8a8a8a;
+  --accent: #ffe27a;
+  --accent-foreground: #101010;
+  --destructive: #f44747;
   --destructive-foreground: #ffffff;
-  --border: rgba(0, 0, 0, 0.1);
-  --input: rgba(255, 255, 255, 0.16);
-  --ring: #dc2626;
-  --chart-1: #dc2626;
-  --chart-2: #000000;
-  --chart-3: #ffffff;
-  --chart-4: #dc2626;
-  --chart-5: #000000;
-  --radius: 0.625rem;
-  --sidebar: rgba(255, 255, 255, 0.3);
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #dc2626;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #dc2626;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #000000;
-  --sidebar-ring: #dc2626;
+  --border: #252525;
+  --input: #101010;
+  --ring: #ffd232;
+  --chart-1: #ffd232;
+  --chart-2: #ffe27a;
+  --chart-3: #7a7a7a;
+  --chart-4: #4d4d4d;
+  --chart-5: #d9d9d9;
+  --radius: 0.25rem;
+  --sidebar: #0c0c0c;
+  --sidebar-foreground: #f4f4f4;
+  --sidebar-primary: #ffd232;
+  --sidebar-primary-foreground: #0b0b0b;
+  --sidebar-accent: #ffe27a;
+  --sidebar-accent-foreground: #101010;
+  --sidebar-border: #252525;
+  --sidebar-ring: #ffd232;
 }
 
 .dark {
-  --background: rgba(6, 6, 6, 0.2);
-  --foreground: #ffffff;
-  --card: rgba(17, 17, 17, 0.14);
-  --card-foreground: #ffffff;
-  --popover: rgba(17, 17, 17, 0.18);
-  --popover-foreground: #ffffff;
-  --primary: #dc2626;
-  --primary-foreground: #ffffff;
-  --secondary: #ffffff;
-  --secondary-foreground: #000000;
-  --muted: rgba(34, 34, 34, 0.2);
-  --muted-foreground: #f4f4f4;
-  --accent: #dc2626;
-  --accent-foreground: #ffffff;
-  --destructive: #dc2626;
+  --background: #050505;
+  --foreground: #f4f4f4;
+  --card: #0c0c0c;
+  --card-foreground: #f4f4f4;
+  --popover: #0c0c0c;
+  --popover-foreground: #f4f4f4;
+  --primary: #ffd232;
+  --primary-foreground: #0b0b0b;
+  --secondary: #171717;
+  --secondary-foreground: #e9e9e9;
+  --muted: #121212;
+  --muted-foreground: #8a8a8a;
+  --accent: #ffe27a;
+  --accent-foreground: #101010;
+  --destructive: #f44747;
   --destructive-foreground: #ffffff;
-  --border: rgba(255, 255, 255, 0.12);
-  --input: rgba(17, 17, 17, 0.14);
-  --ring: #dc2626;
-  --chart-1: #dc2626;
-  --chart-2: #ffffff;
-  --chart-3: #000000;
-  --chart-4: #dc2626;
-  --chart-5: #ffffff;
-  --sidebar: rgba(17, 17, 17, 0.3);
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #dc2626;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #dc2626;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #ffffff;
-  --sidebar-ring: #dc2626;
+  --border: #252525;
+  --input: #101010;
+  --ring: #ffd232;
+  --chart-1: #ffd232;
+  --chart-2: #ffe27a;
+  --chart-3: #7a7a7a;
+  --chart-4: #4d4d4d;
+  --chart-5: #d9d9d9;
+  --sidebar: #0c0c0c;
+  --sidebar-foreground: #f4f4f4;
+  --sidebar-primary: #ffd232;
+  --sidebar-primary-foreground: #0b0b0b;
+  --sidebar-accent: #ffe27a;
+  --sidebar-accent-foreground: #101010;
+  --sidebar-border: #252525;
+  --sidebar-ring: #ffd232;
 }
 
 @theme inline {
@@ -135,10 +135,7 @@
   body {
     @apply bg-background text-foreground;
     background-image:
-      radial-gradient(circle at 8% 12%, color-mix(in oklab, var(--primary) 32%, transparent) 0, transparent 34%),
-      radial-gradient(circle at 92% 0%, color-mix(in oklab, var(--accent) 30%, transparent) 0, transparent 38%),
-      radial-gradient(circle at 45% 120%, color-mix(in oklab, #06b6d4 24%, transparent) 0, transparent 48%),
-      linear-gradient(180deg, color-mix(in oklab, var(--background) 78%, black) 0%, var(--background) 45%, color-mix(in oklab, var(--background) 82%, black) 100%);
+      linear-gradient(180deg, rgba(14, 14, 14, 0.4) 0%, rgba(6, 6, 6, 0.86) 45%, rgba(4, 4, 4, 0.98) 100%);
     min-height: 100vh;
     overflow-x: clip;
     background-attachment: fixed;
