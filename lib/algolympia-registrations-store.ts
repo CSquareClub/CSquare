@@ -23,6 +23,7 @@ export type AlgolympiaRegistration = {
   member2Name: string;
   member2Email: string;
   member2UID: string;
+  member2Phone: string;
   member2Leetcode: string;
   member2Codeforces: string;
   member2Codechef: string;
@@ -32,10 +33,15 @@ export type AlgolympiaRegistration = {
   member3Name: string;
   member3Email: string;
   member3UID: string;
+  member3Phone: string;
   member3Leetcode: string;
   member3Codeforces: string;
   member3Codechef: string;
   member3Github: string;
+
+  /* Faculty Mentor (CU only) */
+  facultyMentorName?: string;
+  facultyMentorEid?: string;
 
   paymentStatus: string; // pending | paid | submitted
   transactionId?: string;
@@ -59,6 +65,7 @@ type RegistrationRow = {
   member2_name: string;
   member2_email: string;
   member2_uid: string;
+  member2_phone: string;
   member2_leetcode: string;
   member2_codeforces: string;
   member2_codechef: string;
@@ -66,10 +73,13 @@ type RegistrationRow = {
   member3_name: string;
   member3_email: string;
   member3_uid: string;
+  member3_phone: string;
   member3_leetcode: string;
   member3_codeforces: string;
   member3_codechef: string;
   member3_github: string;
+  faculty_mentor_name?: string;
+  faculty_mentor_eid?: string;
   payment_status: string;
   transaction_id?: string;
   payment_screenshot_url?: string;
@@ -100,6 +110,7 @@ async function ensureTable() {
       member2_name TEXT NOT NULL DEFAULT '',
       member2_email TEXT NOT NULL DEFAULT '',
       member2_uid TEXT NOT NULL DEFAULT '',
+      member2_phone TEXT NOT NULL DEFAULT '',
       member2_leetcode TEXT NOT NULL DEFAULT '',
       member2_codeforces TEXT NOT NULL DEFAULT '',
       member2_codechef TEXT NOT NULL DEFAULT '',
@@ -108,10 +119,14 @@ async function ensureTable() {
       member3_name TEXT NOT NULL DEFAULT '',
       member3_email TEXT NOT NULL DEFAULT '',
       member3_uid TEXT NOT NULL DEFAULT '',
+      member3_phone TEXT NOT NULL DEFAULT '',
       member3_leetcode TEXT NOT NULL DEFAULT '',
       member3_codeforces TEXT NOT NULL DEFAULT '',
       member3_codechef TEXT NOT NULL DEFAULT '',
       member3_github TEXT NOT NULL DEFAULT '',
+
+      faculty_mentor_name TEXT DEFAULT '',
+      faculty_mentor_eid TEXT DEFAULT '',
 
       payment_status TEXT NOT NULL DEFAULT 'pending'
     );
@@ -120,6 +135,13 @@ async function ensureTable() {
   // Add payment confirmation columns for outside participants
   await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations ADD COLUMN IF NOT EXISTS transaction_id TEXT;`);
   await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations ADD COLUMN IF NOT EXISTS payment_screenshot_url TEXT;`);
+  
+  // New columns requested
+  await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations ADD COLUMN IF NOT EXISTS member2_phone TEXT NOT NULL DEFAULT '';`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations ADD COLUMN IF NOT EXISTS member3_phone TEXT NOT NULL DEFAULT '';`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations ADD COLUMN IF NOT EXISTS faculty_mentor_name TEXT;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations ADD COLUMN IF NOT EXISTS faculty_mentor_eid TEXT;`);
+
   
   try {
     await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations DROP COLUMN IF EXISTS member2_college;`);
@@ -150,6 +172,7 @@ function rowToRegistration(row: RegistrationRow): AlgolympiaRegistration {
     member2Name: row.member2_name,
     member2Email: row.member2_email,
     member2UID: row.member2_uid,
+    member2Phone: row.member2_phone,
     member2Leetcode: row.member2_leetcode,
     member2Codeforces: row.member2_codeforces,
     member2Codechef: row.member2_codechef,
@@ -157,10 +180,13 @@ function rowToRegistration(row: RegistrationRow): AlgolympiaRegistration {
     member3Name: row.member3_name,
     member3Email: row.member3_email,
     member3UID: row.member3_uid,
+    member3Phone: row.member3_phone,
     member3Leetcode: row.member3_leetcode,
     member3Codeforces: row.member3_codeforces,
     member3Codechef: row.member3_codechef,
     member3Github: row.member3_github,
+    facultyMentorName: row.faculty_mentor_name || '',
+    facultyMentorEid: row.faculty_mentor_eid || '',
     paymentStatus: row.payment_status,
     transactionId: row.transaction_id,
     paymentScreenshotUrl: row.payment_screenshot_url,
@@ -182,6 +208,7 @@ export type CreateAlgolympiaRegistrationInput = {
   member2Name: string;
   member2Email: string;
   member2UID: string;
+  member2Phone: string;
   member2Leetcode: string;
   member2Codeforces: string;
   member2Codechef: string;
@@ -189,10 +216,13 @@ export type CreateAlgolympiaRegistrationInput = {
   member3Name: string;
   member3Email: string;
   member3UID: string;
+  member3Phone: string;
   member3Leetcode: string;
   member3Codeforces: string;
   member3Codechef: string;
   member3Github: string;
+  facultyMentorName?: string;
+  facultyMentorEid?: string;
 };
 
 export async function createAlgolympiaRegistration(
@@ -205,12 +235,13 @@ export async function createAlgolympiaRegistration(
       (is_cu, team_name,
        leader_name, leader_email, leader_uid, leader_phone, leader_college,
        leader_leetcode, leader_codeforces, leader_codechef, leader_github,
-       member2_name, member2_email, member2_uid,
+       member2_name, member2_email, member2_uid, member2_phone,
        member2_leetcode, member2_codeforces, member2_codechef, member2_github,
-       member3_name, member3_email, member3_uid,
+       member3_name, member3_email, member3_uid, member3_phone,
        member3_leetcode, member3_codeforces, member3_codechef, member3_github,
+       faculty_mentor_name, faculty_mentor_eid,
        payment_status)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30)
      RETURNING *;`,
     input.isCU,
     input.teamName,
@@ -226,6 +257,7 @@ export async function createAlgolympiaRegistration(
     input.member2Name,
     input.member2Email,
     input.member2UID,
+    input.member2Phone,
     input.member2Leetcode,
     input.member2Codeforces,
     input.member2Codechef,
@@ -233,10 +265,13 @@ export async function createAlgolympiaRegistration(
     input.member3Name,
     input.member3Email,
     input.member3UID,
+    input.member3Phone,
     input.member3Leetcode,
     input.member3Codeforces,
     input.member3Codechef,
     input.member3Github,
+    input.facultyMentorName || '',
+    input.facultyMentorEid || '',
     input.isCU ? "cuims_pending" : "pending",
   );
 

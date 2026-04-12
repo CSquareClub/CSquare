@@ -28,6 +28,7 @@ interface MemberData {
   name: string;
   email: string;
   uid: string;
+  phone: string;
   college: string;
   leetcode: string;
   codeforces: string;
@@ -39,6 +40,7 @@ const emptyMember: MemberData = {
   name: '',
   email: '',
   uid: '',
+  phone: '',
   college: '',
   leetcode: '',
   codeforces: '',
@@ -73,10 +75,13 @@ export default function AlgolympiaRegistrationForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [teamName, setTeamName] = useState('');
-  const [leader, setLeader] = useState<MemberData & { phone: string }>({ ...emptyMember, phone: '' });
+  const [leader, setLeader] = useState<MemberData>({ ...emptyMember });
   const [member2, setMember2] = useState<MemberData>({ ...emptyMember });
   const [member3, setMember3] = useState<MemberData>({ ...emptyMember });
   const [isCuPaymentInfo, setIsCuPaymentInfo] = useState(false);
+  const [hasFacultyMentor, setHasFacultyMentor] = useState(false);
+  const [facultyMentorName, setFacultyMentorName] = useState('');
+  const [facultyMentorEid, setFacultyMentorEid] = useState('');
 
   /* ── OTP state ─────────────────────────────────────────── */
   const [otp, setOtp] = useState('');
@@ -189,7 +194,7 @@ export default function AlgolympiaRegistrationForm() {
     if (isLeader && (!member.college?.trim() || member.college.trim().length < 2)) {
       return `${label}: College/Institute name is required`;
     }
-    if (isLeader && (!leader.phone?.trim() || !/^[0-9]{10,15}$/.test(leader.phone))) {
+    if (!member.phone?.trim() || !/^[0-9]{10,15}$/.test(member.phone)) {
       return `${label}: Valid phone number required`;
     }
     return null;
@@ -238,6 +243,8 @@ export default function AlgolympiaRegistrationForm() {
         ? {
             isCU: true,
             teamName: teamName.trim(),
+            facultyMentorName: hasFacultyMentor ? facultyMentorName.trim() : undefined,
+            facultyMentorEid: hasFacultyMentor ? facultyMentorEid.trim() : undefined,
             leader: {
               name: leader.name.trim(),
               email: leader.email.trim(),
@@ -253,6 +260,7 @@ export default function AlgolympiaRegistrationForm() {
               name: member2.name.trim(),
               email: member2.email.trim(),
               uid: member2.uid.trim().toUpperCase(),
+              phone: member2.phone.trim(),
               leetcode: member2.leetcode.trim(),
               codeforces: member2.codeforces.trim(),
               codechef: member2.codechef.trim(),
@@ -262,6 +270,7 @@ export default function AlgolympiaRegistrationForm() {
               name: member3.name.trim(),
               email: member3.email.trim(),
               uid: member3.uid.trim().toUpperCase(),
+              phone: member3.phone.trim(),
               leetcode: member3.leetcode.trim(),
               codeforces: member3.codeforces.trim(),
               codechef: member3.codechef.trim(),
@@ -284,6 +293,7 @@ export default function AlgolympiaRegistrationForm() {
             member2: {
               name: member2.name.trim(),
               email: member2.email.trim(),
+              phone: member2.phone.trim(),
               leetcode: member2.leetcode.trim(),
               codeforces: member2.codeforces.trim(),
               codechef: member2.codechef.trim(),
@@ -292,6 +302,7 @@ export default function AlgolympiaRegistrationForm() {
             member3: {
               name: member3.name.trim(),
               email: member3.email.trim(),
+              phone: member3.phone.trim(),
               leetcode: member3.leetcode.trim(),
               codeforces: member3.codeforces.trim(),
               codechef: member3.codechef.trim(),
@@ -503,18 +514,16 @@ export default function AlgolympiaRegistrationForm() {
             />
           </div>
         )}
-        {isLeader && (
-          <div>
-            <label className={labelCls}>Phone Number *</label>
-            <input
-              type="tel"
-              value={(data as any).phone || ''}
-              onChange={(e) => setData({ ...data, phone: e.target.value })}
-              placeholder="Enter 10-digit number"
-              className={inputCls}
-            />
-          </div>
-        )}
+        <div>
+          <label className={labelCls}>Phone Number *</label>
+          <input
+            type="tel"
+            value={(data as any).phone || ''}
+            onChange={(e) => setData({ ...data, phone: e.target.value })}
+            placeholder="Enter 10-digit number"
+            className={inputCls}
+          />
+        </div>
       </div>
 
       {/* Coding profiles — all optional */}
@@ -685,9 +694,7 @@ export default function AlgolympiaRegistrationForm() {
         <div><span className="text-foreground/45">Email:</span> <span className="text-foreground">{data.email}</span></div>
         {isCU && <div><span className="text-foreground/45">UID:</span> <span className="text-foreground">{data.uid}</span></div>}
         {isLeader && <div><span className="text-foreground/45">College:</span> <span className="text-foreground">{data.college}</span></div>}
-        {isLeader && (
-          <div><span className="text-foreground/45">Phone:</span> <span className="text-foreground">{(data as any).phone}</span></div>
-        )}
+        <div><span className="text-foreground/45">Phone:</span> <span className="text-foreground">{(data as any).phone}</span></div>
         {data.leetcode && <div><span className="text-foreground/45">LeetCode:</span> <span className="text-foreground">{data.leetcode}</span></div>}
         {data.codeforces && <div><span className="text-foreground/45">Codeforces:</span> <span className="text-foreground">{data.codeforces}</span></div>}
         {data.codechef && <div><span className="text-foreground/45">CodeChef:</span> <span className="text-foreground">{data.codechef}</span></div>}
@@ -797,6 +804,45 @@ export default function AlgolympiaRegistrationForm() {
           {renderReviewMember(leader, 'Team Leader', true)}
           {renderReviewMember(member2, 'Member 2')}
           {renderReviewMember(member3, 'Member 3')}
+
+          {isCU && (
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={hasFacultyMentor}
+                  onChange={(e) => setHasFacultyMentor(e.target.checked)}
+                  className="h-4 w-4 rounded border-primary/50 text-primary accent-primary"
+                />
+                <span className="text-sm font-medium text-foreground">Add a Faculty Mentor (Optional)</span>
+              </label>
+              
+              {hasFacultyMentor && (
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className={labelCls}>Faculty Mentor Name</label>
+                    <input
+                      type="text"
+                      value={facultyMentorName}
+                      onChange={(e) => setFacultyMentorName(e.target.value)}
+                      placeholder="Enter mentor's name"
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Employee Code (EID)</label>
+                    <input
+                      type="text"
+                      value={facultyMentorEid}
+                      onChange={(e) => setFacultyMentorEid(e.target.value)}
+                      placeholder="Enter employee code"
+                      className={inputCls}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {isCU && (
             <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-xs text-foreground/70">

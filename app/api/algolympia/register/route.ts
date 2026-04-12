@@ -107,23 +107,25 @@ const profileSchema = z.object({
   github: z.string().optional().default(""),
 });
 
-const cuMemberSchema = z.object({
+const baseMemberSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Valid email required"),
-  uid: z.string().trim().regex(/^[A-Za-z0-9-]{6,20}$/, "Valid CU UID required"),
+  phone: z.string().regex(/^[0-9]{10,15}$/, "Valid phone number required"),
 }).merge(profileSchema);
 
-const nonCuMemberSchema = z.object({
-  name: z.string().min(2, "Name is required"),
-  email: z.string().email("Valid email required"),
-}).merge(profileSchema);
+const cuMemberSchema = baseMemberSchema.extend({
+  uid: z.string().trim().regex(/^[A-Za-z0-9-]{6,20}$/, "Valid CU UID required"),
+});
+
+const nonCuMemberSchema = baseMemberSchema;
 
 const cuRegistrationSchema = z.object({
   isCU: z.literal(true),
   teamName: z.string().min(2, "Team name is required"),
+  facultyMentorName: z.string().optional(),
+  facultyMentorEid: z.string().optional(),
   leader: cuMemberSchema.merge(z.object({
     college: z.string().min(2, "College/Institute name is required"),
-    phone: z.string().regex(/^[0-9]{10,15}$/, "Valid phone number required"),
   })),
   member2: cuMemberSchema,
   member3: cuMemberSchema,
@@ -134,7 +136,6 @@ const nonCuRegistrationSchema = z.object({
   teamName: z.string().min(2, "Team name is required"),
   leader: nonCuMemberSchema.merge(z.object({
     college: z.string().min(2, "College name is required"),
-    phone: z.string().regex(/^[0-9]{10,15}$/, "Valid phone number required"),
   })),
   member2: nonCuMemberSchema,
   member3: nonCuMemberSchema,
@@ -521,6 +522,7 @@ export async function POST(req: NextRequest) {
       member2Name: data.member2.name,
       member2Email: data.member2.email,
       member2UID: isCU ? (data.member2 as any).uid : "",
+      member2Phone: data.member2.phone,
       member2Leetcode: data.member2.leetcode,
       member2Codeforces: data.member2.codeforces,
       member2Codechef: data.member2.codechef,
@@ -528,10 +530,13 @@ export async function POST(req: NextRequest) {
       member3Name: data.member3.name,
       member3Email: data.member3.email,
       member3UID: isCU ? (data.member3 as any).uid : "",
+      member3Phone: data.member3.phone,
       member3Leetcode: data.member3.leetcode,
       member3Codeforces: data.member3.codeforces,
       member3Codechef: data.member3.codechef,
       member3Github: data.member3.github,
+      facultyMentorName: isCU ? (data as any).facultyMentorName : undefined,
+      facultyMentorEid: isCU ? (data as any).facultyMentorEid : undefined,
     };
     
     const registration = await createAlgolympiaRegistration(registrationInput);

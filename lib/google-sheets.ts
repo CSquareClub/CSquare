@@ -37,6 +37,7 @@ export async function appendRegistrationToSheet(data: any) {
       data.member2Name || "",
       data.member2Email || "",
       data.member2UID || "",
+      data.member2Phone || "",
       data.member2Leetcode || "",
       data.member2Codeforces || "",
       data.member2Codechef || "",
@@ -44,10 +45,13 @@ export async function appendRegistrationToSheet(data: any) {
       data.member3Name || "",
       data.member3Email || "",
       data.member3UID || "",
+      data.member3Phone || "",
       data.member3Leetcode || "",
       data.member3Codeforces || "",
       data.member3Codechef || "",
-      data.member3Github || ""
+      data.member3Github || "",
+      data.facultyMentorName || "",
+      data.facultyMentorEid || ""
     ];
 
     await sheets.spreadsheets.values.append({
