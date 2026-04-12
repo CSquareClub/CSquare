@@ -186,7 +186,7 @@ export default function AlgolympiaRegistrationForm() {
     if (isCU && (!member.uid.trim() || !/^[A-Za-z0-9-]{6,20}$/.test(member.uid.trim()))) {
       return `${label}: Valid CU UID is required`;
     }
-    if (!member.college.trim() || member.college.trim().length < 2) {
+    if (isLeader && (!member.college?.trim() || member.college.trim().length < 2)) {
       return `${label}: College/Institute name is required`;
     }
     if (isLeader && (!leader.phone?.trim() || !/^[0-9]{10,15}$/.test(leader.phone))) {
@@ -253,7 +253,6 @@ export default function AlgolympiaRegistrationForm() {
               name: member2.name.trim(),
               email: member2.email.trim(),
               uid: member2.uid.trim().toUpperCase(),
-              college: member2.college.trim(),
               leetcode: member2.leetcode.trim(),
               codeforces: member2.codeforces.trim(),
               codechef: member2.codechef.trim(),
@@ -263,7 +262,6 @@ export default function AlgolympiaRegistrationForm() {
               name: member3.name.trim(),
               email: member3.email.trim(),
               uid: member3.uid.trim().toUpperCase(),
-              college: member3.college.trim(),
               leetcode: member3.leetcode.trim(),
               codeforces: member3.codeforces.trim(),
               codechef: member3.codechef.trim(),
@@ -286,7 +284,6 @@ export default function AlgolympiaRegistrationForm() {
             member2: {
               name: member2.name.trim(),
               email: member2.email.trim(),
-              college: member2.college.trim(),
               leetcode: member2.leetcode.trim(),
               codeforces: member2.codeforces.trim(),
               codechef: member2.codechef.trim(),
@@ -295,7 +292,6 @@ export default function AlgolympiaRegistrationForm() {
             member3: {
               name: member3.name.trim(),
               email: member3.email.trim(),
-              college: member3.college.trim(),
               leetcode: member3.leetcode.trim(),
               codeforces: member3.codeforces.trim(),
               codechef: member3.codechef.trim(),
@@ -495,16 +491,18 @@ export default function AlgolympiaRegistrationForm() {
             />
           </div>
         )}
-        <div>
-          <label className={labelCls}>College / Institute Name *</label>
-          <input
-            type="text"
-            value={data.college}
-            onChange={(e) => setData({ ...data, college: e.target.value })}
-            placeholder={isCU ? "e.g. UIE, UIC, etc." : "Enter college/institute name"}
-            className={inputCls}
-          />
-        </div>
+        {isLeader && (
+          <div>
+            <label className={labelCls}>College / Institute Name *</label>
+            <input
+              type="text"
+              value={data.college}
+              onChange={(e) => setData({ ...data, college: e.target.value })}
+              placeholder={isCU ? "e.g. UIE, UIC, etc." : "Enter college/institute name"}
+              className={inputCls}
+            />
+          </div>
+        )}
         {isLeader && (
           <div>
             <label className={labelCls}>Phone Number *</label>
@@ -686,7 +684,7 @@ export default function AlgolympiaRegistrationForm() {
         <div><span className="text-foreground/45">Name:</span> <span className="text-foreground">{data.name}</span></div>
         <div><span className="text-foreground/45">Email:</span> <span className="text-foreground">{data.email}</span></div>
         {isCU && <div><span className="text-foreground/45">UID:</span> <span className="text-foreground">{data.uid}</span></div>}
-        <div><span className="text-foreground/45">College:</span> <span className="text-foreground">{data.college}</span></div>
+        {isLeader && <div><span className="text-foreground/45">College:</span> <span className="text-foreground">{data.college}</span></div>}
         {isLeader && (
           <div><span className="text-foreground/45">Phone:</span> <span className="text-foreground">{(data as any).phone}</span></div>
         )}
