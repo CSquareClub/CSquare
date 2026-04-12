@@ -69,6 +69,45 @@ async function sendOtpEmail(collegeEmail: string, otp: string, fullName?: string
     Message: {
       Subject: { Data: "CUSoC OTP Verification" },
       Body: {
+        Html: {
+          Data: `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f9f9f9;font-family:Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9;padding:20px;"><tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #eaeaea;max-width:600px;width:100%;">
+  <tr><td style="padding:40px 30px;color:#333;line-height:1.6;font-size:16px;">
+    <p style="font-size:18px;margin-top:0;">${greeting}</p>
+    <p>Your OTP for CUSoC registration is:</p>
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:15px;margin:20px 0;display:inline-block;font-size:24px;font-weight:bold;letter-spacing:4px;color:#92400e;">
+      ${otp}
+    </div>
+    <p>This OTP is valid for <strong>${OTP_EXPIRY_MINUTES} minutes</strong>.</p>
+    <p>If you did not request this, you can ignore this email.</p>
+
+    <div style="font-family:Arial, sans-serif;color:#222;margin-top:30px;">
+      <p style="margin:0"><strong>Thanks & Regards,</strong></p>
+      <p style="margin:0"><strong>C Square Club</strong><br><span style="font-size:13px;color:#555">The Coding and Technical Club of Chandigarh University</span></p>
+      <div style="margin-top:6px">
+        <img src="https://ci3.googleusercontent.com/mail-sig/AIorK4zcvdT1Wlvks3L3JLyXCW_h14u_h4tipSq1VCkipfAkoTdWo0BV4idRf6Q4SDIoTCfhjxUB1plV7Gg8" width="80">
+        &nbsp;
+        <img src="https://ci3.googleusercontent.com/mail-sig/AIorK4xv3qRGQ6IGUj4tyzrjBsCy1AR47puIdw1UO4l_z3ew0xmt_S_F9nme4ESuDBYx619S0kvOhCk" width="180">
+      </div>
+      <hr style="border:none;border-top:1px solid #ccc;margin:10px 0">
+      <p style="margin:0;font-size:14px"><strong>Learn • Compete • Build</strong></p>
+      <p style="margin:6px 0;font-size:14px">
+        &#128222; <a href="https://wa.me/919084542911">+91 9084542911</a>&nbsp;&nbsp;
+        &#9993; <a href="mailto:csquareclub@cumail.in">csquareclub@cumail.in</a><br>
+        &#128188; <a href="https://www.linkedin.com/company/csquare-club/">csquare-club</a><br>
+        &#128247; <a href="https://www.instagram.com/csquare_club/">@csquare_club</a>
+      </p>
+    </div>
+  </td></tr>
+</table>
+</td></tr></table>
+</body>
+</html>`
+        },
         Text: {
           Data: `${greeting}\n\nYour OTP for CUSoC registration is: ${otp}\nThis OTP is valid for ${OTP_EXPIRY_MINUTES} minutes.\n\nIf you did not request this, you can ignore this email.\n\nCUSoC Team`,
         },
