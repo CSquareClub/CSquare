@@ -5,7 +5,9 @@ import { createHash, randomInt } from "crypto";
 import {
   createAlgolympiaRegistration,
   checkDuplicateAlgolympiaRegistration,
+  checkDuplicateAlgolympiaUid,
 } from "@/lib/algolympia-registrations-store";
+import { appendRegistrationToSheet } from "@/lib/google-sheets";
 import {
   getAlgolympiaOtpSentAt,
   isAlgolympiaOtpVerified,
@@ -109,6 +111,7 @@ const cuMemberSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Valid email required"),
   uid: z.string().trim().regex(/^[A-Za-z0-9-]{6,20}$/, "Valid CU UID required"),
+  college: z.string().min(2, "College/Institute name is required"),
 }).merge(profileSchema);
 
 const nonCuMemberSchema = z.object({
@@ -465,6 +468,35 @@ export async function POST(req: NextRequest) {
       data.member3.email,
     ];
 
+    if (new Set(allEmails.map(e => e.toLowerCase())).size !== 3) {
+      return NextResponse.json(
+        { error: "All team members must have unique email addresses." },
+        { status: 400 }
+      );
+    }
+
+    if (isCU) {
+      const allUids = [
+        (data.leader as any).uid,
+        (data.member2 as any).uid,
+        (data.member3 as any).uid,
+      ];
+      if (new Set(allUids.map(u => u.toUpperCase())).size !== 3) {
+        return NextResponse.json(
+          { error: "All team members must have unique CU UIDs." },
+          { status: 400 }
+        );
+      }
+      
+      const duplicateUid = await checkDuplicateAlgolympiaUid(allUids);
+      if (duplicateUid) {
+        return NextResponse.json(
+          { error: "One or more team members' UID is already registered for AlgOlympia." },
+          { status: 409 },
+        );
+      }
+    }
+
     const duplicate = await checkDuplicateAlgolympiaRegistration(allEmails);
     if (duplicate) {
       return NextResponse.json(
@@ -474,14 +506,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Create registration
-    const registration = await createAlgolympiaRegistration({
+    const registrationInput = {
       isCU,
       teamName: data.teamName,
       leaderName: data.leader.name,
       leaderEmail: data.leader.email,
       leaderUID: isCU ? (data.leader as any).uid : "",
       leaderPhone: data.leader.phone,
-      leaderCollege: !isCU ? (data.leader as any).college : "",
+      leaderCollege: (data.leader as any).college,
       leaderLeetcode: data.leader.leetcode,
       leaderCodeforces: data.leader.codeforces,
       leaderCodechef: data.leader.codechef,
@@ -489,7 +521,7 @@ export async function POST(req: NextRequest) {
       member2Name: data.member2.name,
       member2Email: data.member2.email,
       member2UID: isCU ? (data.member2 as any).uid : "",
-      member2College: !isCU ? (data.member2 as any).college : "",
+      member2College: (data.member2 as any).college,
       member2Leetcode: data.member2.leetcode,
       member2Codeforces: data.member2.codeforces,
       member2Codechef: data.member2.codechef,
@@ -497,12 +529,17 @@ export async function POST(req: NextRequest) {
       member3Name: data.member3.name,
       member3Email: data.member3.email,
       member3UID: isCU ? (data.member3 as any).uid : "",
-      member3College: !isCU ? (data.member3 as any).college : "",
+      member3College: (data.member3 as any).college,
       member3Leetcode: data.member3.leetcode,
       member3Codeforces: data.member3.codeforces,
       member3Codechef: data.member3.codechef,
       member3Github: data.member3.github,
-    });
+    };
+    
+    const registration = await createAlgolympiaRegistration(registrationInput);
+
+    // Append to Google Sheet async
+    appendRegistrationToSheet(registrationInput).catch(console.error);
 
     // Send confirmation to team leader only
     if (isCU) {

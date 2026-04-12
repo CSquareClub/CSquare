@@ -277,6 +277,35 @@ export async function checkDuplicateAlgolympiaRegistration(
   return rows[0]?.exists ?? false;
 }
 
+export async function checkDuplicateAlgolympiaUid(
+  uids: string[]
+): Promise<boolean> {
+  await ensureTable();
+
+  const valid = uids.filter(Boolean).map((u) => u.toUpperCase());
+  if (!valid.length) return false;
+
+  const n = valid.length;
+
+  const leaderPlaceholders = valid.map((_, i) => `$${i + 1}`).join(", ");
+  const member2Placeholders = valid.map((_, i) => `$${i + 1 + n}`).join(", ");
+  const member3Placeholders = valid.map((_, i) => `$${i + 1 + 2 * n}`).join(", ");
+
+  const rows = await prisma.$queryRawUnsafe<Array<{ exists: boolean }>>(
+    `SELECT EXISTS(
+      SELECT 1 FROM algolympia_registrations
+      WHERE UPPER(leader_uid) IN (${leaderPlaceholders})
+         OR UPPER(member2_uid) IN (${member2Placeholders})
+         OR UPPER(member3_uid) IN (${member3Placeholders})
+    ) AS exists;`,
+    ...valid,
+    ...valid,
+    ...valid,
+  );
+
+  return rows[0]?.exists ?? false;
+}
+
 export async function listAlgolympiaRegistrations(): Promise<AlgolympiaRegistration[]> {
   await ensureTable();
 
