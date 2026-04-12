@@ -170,6 +170,24 @@ async function sendCuConfirmationEmail(
 
     <p style="margin-top:20px;font-style:italic;">Please ensure that the payment and form submission are completed at the earliest to secure your participation.</p>
     <p style="margin-top:30px;">Looking forward to hosting you at AlgOlympia 2026!</p>
+
+    <div style="font-family:Arial, sans-serif;color:#222;margin-top:30px;">
+      <p style="margin:0"><strong>Thanks & Regards,</strong></p>
+      <p style="margin:0"><strong>C Square Club</strong><br><span style="font-size:13px;color:#555">The Coding and Technical Club of Chandigarh University</span></p>
+      <div style="margin-top:6px">
+        <img src="https://ci3.googleusercontent.com/mail-sig/AIorK4zcvdT1Wlvks3L3JLyXCW_h14u_h4tipSq1VCkipfAkoTdWo0BV4idRf6Q4SDIoTCfhjxUB1plV7Gg8" width="80">
+        &nbsp;
+        <img src="https://ci3.googleusercontent.com/mail-sig/AIorK4xv3qRGQ6IGUj4tyzrjBsCy1AR47puIdw1UO4l_z3ew0xmt_S_F9nme4ESuDBYx619S0kvOhCk" width="180">
+      </div>
+      <hr style="border:none;border-top:1px solid #ccc;margin:10px 0">
+      <p style="margin:0;font-size:14px"><strong>Learn • Compete • Build</strong></p>
+      <p style="margin:6px 0;font-size:14px">
+        &#128222; <a href="https://wa.me/919084542911">+91 9084542911</a>&nbsp;&nbsp;
+        &#9993; <a href="mailto:csquareclub@cumail.in">csquareclub@cumail.in</a><br>
+        &#128188; <a href="https://www.linkedin.com/company/csquare-club/">csquare-club</a><br>
+        &#128247; <a href="https://www.instagram.com/csquare_club/">@csquare_club</a>
+      </p>
+    </div>
   </td></tr>
   <tr><td style="background:#fafafa;padding:20px;text-align:center;font-size:13px;color:#888;">
     <p style="margin:0;">AlgOlympia 2026 – C Square Club</p>
@@ -180,7 +198,7 @@ async function sendCuConfirmationEmail(
 </body></html>`,
         },
         Text: {
-          Data: `Dear Participant,\n\nGreetings from C Square Club, Chandigarh University, Punjab!\nWe are pleased to inform you that your registration for AlgOlympia 2026 has been successfully received. We are excited to have you join us for this global-level programming competition.\n\nAll participants are requested to complete their registration by submitting the participation fee through CUIMS.\n\nPayment Details:\n- Amount: ₹100 per team member\n- Mode: Payment will be reflected on CUIMS\n- Note: Each team member must complete the payment individually through their CUIMS portal\n\nImportant Note:\n- Once you have registered for AlgOlympia, participation is mandatory as the fee will be reflected on CUIMS soon and will not be removed.\n- If you have exhausted your duty leaves, Special Duty Leave (IDL) will be provided.\n\nNext Steps:\n1. Complete the payment via CUIMS.\n2. Each team member must fill the confirmation form individually after payment.\n3. Upload the payment proof in the form for verification.\n4. Join the official WhatsApp group for updates and announcements: https://chat.whatsapp.com/GfKnKJ4KbNi486bOksarfx\n\nPlease ensure that the payment and form submission are completed at the earliest to secure your participation.\n\nLooking forward to hosting you at AlgOlympia 2026!`,
+          Data: `Dear Participant,\n\nGreetings from C Square Club, Chandigarh University, Punjab!\nWe are pleased to inform you that your registration for AlgOlympia 2026 has been successfully received. We are excited to have you join us for this global-level programming competition.\n\nAll participants are requested to complete their registration by submitting the participation fee through CUIMS.\n\nPayment Details:\n- Amount: ₹100 per team member\n- Mode: Payment will be reflected on CUIMS\n- Note: Each team member must complete the payment individually through their CUIMS portal\n\nImportant Note:\n- Once you have registered for AlgOlympia, participation is mandatory as the fee will be reflected on CUIMS soon and will not be removed.\n- If you have exhausted your duty leaves, Special Duty Leave (IDL) will be provided.\n\nNext Steps:\n1. Complete the payment via CUIMS.\n2. Each team member must fill the confirmation form individually after payment.\n3. Upload the payment proof in the form for verification.\n4. Join the official WhatsApp group for updates and announcements: https://chat.whatsapp.com/GfKnKJ4KbNi486bOksarfx\n\nPlease ensure that the payment and form submission are completed at the earliest to secure your participation.\n\nLooking forward to hosting you at AlgOlympia 2026!\n\n--\nThanks & Regards,\nC Square Club\nThe Coding and Technical Club of Chandigarh University\n\nLearn • Compete • Build\nPhone: +91 9084542911\nEmail: csquareclub@cumail.in\nLinkedIn: https://www.linkedin.com/company/csquare-club/\nInstagram: @csquare_club`,
         },
       },
     },
@@ -270,7 +288,24 @@ async function sendNonCuConfirmationEmail(
 
     <p style="margin-top:20px;font-style:italic;">Please ensure that the payment and form submission are completed at the earliest to secure your participation.</p>
     <p style="margin-top:30px;">Looking forward to hosting you at AlgOlympia 2026!</p>
-    <p>Best regards,<br><strong style="color:#ffd232;">C Square Club</strong></p>
+
+    <div style="font-family:Arial, sans-serif;color:#222;margin-top:30px;">
+      <p style="margin:0"><strong>Thanks & Regards,</strong></p>
+      <p style="margin:0"><strong>C Square Club</strong><br><span style="font-size:13px;color:#555">The Coding and Technical Club of Chandigarh University</span></p>
+      <div style="margin-top:6px">
+        <img src="https://ci3.googleusercontent.com/mail-sig/AIorK4zcvdT1Wlvks3L3JLyXCW_h14u_h4tipSq1VCkipfAkoTdWo0BV4idRf6Q4SDIoTCfhjxUB1plV7Gg8" width="80">
+        &nbsp;
+        <img src="https://ci3.googleusercontent.com/mail-sig/AIorK4xv3qRGQ6IGUj4tyzrjBsCy1AR47puIdw1UO4l_z3ew0xmt_S_F9nme4ESuDBYx619S0kvOhCk" width="180">
+      </div>
+      <hr style="border:none;border-top:1px solid #ccc;margin:10px 0">
+      <p style="margin:0;font-size:14px"><strong>Learn • Compete • Build</strong></p>
+      <p style="margin:6px 0;font-size:14px">
+        &#128222; <a href="https://wa.me/919084542911">+91 9084542911</a>&nbsp;&nbsp;
+        &#9993; <a href="mailto:csquareclub@cumail.in">csquareclub@cumail.in</a><br>
+        &#128188; <a href="https://www.linkedin.com/company/csquare-club/">csquare-club</a><br>
+        &#128247; <a href="https://www.instagram.com/csquare_club/">@csquare_club</a>
+      </p>
+    </div>
   </td></tr>
   <tr><td style="background:#fafafa;padding:20px;text-align:center;font-size:13px;color:#888;">
     <p style="margin:0;">AlgOlympia 2026 – C Square Club</p>
@@ -281,7 +316,7 @@ async function sendNonCuConfirmationEmail(
 </body></html>`,
         },
         Text: {
-          Data: `Dear ${leaderName},\n\nGreetings from C Square Club, Chandigarh University, Punjab!\nWe are pleased to inform you that your registration for AlgOlympia 2026 has been successfully received. We are excited to have your team ${teamName} join us for this global-level programming competition.\n\nAll participants are requested to complete their registration by submitting the participation fee.\n\nPayment Details:\n- Amount: ₹300 (for the entire team)\n- Note: Only the team leader is required to make the payment on behalf of the team.\n\nBank Details:\nBank Name: HDFC Bank Ltd.\nBranch: Morinda - Punjab\nAddress: Rattan Towers, Ward No. 5, Sugar Mill Road, Distt - Rupnagar, Morinda - 140101, Punjab\nBeneficiary Name: CU AC University Insti of Engineering\nBeneficiary Address: #2368 PH-10, S.A.S. Nagar, Distt S.A.S. Nagar, Punjab - 160061, India\nAccount Number: 50100078635437\nIFSC Code: HDFC0000798\nMICR: 160240049\n\nNext Steps:\n1. Complete the payment using the details above.\n2. The team leader must fill the confirmation form after payment submission at: https://www.csquareclub.co.in/algolympia/payment\n3. Upload the payment proof in the form for verification.\n4. Join the official WhatsApp group for updates and announcements: https://chat.whatsapp.com/Czg1x1RmJuu1zRsJNtcOD6\n\nPlease ensure that the payment and form submission are completed at the earliest to secure your participation.\n\nLooking forward to hosting you at AlgOlympia 2026!\n\nBest,\nC Square Club`,
+          Data: `Dear ${leaderName},\n\nGreetings from C Square Club, Chandigarh University, Punjab!\nWe are pleased to inform you that your registration for AlgOlympia 2026 has been successfully received. We are excited to have your team ${teamName} join us for this global-level programming competition.\n\nAll participants are requested to complete their registration by submitting the participation fee.\n\nPayment Details:\n- Amount: ₹300 (for the entire team)\n- Note: Only the team leader is required to make the payment on behalf of the team.\n\nBank Details:\nBank Name: HDFC Bank Ltd.\nBranch: Morinda - Punjab\nAddress: Rattan Towers, Ward No. 5, Sugar Mill Road, Distt - Rupnagar, Morinda - 140101, Punjab\nBeneficiary Name: CU AC University Insti of Engineering\nBeneficiary Address: #2368 PH-10, S.A.S. Nagar, Distt S.A.S. Nagar, Punjab - 160061, India\nAccount Number: 50100078635437\nIFSC Code: HDFC0000798\nMICR: 160240049\n\nNext Steps:\n1. Complete the payment using the details above.\n2. The team leader must fill the confirmation form after payment submission at: https://www.csquareclub.co.in/algolympia/payment\n3. Upload the payment proof in the form for verification.\n4. Join the official WhatsApp group for updates and announcements: https://chat.whatsapp.com/Czg1x1RmJuu1zRsJNtcOD6\n\nPlease ensure that the payment and form submission are completed at the earliest to secure your participation.\n\nLooking forward to hosting you at AlgOlympia 2026!\n\n--\nThanks & Regards,\nC Square Club\nThe Coding and Technical Club of Chandigarh University\n\nLearn • Compete • Build\nPhone: +91 9084542911\nEmail: csquareclub@cumail.in\nLinkedIn: https://www.linkedin.com/company/csquare-club/\nInstagram: @csquare_club`,
         },
       },
     },
