@@ -13,6 +13,7 @@
     "sync:event-folders:all": "npx --yes tsx scripts/sync-event-folders.ts --all-events"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1029.0",
     "@aws-sdk/client-ses": "^3.1014.0",
     "@hookform/resolvers": "^3.9.1",
     "@prisma/adapter-pg": "^7.5.0",

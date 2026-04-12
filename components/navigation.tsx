@@ -84,7 +84,7 @@ export default function Navigation() {
             <div className="grid h-8 w-8 place-items-center bg-primary font-mono text-xs font-semibold text-primary-foreground">c2</div>
             <span className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">
               CSQUARE
-              <span className="ml-2 text-foreground/65">/ CODEWAR</span>
+              <span className="ml-2 text-foreground/65">/ ALGOLYMPIA</span>
             </span>
           </Link>
 

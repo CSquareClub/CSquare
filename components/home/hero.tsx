@@ -12,8 +12,7 @@ export default function Hero() {
           </div>
 
           <h1 className="text-[3.2rem] font-semibold uppercase leading-[0.92] tracking-[0.02em] text-foreground sm:text-[4.7rem] md:text-[6.2rem] lg:text-[7.4rem]">
-            Code
-            <span className="text-primary">war</span>
+            Alg<span className="text-primary">Olympia</span>
           </h1>
 
           <p className="mt-5 font-mono text-lg uppercase tracking-[0.24em] text-foreground/80 sm:text-2xl">
@@ -25,16 +24,10 @@ export default function Hero() {
 
           <div className="mt-11 flex flex-col gap-4 sm:flex-row sm:items-center">
             <Link
-              href="/events"
+              href="/algolympia/register"
               className="inline-flex items-center justify-center border border-primary bg-primary px-7 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-colors hover:bg-primary/90"
             >
-              View Contests
-            </Link>
-            <Link
-              href="/cusoc"
-              className="inline-flex items-center justify-center border border-transparent px-2 py-3 font-mono text-sm uppercase tracking-[0.14em] text-foreground/72 transition-colors hover:text-foreground"
-            >
-              Leaderboard {'>'}
+              Register Now
             </Link>
           </div>
         </div>
@@ -42,7 +35,7 @@ export default function Hero() {
         <div className="mt-14 border-y border-border py-8">
           <div className="grid grid-cols-2 gap-y-7 text-left sm:grid-cols-4 sm:gap-6">
             {[
-              ['2', 'Participants'],
+              ['3', 'Participants'],
               ['4', 'Problems'],
               ['2', 'Submissions'],
               ['Live', 'Status'],
