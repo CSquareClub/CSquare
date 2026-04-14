@@ -76,6 +76,7 @@ export default function AlgolympiaRegistrationForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [teamName, setTeamName] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [leader, setLeader] = useState<MemberData>({ ...emptyMember });
   const [member2, setMember2] = useState<MemberData>({ ...emptyMember });
   const [member3, setMember3] = useState<MemberData>({ ...emptyMember });
@@ -194,7 +195,7 @@ export default function AlgolympiaRegistrationForm() {
       return `${label}: Valid CU UID is required`;
     }
     if (isLeader && (!member.college?.trim() || member.college.trim().length < 2)) {
-      return `${label}: College/Organization name is required`;
+      return `${label}: ${isProfessional ? 'Organization' : (isCU ? 'Department name' : 'College/Institute')} is required`;
     }
     if (!member.phone?.trim() || !/^[0-9]{10,15}$/.test(member.phone)) {
       return `${label}: Valid phone number required`;
@@ -220,12 +221,34 @@ export default function AlgolympiaRegistrationForm() {
     return null;
   };
 
-  const next = () => {
+  const next = async () => {
     const err = validate();
     if (err) {
       setError(err);
       return;
     }
+    
+    if (step === sm.leader) {
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/algolympia/check-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: leader.email }),
+        });
+        const data = await res.json();
+        
+        if (data.exists) {
+          setError('This team leader email is already registered for AlgOlympia. Please use a different one to register a new team.');
+          setIsLoading(false);
+          return;
+        }
+      } catch (e) {
+        console.error("Duplicate check failed:", e);
+      }
+      setIsLoading(false);
+    }
+
     setError(null);
     setStep((s) => Math.min(s + 1, totalSteps - 1));
   };
@@ -258,6 +281,7 @@ export default function AlgolympiaRegistrationForm() {
             isCU: true,
             isProfessional: false,
             teamName: teamName.trim(),
+            referralCode: referralCode.trim(),
             facultyMentorName: hasFacultyMentor ? facultyMentorName.trim() : undefined,
             facultyMentorEid: hasFacultyMentor ? facultyMentorEid.trim() : undefined,
             leader: buildMemberPayload(leader, true, true),
@@ -268,6 +292,7 @@ export default function AlgolympiaRegistrationForm() {
             isCU: false,
             isProfessional,
             teamName: teamName.trim(),
+            referralCode: referralCode.trim(),
             leader: buildMemberPayload(leader, false, true),
             member2: buildMemberPayload(member2, false, false),
             member3: buildMemberPayload(member3, false, false),
@@ -491,7 +516,7 @@ export default function AlgolympiaRegistrationForm() {
         )}
         {isLeader && (
           <div>
-            <label className={labelCls}>{isProfessional ? 'Organization / Institution *' : 'College / Institute Name *'}</label>
+            <label className={labelCls}>{isProfessional ? 'Organization / Institution *' : isCU ? 'Department Name *' :  'College / Institution Name *'}</label>
             <input
               type="text"
               value={data.college}
@@ -521,42 +546,42 @@ export default function AlgolympiaRegistrationForm() {
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className={labelCls}>LeetCode Username</label>
+            <label className={labelCls}>LeetCode Profile</label>
             <input
-              type="text"
+              type="url"
               value={data.leetcode}
               onChange={(e) => setData({ ...data, leetcode: e.target.value })}
-              placeholder="leetcode.com/u/username"
+              placeholder="https://leetcode.com/u/username"
               className={inputCls}
             />
           </div>
           <div>
             <label className={labelCls}>Codeforces Handle</label>
             <input
-              type="text"
+              type="url"
               value={data.codeforces}
               onChange={(e) => setData({ ...data, codeforces: e.target.value })}
-              placeholder="codeforces.com/profile/handle"
+              placeholder="https://codeforces.com/profile/handle"
               className={inputCls}
             />
           </div>
           <div>
             <label className={labelCls}>CodeChef Username</label>
             <input
-              type="text"
+              type="url"
               value={data.codechef}
               onChange={(e) => setData({ ...data, codechef: e.target.value })}
-              placeholder="codechef.com/users/username"
+              placeholder="https://www.codechef.com/users/username"
               className={inputCls}
             />
           </div>
           <div>
             <label className={labelCls}>GitHub Profile</label>
             <input
-              type="text"
+              type="url"
               value={data.github}
               onChange={(e) => setData({ ...data, github: e.target.value })}
-              placeholder="github.com/username"
+              placeholder="https://github.com/username"
               className={inputCls}
             />
           </div>
@@ -680,7 +705,7 @@ export default function AlgolympiaRegistrationForm() {
         <div><span className="text-foreground/45">Name:</span> <span className="text-foreground">{data.name}</span></div>
         <div><span className="text-foreground/45">Email:</span> <span className="text-foreground">{data.email}</span></div>
         {isCU && <div><span className="text-foreground/45">UID:</span> <span className="text-foreground">{data.uid}</span></div>}
-        {isLeader && <div><span className="text-foreground/45">College:</span> <span className="text-foreground">{data.college}</span></div>}
+        {isLeader && <div><span className="text-foreground/45">{isCU ? 'Department:' : 'College:'}</span> <span className="text-foreground">{data.college}</span></div>}
         <div><span className="text-foreground/45">Phone:</span> <span className="text-foreground">{(data as any).phone}</span></div>
         {data.leetcode && <div><span className="text-foreground/45">LeetCode:</span> <span className="text-foreground">{data.leetcode}</span></div>}
         {data.codeforces && <div><span className="text-foreground/45">Codeforces:</span> <span className="text-foreground">{data.codeforces}</span></div>}
@@ -716,6 +741,17 @@ export default function AlgolympiaRegistrationForm() {
               value={teamName}
               onChange={(e) => setTeamName(e.target.value)}
               placeholder="Enter your team name"
+              className={inputCls}
+            />
+          </div>
+
+          <div>
+            <label className={labelCls}>Referral Code (Optional)</label>
+            <input
+              type="text"
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value)}
+              placeholder="Enter referral code if any"
               className={inputCls}
             />
           </div>
@@ -786,6 +822,7 @@ export default function AlgolympiaRegistrationForm() {
           <div className="rounded-xl border border-primary/15 bg-black/20 p-4">
             <div className="grid gap-2 text-sm sm:grid-cols-2">
               <div><span className="text-foreground/45">Team Name:</span> <span className="font-semibold text-primary">{teamName}</span></div>
+              {referralCode && <div><span className="text-foreground/45">Referral Code:</span> <span className="font-semibold text-foreground">{referralCode}</span></div>}
               <div><span className="text-foreground/45">Category:</span> <span className="font-semibold text-foreground">{isCU ? 'CU Participant' : isProfessional ? 'Professional / Faculty' : 'Non-CU Participant'}</span></div>
               <div><span className="text-foreground/45">Fee:</span> <span className="font-semibold text-primary">₹300</span></div>
               <div><span className="text-foreground/45">Payment:</span> <span className="font-semibold text-foreground">{isCU ? 'CUIMS' : 'Via Email'}</span></div>
@@ -965,9 +1002,10 @@ export default function AlgolympiaRegistrationForm() {
           <button
             type="button"
             onClick={next}
-            className="inline-flex items-center gap-1 rounded-xl border border-primary bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            disabled={isLoading}
+            className="inline-flex items-center gap-1 rounded-xl border border-primary bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
-            Continue
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Continue'}
             <ChevronRight className="h-4 w-4" />
           </button>
         )}

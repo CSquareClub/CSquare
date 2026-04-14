@@ -100,11 +100,13 @@ async function sendOtpEmail(email: string, otp: string, fullName?: string) {
   await ses.send(command);
 }
 
+const profileUrl = z.string().url("Must be a valid link (e.g. https://...)").optional().or(z.literal(""));
+
 const profileSchema = z.object({
-  leetcode: z.string().optional().default(""),
-  codeforces: z.string().optional().default(""),
-  codechef: z.string().optional().default(""),
-  github: z.string().optional().default(""),
+  leetcode: profileUrl,
+  codeforces: profileUrl,
+  codechef: profileUrl,
+  github: profileUrl,
 });
 
 const baseMemberSchema = z.object({
@@ -125,8 +127,9 @@ const cuRegistrationSchema = z.object({
   teamName: z.string().min(2, "Team name is required"),
   facultyMentorName: z.string().optional(),
   facultyMentorEid: z.string().optional(),
+  referralCode: z.string().optional(),
   leader: cuMemberSchema.merge(z.object({
-    college: z.string().min(2, "College/Institute name is required"),
+    college: z.string().min(2, "Department name is required"),
   })),
   member2: cuMemberSchema,
   member3: cuMemberSchema,
@@ -136,6 +139,7 @@ const nonCuRegistrationSchema = z.object({
   isCU: z.literal(false),
   isProfessional: z.boolean().optional().default(false),
   teamName: z.string().min(2, "Team name is required"),
+  referralCode: z.string().optional(),
   leader: nonCuMemberSchema.merge(z.object({
     college: z.string().min(2, "College/Organization name is required"),
   })),
@@ -493,28 +497,29 @@ export async function POST(req: NextRequest) {
       leaderUID: isCU ? (data.leader as any).uid : "",
       leaderPhone: data.leader.phone,
       leaderCollege: (data.leader as any).college,
-      leaderLeetcode: data.leader.leetcode,
-      leaderCodeforces: data.leader.codeforces,
-      leaderCodechef: data.leader.codechef,
-      leaderGithub: data.leader.github,
+      leaderLeetcode: data.leader.leetcode || "",
+      leaderCodeforces: data.leader.codeforces || "",
+      leaderCodechef: data.leader.codechef || "",
+      leaderGithub: data.leader.github || "",
       member2Name: data.member2.name,
       member2Email: data.member2.email,
       member2UID: isCU ? (data.member2 as any).uid : "",
       member2Phone: data.member2.phone,
-      member2Leetcode: data.member2.leetcode,
-      member2Codeforces: data.member2.codeforces,
-      member2Codechef: data.member2.codechef,
-      member2Github: data.member2.github,
+      member2Leetcode: data.member2.leetcode || "",
+      member2Codeforces: data.member2.codeforces || "",
+      member2Codechef: data.member2.codechef || "",
+      member2Github: data.member2.github || "",
       member3Name: data.member3.name,
       member3Email: data.member3.email,
       member3UID: isCU ? (data.member3 as any).uid : "",
       member3Phone: data.member3.phone,
-      member3Leetcode: data.member3.leetcode,
-      member3Codeforces: data.member3.codeforces,
-      member3Codechef: data.member3.codechef,
-      member3Github: data.member3.github,
+      member3Leetcode: data.member3.leetcode || "",
+      member3Codeforces: data.member3.codeforces || "",
+      member3Codechef: data.member3.codechef || "",
+      member3Github: data.member3.github || "",
       facultyMentorName: isCU ? (data as any).facultyMentorName : undefined,
       facultyMentorEid: isCU ? (data as any).facultyMentorEid : undefined,
+      referralCode: (data as any).referralCode || "",
     };
     
     const registration = await createAlgolympiaRegistration(registrationInput);

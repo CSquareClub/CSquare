@@ -51,7 +51,8 @@ export async function appendRegistrationToSheet(data: any) {
       data.member3Codechef || "",
       data.member3Github || "",
       data.facultyMentorName || "",
-      data.facultyMentorEid || ""
+      data.facultyMentorEid || "",
+      data.referralCode || ""
     ];
 
     await sheets.spreadsheets.values.append({
@@ -161,6 +162,7 @@ export async function appendPaymentConfirmationToSheet(data: any) {
       new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
       data.isCU ? "CU" : data.isProfessional ? "Professional/Faculty" : "Non-CU",
       data.teamName || "",
+      data.referralCode || "",
       data.leaderName || "",
       data.leaderEmail || "",
       data.leaderPhone || "",
@@ -191,6 +193,7 @@ export async function appendPaymentConfirmationToSheet(data: any) {
       data.transactionId || "",
       data.paymentScreenshotUrl || "",
       data.paymentStatus || "",
+      data.referralCode || ""
     ];
 
     await sheets.spreadsheets.values.append({
@@ -262,6 +265,7 @@ export async function appendMultiplePaymentConfirmationsToSheet(rows: any[]) {
       data.transactionId || "",
       data.paymentScreenshotUrl || "",
       data.paymentStatus || "",
+       data.referralCode || ""
     ]);
 
     await sheets.spreadsheets.values.append({

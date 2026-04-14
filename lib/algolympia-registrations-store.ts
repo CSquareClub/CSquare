@@ -44,6 +44,9 @@ export type AlgolympiaRegistration = {
   facultyMentorName?: string;
   facultyMentorEid?: string;
 
+  /* Referral */
+  referralCode?: string;
+
   paymentStatus: string; // pending | paid | submitted
   transactionId?: string;
   paymentScreenshotUrl?: string;
@@ -82,6 +85,7 @@ type RegistrationRow = {
   member3_github: string;
   faculty_mentor_name?: string;
   faculty_mentor_eid?: string;
+  referral_code?: string;
   payment_status: string;
   transaction_id?: string;
   payment_screenshot_url?: string;
@@ -143,6 +147,7 @@ async function ensureTable() {
   await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations ADD COLUMN IF NOT EXISTS member3_phone TEXT NOT NULL DEFAULT '';`);
   await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations ADD COLUMN IF NOT EXISTS faculty_mentor_name TEXT;`);
   await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations ADD COLUMN IF NOT EXISTS faculty_mentor_eid TEXT;`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations ADD COLUMN IF NOT EXISTS referral_code TEXT DEFAULT '';`);
 
   
   try {
@@ -193,6 +198,7 @@ function rowToRegistration(row: RegistrationRow): AlgolympiaRegistration {
     member3Github: row.member3_github,
     facultyMentorName: row.faculty_mentor_name || '',
     facultyMentorEid: row.faculty_mentor_eid || '',
+    referralCode: row.referral_code || '',
     paymentStatus: row.payment_status,
     transactionId: row.transaction_id,
     paymentScreenshotUrl: row.payment_screenshot_url,
@@ -230,6 +236,7 @@ export type CreateAlgolympiaRegistrationInput = {
   member3Github: string;
   facultyMentorName?: string;
   facultyMentorEid?: string;
+  referralCode?: string;
 };
 
 export async function createAlgolympiaRegistration(
@@ -246,9 +253,9 @@ export async function createAlgolympiaRegistration(
        member2_leetcode, member2_codeforces, member2_codechef, member2_github,
        member3_name, member3_email, member3_uid, member3_phone,
        member3_leetcode, member3_codeforces, member3_codechef, member3_github,
-       faculty_mentor_name, faculty_mentor_eid,
+       faculty_mentor_name, faculty_mentor_eid, referral_code,
        payment_status)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32)
      RETURNING *;`,
     input.isCU,
     input.isProfessional ?? false,
@@ -280,6 +287,7 @@ export async function createAlgolympiaRegistration(
     input.member3Github,
     input.facultyMentorName || '',
     input.facultyMentorEid || '',
+    input.referralCode || '',
     input.isCU ? "cuims_pending" : "pending",
   );
 
