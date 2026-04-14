@@ -390,17 +390,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Valid email is required to send OTP" }, { status: 400 });
       }
 
-      const sentAt = await getAlgolympiaOtpSentAt(email);
-      if (sentAt) {
-        const elapsed = Math.floor((Date.now() - sentAt.getTime()) / 1000);
-        if (elapsed < OTP_COOLDOWN_SECONDS) {
-          return NextResponse.json(
-            { error: `Please wait ${OTP_COOLDOWN_SECONDS - elapsed}s before requesting another OTP` },
-            { status: 429 },
-          );
-        }
-      }
-
       const otp = generateOtp();
       const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
       await upsertAlgolympiaOtp({ email, otpHash: hashOtp(otp), expiresAt });
@@ -464,19 +453,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Duplicate check
-    const allEmails = [
-      data.leader.email,
-      data.member2.email,
-      data.member3.email,
-    ];
-
-    if (new Set(allEmails.map(e => e.toLowerCase())).size !== 3) {
-      return NextResponse.json(
-        { error: "All team members must have unique email addresses." },
-        { status: 400 }
-      );
-    }
+    // Duplicate checks allowed per user request (emails can be reused)
 
     if (isCU) {
       const allUids = [
@@ -500,13 +477,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const duplicate = await checkDuplicateAlgolympiaRegistration(allEmails);
-    if (duplicate) {
-      return NextResponse.json(
-        { error: "One or more team members are already registered for AlgOlympia." },
-        { status: 409 },
-      );
-    }
+    // Duplicate registrations check removed
+
 
     // Create registration
     const isProfessional = !isCU && (data as any).isProfessional === true;

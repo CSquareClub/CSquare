@@ -277,3 +277,58 @@ export async function appendMultiplePaymentConfirmationsToSheet(rows: any[]) {
     console.error("Error appending bulk payment confirmations to Google Sheets:", error);
   }
 }
+
+export async function appendStallRegistrationToSheet(data: any) {
+  try {
+    const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+    
+    if (!clientEmail || !privateKey) {
+      console.warn("Google Sheets credentials are not configured.");
+      return;
+    }
+
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: clientEmail,
+        private_key: privateKey,
+      },
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    });
+
+    const sheets = google.sheets({ version: "v4", auth });
+    const spreadsheetId = "1O3e33Q1SKPDB39uQK3UkmjrLXwzR36yeIbwqiHsKraM";
+
+    const members = data.members || [];
+    const row = [
+      new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+      data.fullName || "",
+      data.email || "",
+      data.phone || "",
+      data.college || "",
+      data.stallCategory === 'food_beverage' ? "Food & Beverage" : "Products or Games",
+      data.isPremium ? "Yes" : "No",
+      "₹" + ((data.stallCategory === 'products_games' ? 10000 : 20000) + (data.isPremium ? 5000 : 0)).toLocaleString('en-IN'),
+      data.stallName || "",
+      data.stallDescription || "",
+      // Members 1-5
+      ...[0, 1, 2, 3, 4].flatMap((i) => [
+        members[i]?.name || "",
+        members[i]?.email || "",
+        members[i]?.phone || "",
+      ]),
+    ];
+
+    await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: "'Stall Registrations'!A1",
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [row],
+      },
+    });
+
+  } catch (error) {
+    console.error("Error appending stall registration to Google Sheets:", error);
+  }
+}
