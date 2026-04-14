@@ -384,3 +384,54 @@ export async function appendAmbassadorToSheet(data: any) {
     console.error("Error appending ambassador to Google Sheets:", error);
   }
 }
+
+export async function appendCommunityPartnerToSheet(data: any) {
+  try {
+    const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+    
+    if (!clientEmail || !privateKey) {
+      console.warn("Google Sheets credentials are not configured.");
+      return;
+    }
+
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: clientEmail,
+        private_key: privateKey,
+      },
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    });
+
+    const sheets = google.sheets({ version: "v4", auth });
+    const spreadsheetId = "1O3e33Q1SKPDB39uQK3UkmjrLXwzR36yeIbwqiHsKraM";
+    
+    const expectationsList = Array.isArray(data.expectations) ? data.expectations.join(", ") : data.expectations || "";
+    const deliverablesList = Array.isArray(data.deliverables) ? data.deliverables.join(", ") : data.deliverables || "";
+
+    const row = [
+      new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+      data.spocName || "",
+      data.email || "",
+      data.phone || "",
+      data.communityName || "",
+      data.description || "",
+      data.logoLightUrl || "",
+      data.logoDarkUrl || "",
+      expectationsList,
+      deliverablesList
+    ];
+
+    await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: "'Community Partner'!A1",
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [row],
+      },
+    });
+
+  } catch (error) {
+    console.error("Error appending community partner to Google Sheets:", error);
+  }
+}
