@@ -11,6 +11,8 @@ export type StallRegistration = {
   college: string;
   stallCategory: string;
   isPremium: boolean;
+  numberOfDays: number;
+  selectedDate: string;
   stallName: string;
   stallDescription: string;
   members: StallMember[];
@@ -31,6 +33,8 @@ type StallRow = {
   college: string;
   stall_category: string;
   is_premium: boolean;
+  number_of_days: number;
+  selected_date: string;
   stall_name: string;
   stall_description: string;
   members_json: string;
@@ -60,6 +64,8 @@ async function ensureTable() {
   try {
     await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_stall_registrations ADD COLUMN IF NOT EXISTS stall_category TEXT NOT NULL DEFAULT 'unknown';`);
     await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_stall_registrations ADD COLUMN IF NOT EXISTS is_premium BOOLEAN NOT NULL DEFAULT FALSE;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_stall_registrations ADD COLUMN IF NOT EXISTS number_of_days INT NOT NULL DEFAULT 2;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_stall_registrations ADD COLUMN IF NOT EXISTS selected_date TEXT DEFAULT '';`);
   } catch (e) {
     console.error("Failed to alter algolympia_stall_registrations table:", e);
   }
@@ -85,6 +91,8 @@ function rowToRegistration(row: StallRow): StallRegistration {
     college: row.college,
     stallCategory: row.stall_category,
     isPremium: row.is_premium,
+    numberOfDays: row.number_of_days,
+    selectedDate: row.selected_date,
     stallName: row.stall_name,
     stallDescription: row.stall_description,
     members,
@@ -98,6 +106,8 @@ export type CreateStallRegistrationInput = {
   college: string;
   stallCategory: string;
   isPremium: boolean;
+  numberOfDays: number;
+  selectedDate: string;
   stallName: string;
   stallDescription: string;
   members: StallMember[];
@@ -110,8 +120,8 @@ export async function createStallRegistration(
 
   const rows = await prisma.$queryRawUnsafe<StallRow[]>(
     `INSERT INTO algolympia_stall_registrations
-      (full_name, email, phone, college, stall_category, is_premium, stall_name, stall_description, members_json)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      (full_name, email, phone, college, stall_category, is_premium, stall_name, stall_description, members_json, number_of_days, selected_date)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
      RETURNING *;`,
     input.fullName,
     input.email,
@@ -122,6 +132,8 @@ export async function createStallRegistration(
     input.stallName,
     input.stallDescription,
     JSON.stringify(input.members),
+    input.numberOfDays,
+    input.selectedDate,
   );
 
   return rowToRegistration(rows[0]);

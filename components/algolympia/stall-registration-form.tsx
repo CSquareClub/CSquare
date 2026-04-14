@@ -53,6 +53,8 @@ export default function StallRegistrationForm() {
   /* ── Category State ───────────────────────────────────── */
   const [category, setCategory] = useState<'products_games' | 'food_beverage' | null>(null);
   const [isPremium, setIsPremium] = useState(false);
+  const [numberOfDays, setNumberOfDays] = useState<number>(2);
+  const [selectedDate, setSelectedDate] = useState<string>('');
 
   /* ── OTP State ───────────────────────────────────────── */
   const [otp, setOtp] = useState('');
@@ -130,6 +132,7 @@ export default function StallRegistrationForm() {
     if (!fullName.trim() || fullName.trim().length < 2) return 'Full name is required (min 2 chars)';
     if (!email.trim() || !email.includes('@')) return 'Valid email is required';
     if (!otpVerified) return 'Please verify your email using OTP before proceeding.';
+    if (numberOfDays === 1 && !selectedDate) return 'Please select a date for your 1-day stall';
     if (!phone.trim() || !/^[0-9]{10,15}$/.test(phone.trim())) return 'Valid phone number is required';
     if (!stallName.trim() || stallName.trim().length < 2) return 'Stall name is required (min 2 chars)';
     if (!stallDescription.trim() || stallDescription.trim().length < 10) return 'Stall description is required (min 10 chars)';
@@ -164,6 +167,8 @@ export default function StallRegistrationForm() {
         college: college.trim(),
         stallCategory: category,
         isPremium,
+        numberOfDays,
+        selectedDate: numberOfDays === 1 ? selectedDate : "",
         stallName: stallName.trim(),
         stallDescription: stallDescription.trim(),
         members: members
@@ -253,7 +258,7 @@ export default function StallRegistrationForm() {
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15">
                 <ShoppingBag className="h-5 w-5 text-primary" />
               </span>
-              <span className="text-xl font-bold font-mono text-primary">₹10,000</span>
+              <span className="text-xl font-bold font-mono text-primary">₹2,500/day</span>
             </div>
             <div>
               <h3 className="text-lg font-bold text-foreground">Products or Games</h3>
@@ -284,7 +289,7 @@ export default function StallRegistrationForm() {
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15">
                 <Coffee className="h-5 w-5 text-primary" />
               </span>
-              <span className="text-xl font-bold font-mono text-primary">₹20,000</span>
+              <span className="text-xl font-bold font-mono text-primary">₹4000/day</span>
             </div>
             <div>
               <h3 className="text-lg font-bold text-foreground">Food & Beverage (FNF)</h3>
@@ -309,18 +314,18 @@ export default function StallRegistrationForm() {
         {/* Premium Upgrade Selection (before form) */}
         <div className="rounded-xl border border-accent/20 bg-accent/5 p-5 transition-colors hover:bg-accent/10">
           <label className="flex items-start gap-4 cursor-pointer">
-            <div className="flex h-5 items-center mt-0.5">
+            {/* <div className="flex h-5 items-center mt-0.5">
               <input
                 type="checkbox"
                 checked={isPremium}
                 onChange={(e) => setIsPremium(e.target.checked)}
                 className="h-5 w-5 rounded border-accent/40 bg-black/50 text-accent focus:ring-accent focus:ring-offset-background"
               />
-            </div>
+            </div> */}
             <div>
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-accent" />
-                <span className="font-bold text-accent">Premium Upgrade Available (+₹5,000)</span>
+                <span className="font-bold text-accent">Premium Upgrade Available (+₹2,000)</span>
               </div>
               <p className="mt-1 text-sm text-foreground/60">
                 Upgrade any stall type to Premium for a larger space in a high-footfall area! Highly recommended for maximum visibility.
@@ -362,8 +367,52 @@ export default function StallRegistrationForm() {
               </span>
             )}
             <span className="font-mono text-primary/70">
-              ₹{(category === 'products_games' ? 10000 : 20000) + (isPremium ? 5000 : 0)}
+              ₹{((category === 'products_games' ? 2500 : 4000) + (isPremium ? 2000 : 0)) * numberOfDays} for {numberOfDays} day{numberOfDays > 1 ? 's' : ''}
             </span>
+          </div>
+        </div>
+
+        {/* Booking Duration */}
+        <div>
+          <div className="rounded-xl border border-primary/10 bg-primary/[0.03] p-4 mb-5">
+            <div className="flex items-center gap-2 text-sm font-medium text-primary mb-1">
+              <Store className="h-4 w-4" />
+              Booking Duration
+            </div>
+            <p className="text-xs text-foreground/45">
+              Select how many days you would like to book your stall.
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className={labelCls}>Number of Days *</label>
+              <select
+                value={numberOfDays}
+                onChange={(e) => {
+                  setNumberOfDays(Number(e.target.value));
+                  if (Number(e.target.value) === 2) setSelectedDate('');
+                }}
+                className={inputCls}
+              >
+                <option value={1} className="bg-black/80">1 Day</option>
+                <option value={2} className="bg-black/80">2 Days</option>
+              </select>
+            </div>
+            {numberOfDays === 1 && (
+              <div className="animate-in fade-in slide-in-from-top-2">
+                <label className={labelCls}>Select Date *</label>
+                <select
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className={inputCls}
+                >
+                  <option value="" disabled className="text-gray-500 bg-black/80">Choose Date</option>
+                  <option value="20 April 2026" className="bg-black/80">20 April 2026</option>
+                  <option value="21 April 2026" className="bg-black/80">21 April 2026</option>
+                </select>
+              </div>
+            )}
           </div>
         </div>
 
@@ -514,7 +563,7 @@ export default function StallRegistrationForm() {
             <div>
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-accent" />
-                <span className="font-bold text-accent">Premium Upgrade Available (+₹5,000)</span>
+                <span className="font-bold text-accent">Premium Upgrade Available (+₹2,000)</span>
               </div>
               <p className="mt-1 text-sm text-foreground/60">
                 Upgrade any stall type to Premium for a larger space in a high-footfall area! Highly recommended for maximum visibility.

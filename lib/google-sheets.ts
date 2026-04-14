@@ -315,7 +315,9 @@ export async function appendStallRegistrationToSheet(data: any) {
       data.college || "",
       data.stallCategory === 'food_beverage' ? "Food & Beverage" : "Products or Games",
       data.isPremium ? "Yes" : "No",
-      "₹" + ((data.stallCategory === 'products_games' ? 10000 : 20000) + (data.isPremium ? 5000 : 0)).toLocaleString('en-IN'),
+      data.numberOfDays || 2,
+      data.selectedDate || "N/A",
+      "₹" + (((data.stallCategory === 'products_games' ? 2500 : 4000) + (data.isPremium ? 2000 : 0)) * (data.numberOfDays || 2)).toLocaleString('en-IN'),
       data.stallName || "",
       data.stallDescription || "",
       // Members 1-5
@@ -421,7 +423,9 @@ export async function appendCommunityPartnerToSheet(data: any) {
       data.logoLightUrl || "",
       data.logoDarkUrl || "",
       expectationsList,
-      deliverablesList
+      deliverablesList,
+      data.instagramUrl || "",
+      data.linkedinUrl || ""
     ];
 
     await sheets.spreadsheets.values.append({

@@ -12,6 +12,8 @@ export type AlgolympiaCommunityPartner = {
   description: string;
   logoLightUrl: string;
   logoDarkUrl: string;
+  instagramUrl?: string;
+  linkedinUrl?: string;
   expectations: string[];
   deliverables: string[];
 };
@@ -26,6 +28,8 @@ type CommunityPartnerRow = {
   description: string;
   logo_light_url: string;
   logo_dark_url: string;
+  instagram_url?: string;
+  linkedin_url?: string;
   expectations: string; // Stored as JSON string directly, or JSON/JSONB
   deliverables: string;
 };
@@ -48,10 +52,17 @@ async function ensureTable() {
       description TEXT NOT NULL,
       logo_light_url TEXT NOT NULL,
       logo_dark_url TEXT NOT NULL,
+      instagram_url TEXT DEFAULT '',
+      linkedin_url TEXT DEFAULT '',
       expectations TEXT NOT NULL,
       deliverables TEXT NOT NULL
     );
   `);
+
+  try {
+    await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_community_partners ADD COLUMN IF NOT EXISTS instagram_url TEXT DEFAULT '';`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_community_partners ADD COLUMN IF NOT EXISTS linkedin_url TEXT DEFAULT '';`);
+  } catch (e) {}
 
   tableReady = true;
 }
@@ -74,6 +85,8 @@ function rowToPartner(row: CommunityPartnerRow): AlgolympiaCommunityPartner {
     description: row.description,
     logoLightUrl: row.logo_light_url,
     logoDarkUrl: row.logo_dark_url,
+    instagramUrl: row.instagram_url || '',
+    linkedinUrl: row.linkedin_url || '',
     expectations: JSON.parse(row.expectations || "[]"),
     deliverables: JSON.parse(row.deliverables || "[]"),
   };
@@ -89,6 +102,8 @@ export type CreatePartnerInput = {
   description: string;
   logoLightUrl: string;
   logoDarkUrl: string;
+  instagramUrl?: string;
+  linkedinUrl?: string;
   expectations: string[];
   deliverables: string[];
 };
@@ -103,8 +118,8 @@ export async function createCommunityPartner(
 
   const rows = await prisma.$queryRawUnsafe<CommunityPartnerRow[]>(
     `INSERT INTO algolympia_community_partners
-       (spoc_name, email, phone, community_name, description, logo_light_url, logo_dark_url, expectations, deliverables)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       (spoc_name, email, phone, community_name, description, logo_light_url, logo_dark_url, expectations, deliverables, instagram_url, linkedin_url)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
      RETURNING *;`,
     input.spocName.trim(),
     input.email.trim().toLowerCase(),
@@ -114,7 +129,9 @@ export async function createCommunityPartner(
     input.logoLightUrl.trim(),
     input.logoDarkUrl.trim(),
     expJson,
-    delJson
+    delJson,
+    (input.instagramUrl || '').trim(),
+    (input.linkedinUrl || '').trim()
   );
 
   return rowToPartner(rows[0]);

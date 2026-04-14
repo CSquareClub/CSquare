@@ -134,6 +134,8 @@ export async function POST(req: NextRequest) {
     const phone = formData.get("phone") as string;
     const communityName = formData.get("communityName") as string;
     const description = formData.get("description") as string;
+    const instagramUrl = formData.get("instagramUrl") as string;
+    const linkedinUrl = formData.get("linkedinUrl") as string;
     const expectationsStr = formData.get("expectations") as string;
     const deliverablesStr = formData.get("deliverables") as string;
     
@@ -215,6 +217,8 @@ export async function POST(req: NextRequest) {
       description,
       logoLightUrl,
       logoDarkUrl,
+      instagramUrl,
+      linkedinUrl,
       expectations,
       deliverables
     });

@@ -55,6 +55,8 @@ export default function CommunityPartnerForm() {
     phone: '',
     communityName: '',
     description: '',
+    instagramUrl: '',
+    linkedinUrl: '',
   });
 
   const [expectations, setExpectations] = useState<string[]>([]);
@@ -112,6 +114,8 @@ export default function CommunityPartnerForm() {
       fd.append("phone", formData.phone);
       fd.append("communityName", formData.communityName);
       fd.append("description", formData.description);
+      if (formData.instagramUrl) fd.append("instagramUrl", formData.instagramUrl);
+      if (formData.linkedinUrl) fd.append("linkedinUrl", formData.linkedinUrl);
       
       fd.append("expectations", JSON.stringify(expectations));
       fd.append("deliverables", JSON.stringify(deliverables));
@@ -250,6 +254,33 @@ export default function CommunityPartnerForm() {
                 className={inputCls}
               />
               <MapPin className="absolute right-4 top-3.5 h-5 w-5 text-foreground/20" />
+            </div>
+          </div>
+          
+          <div className="grid gap-4 md:grid-cols-2 pt-2">
+            <div>
+              <label className={labelCls}>Instagram</label>
+              <div className="relative">
+                <input
+                  type="url"
+                  value={formData.instagramUrl}
+                  onChange={(e) => setFormData({ ...formData, instagramUrl: e.target.value })}
+                  placeholder="https://instagram.com/..."
+                  className={inputCls}
+                />
+              </div>
+            </div>
+            <div>
+              <label className={labelCls}>LinkedIn</label>
+              <div className="relative">
+                <input
+                  type="url"
+                  value={formData.linkedinUrl}
+                  onChange={(e) => setFormData({ ...formData, linkedinUrl: e.target.value })}
+                  placeholder="https://linkedin.com/..."
+                  className={inputCls}
+                />
+              </div>
             </div>
           </div>
         </div>
