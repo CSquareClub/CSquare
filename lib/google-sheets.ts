@@ -52,7 +52,8 @@ export async function appendRegistrationToSheet(data: any) {
       data.member3Github || "",
       data.facultyMentorName || "",
       data.facultyMentorEid || "",
-      data.referralCode || ""
+      data.referralCode || "",
+      data.generatedReferralCode || ""
     ];
 
     await sheets.spreadsheets.values.append({
@@ -334,5 +335,52 @@ export async function appendStallRegistrationToSheet(data: any) {
 
   } catch (error) {
     console.error("Error appending stall registration to Google Sheets:", error);
+  }
+}
+
+export async function appendAmbassadorToSheet(data: any) {
+  try {
+    const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+    
+    if (!clientEmail || !privateKey) {
+      console.warn("Google Sheets credentials are not configured.");
+      return;
+    }
+
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: clientEmail,
+        private_key: privateKey,
+      },
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    });
+
+    const sheets = google.sheets({ version: "v4", auth });
+    const spreadsheetId = "1O3e33Q1SKPDB39uQK3UkmjrLXwzR36yeIbwqiHsKraM";
+    
+    const row = [
+      new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+      data.name || "",
+      data.email || "",
+      data.phone || "",
+      data.college || "",
+      data.department || "",
+      data.year || "",
+      data.referralCode || "",
+      data.source || "direct"
+    ];
+
+    await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: "'Campus Ambassador'!A1",
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [row],
+      },
+    });
+
+  } catch (error) {
+    console.error("Error appending ambassador to Google Sheets:", error);
   }
 }

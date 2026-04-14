@@ -7,7 +7,7 @@ import {
   checkDuplicateAlgolympiaRegistration,
   checkDuplicateAlgolympiaUid,
 } from "@/lib/algolympia-registrations-store";
-import { appendRegistrationToSheet } from "@/lib/google-sheets";
+import { appendRegistrationToSheet, appendAmbassadorToSheet } from "@/lib/google-sheets";
 import {
   getAlgolympiaOtpSentAt,
   isAlgolympiaOtpVerified,
@@ -153,6 +153,7 @@ async function sendCuConfirmationEmail(
   emails: string[],
   teamName: string,
   leaderName: string,
+  leaderReferralCode: string,
 ) {
   const sourceEmail = process.env.AWS_SES_FROM_EMAIL || "csquareclub@cumail.in";
   const validEmails = emails.filter((e) => e && e.includes("@"));
@@ -210,6 +211,14 @@ async function sendCuConfirmationEmail(
       </ul>
     </div>
 
+    <h3 style="color:#0ea5e9;margin-top:25px;">🎖️ Your Team has a Campus Ambassador!</h3>
+    <p>Your team leader has been automatically enrolled as a Campus Ambassador for AlgOlympia.</p>
+    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:15px;margin:15px 0;text-align:center;">
+      <p style="margin:0;font-size:14px;color:#0284c7;">Leader's Referral Code:</p>
+      <p style="font-size:24px;font-weight:bold;letter-spacing:2px;color:#0369a1;margin:5px 0;">${leaderReferralCode}</p>
+    </div>
+    <p style="font-size:14px;color:#333;">Share this code with your peers. Teams who use it will be tracked under your leader!</p>
+
     <h3 style="color:#166534;margin-top:25px;">✅ Next Steps</h3>
     <ol>
       <li>Complete the payment via CUIMS.</li>
@@ -248,7 +257,7 @@ async function sendCuConfirmationEmail(
 </body></html>`,
         },
         Text: {
-          Data: `Dear Participant,\n\nGreetings from C Square Club, Chandigarh University, Punjab!\nWe are pleased to inform you that your registration for AlgOlympia 2026 has been successfully received. We are excited to have you join us for this global-level programming competition.\n\nAll participants are requested to complete their registration by submitting the participation fee through CUIMS.\n\nPayment Details:\n- Amount: ₹100 per team member\n- Mode: Payment will be reflected on CUIMS\n- Note: Each team member must complete the payment individually through their CUIMS portal\n\nImportant Note:\n- Once you have registered for AlgOlympia, participation is mandatory as the fee will be reflected on CUIMS soon and will not be removed.\n- If you have exhausted your duty leaves, Special Duty Leave (IDL) will be provided.\n\nNext Steps:\n1. Complete the payment via CUIMS.\n2. Each team member must fill the confirmation form individually after payment.\n3. Upload the payment proof in the form for verification.\n4. Join the official WhatsApp group for updates and announcements: https://chat.whatsapp.com/GfKnKJ4KbNi486bOksarfx\n\nPlease ensure that the payment and form submission are completed at the earliest to secure your participation.\n\nLooking forward to hosting you at AlgOlympia 2026!\n\n--\nThanks & Regards,\nC Square Club\nThe Coding and Technical Club of Chandigarh University\n\nLearn • Compete • Build\nPhone: +91 9084542911\nEmail: csquareclub@cumail.in\nLinkedIn: https://www.linkedin.com/company/csquare-club/\nInstagram: @csquare_club`,
+          Data: `Dear Participant,\n\nGreetings from C Square Club, Chandigarh University, Punjab!\nWe are pleased to inform you that your registration for AlgOlympia 2026 has been successfully received. We are excited to have you join us for this global-level programming competition.\n\nAll participants are requested to complete their registration by submitting the participation fee through CUIMS.\n\nPayment Details:\n- Amount: ₹100 per team member\n- Mode: Payment will be reflected on CUIMS\n- Note: Each team member must complete the payment individually through their CUIMS portal\n\nImportant Note:\n- Once you have registered for AlgOlympia, participation is mandatory as the fee will be reflected on CUIMS soon and will not be removed.\n- If you have exhausted your duty leaves, Special Duty Leave (IDL) will be provided.\n\n🎖️ Campus Ambassador Program\nYour team leader has been automatically enrolled as a Campus Ambassador for AlgOlympia.\nLeader's Referral Code: ${leaderReferralCode}\nShare this code with your peers. Teams who use it will be tracked under your leader!\n\nNext Steps:\n1. Complete the payment via CUIMS.\n2. Each team member must fill the confirmation form individually after payment.\n3. Upload the payment proof in the form for verification.\n4. Join the official WhatsApp group for updates and announcements: https://chat.whatsapp.com/GfKnKJ4KbNi486bOksarfx\n\nPlease ensure that the payment and form submission are completed at the earliest to secure your participation.\n\nLooking forward to hosting you at AlgOlympia 2026!\n\n--\nThanks & Regards,\nC Square Club\nThe Coding and Technical Club of Chandigarh University\n\nLearn • Compete • Build\nPhone: +91 9084542911\nEmail: csquareclub@cumail.in\nLinkedIn: https://www.linkedin.com/company/csquare-club/\nInstagram: @csquare_club`,
         },
       },
     },
@@ -265,6 +274,7 @@ async function sendNonCuConfirmationEmail(
   emails: string[],
   teamName: string,
   leaderName: string,
+  leaderReferralCode: string,
 ) {
   const sourceEmail = process.env.AWS_SES_FROM_EMAIL || "csquareclub@cumail.in";
   const validEmails = emails.filter((e) => e && e.includes("@"));
@@ -329,6 +339,14 @@ async function sendNonCuConfirmationEmail(
       </td></tr>
     </table>
 
+    <h3 style="color:#0ea5e9;margin-top:25px;">🎖️ You're a Campus Ambassador!</h3>
+    <p>As a team leader, you have been automatically enrolled as a Campus Ambassador for AlgOlympia.</p>
+    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:15px;margin:15px 0;text-align:center;">
+      <p style="margin:0;font-size:14px;color:#0284c7;">Your Referral Code:</p>
+      <p style="font-size:24px;font-weight:bold;letter-spacing:2px;color:#0369a1;margin:5px 0;">${leaderReferralCode}</p>
+    </div>
+    <p style="font-size:14px;color:#333;">Share this code with your peers. Teams can use it during registration!</p>
+
     <h3 style="color:#166534;margin-top:25px;">✅ Next Steps</h3>
     <ol>
       <li>Complete the payment using the details above.</li>
@@ -367,7 +385,7 @@ async function sendNonCuConfirmationEmail(
 </body></html>`,
         },
         Text: {
-          Data: `Dear ${leaderName},\n\nGreetings from C Square Club, Chandigarh University, Punjab!\nWe are pleased to inform you that your registration for AlgOlympia 2026 has been successfully received. We are excited to have your team ${teamName} join us for this global-level programming competition.\n\nAll participants are requested to complete their registration by submitting the participation fee.\n\nPayment Details:\n- Amount: ₹300 (for the entire team)\n- Note: Only the team leader is required to make the payment on behalf of the team.\n\nBank Details:\nBank Name: HDFC Bank Ltd.\nBranch: Morinda - Punjab\nAddress: Rattan Towers, Ward No. 5, Sugar Mill Road, Distt - Rupnagar, Morinda - 140101, Punjab\nBeneficiary Name: CU AC University Insti of Engineering\nBeneficiary Address: #2368 PH-10, S.A.S. Nagar, Distt S.A.S. Nagar, Punjab - 160061, India\nAccount Number: 50100078635437\nIFSC Code: HDFC0000798\nMICR: 160240049\n\nNext Steps:\n1. Complete the payment using the details above.\n2. The team leader must fill the confirmation form after payment submission at: https://www.csquareclub.co.in/algolympia/payment\n3. Upload the payment proof in the form for verification.\n4. Join the official WhatsApp group for updates and announcements: https://chat.whatsapp.com/Czg1x1RmJuu1zRsJNtcOD6\n\nPlease ensure that the payment and form submission are completed at the earliest to secure your participation.\n\nLooking forward to hosting you at AlgOlympia 2026!\n\n--\nThanks & Regards,\nC Square Club\nThe Coding and Technical Club of Chandigarh University\n\nLearn • Compete • Build\nPhone: +91 9084542911\nEmail: csquareclub@cumail.in\nLinkedIn: https://www.linkedin.com/company/csquare-club/\nInstagram: @csquare_club`,
+          Data: `Dear ${leaderName},\n\nGreetings from C Square Club, Chandigarh University, Punjab!\nWe are pleased to inform you that your registration for AlgOlympia 2026 has been successfully received. We are excited to have your team ${teamName} join us for this global-level programming competition.\n\nAll participants are requested to complete their registration by submitting the participation fee.\n\nPayment Details:\n- Amount: ₹300 (for the entire team)\n- Note: Only the team leader is required to make the payment on behalf of the team.\n\nBank Details:\nBank Name: HDFC Bank Ltd.\nBranch: Morinda - Punjab\nAddress: Rattan Towers, Ward No. 5, Sugar Mill Road, Distt - Rupnagar, Morinda - 140101, Punjab\nBeneficiary Name: CU AC University Insti of Engineering\nBeneficiary Address: #2368 PH-10, S.A.S. Nagar, Distt S.A.S. Nagar, Punjab - 160061, India\nAccount Number: 50100078635437\nIFSC Code: HDFC0000798\nMICR: 160240049\n\n🎖️ Your Team has a Campus Ambassador!\nYour team leader has been automatically enrolled as a Campus Ambassador for AlgOlympia.\nLeader's Referral Code: ${leaderReferralCode}\nShare this code with your peers. Teams who use it will be tracked under your leader!\n\nNext Steps:\n1. Complete the payment using the details above.\n2. The team leader must fill the confirmation form after payment submission at: https://www.csquareclub.co.in/algolympia/payment\n3. Upload the payment proof in the form for verification.\n4. Join the official WhatsApp group for updates and announcements: https://chat.whatsapp.com/Czg1x1RmJuu1zRsJNtcOD6\n\nPlease ensure that the payment and form submission are completed at the earliest to secure your participation.\n\nLooking forward to hosting you at AlgOlympia 2026!\n\n--\nThanks & Regards,\nC Square Club\nThe Coding and Technical Club of Chandigarh University\n\nLearn • Compete • Build\nPhone: +91 9084542911\nEmail: csquareclub@cumail.in\nLinkedIn: https://www.linkedin.com/company/csquare-club/\nInstagram: @csquare_club`,
         },
       },
     },
@@ -524,8 +542,52 @@ export async function POST(req: NextRequest) {
     
     const registration = await createAlgolympiaRegistration(registrationInput);
 
+    // Ambassador Logic
+    const {
+      getAmbassadorByEmail,
+      createAmbassador,
+      incrementReferralCount,
+    } = await import("@/lib/algolympia-ambassador-store");
+
+    if (registrationInput.referralCode) {
+      incrementReferralCount(registrationInput.referralCode).catch(console.error);
+    }
+
+    let leaderReferralCode = "";
+    try {
+      let ambassador = await getAmbassadorByEmail(registrationInput.leaderEmail);
+      if (!ambassador) {
+        ambassador = await createAmbassador({
+          name: registrationInput.leaderName,
+          email: registrationInput.leaderEmail,
+          phone: registrationInput.leaderPhone,
+          college: registrationInput.leaderCollege || (isCU ? "Chandigarh University" : ""),
+          source: "team_leader",
+          registrationId: registration.id,
+        });
+        
+        // Add to Google Sheets
+        appendAmbassadorToSheet({
+          name: registrationInput.leaderName,
+          email: registrationInput.leaderEmail,
+          phone: registrationInput.leaderPhone,
+          college: registrationInput.leaderCollege || (isCU ? "Chandigarh University" : ""),
+          department: "",
+          year: "",
+          referralCode: ambassador.referralCode,
+          source: "team_leader",
+        }).catch(console.error);
+      }
+      leaderReferralCode = ambassador.referralCode;
+    } catch (e) {
+      console.error("Failed to process ambassador auto-enrollment:", e);
+    }
+
     // Append to Google Sheet async
-    appendRegistrationToSheet(registrationInput).catch(console.error);
+    appendRegistrationToSheet({
+      ...registrationInput,
+      generatedReferralCode: leaderReferralCode,
+    }).catch(console.error);
 
     // Send confirmation to all team members
     const allEmails = [
@@ -535,15 +597,16 @@ export async function POST(req: NextRequest) {
     ];
 
     if (isCU) {
-      await sendCuConfirmationEmail(allEmails, data.teamName, data.leader.name);
+      await sendCuConfirmationEmail(allEmails, data.teamName, data.leader.name, leaderReferralCode);
     } else {
-      await sendNonCuConfirmationEmail(allEmails, data.teamName, data.leader.name);
+      await sendNonCuConfirmationEmail(allEmails, data.teamName, data.leader.name, leaderReferralCode);
     }
 
     return NextResponse.json({
       success: true,
       registrationId: registration.id,
       isCU,
+      referralCode: leaderReferralCode,
     });
   } catch (err) {
     if (err instanceof z.ZodError) {

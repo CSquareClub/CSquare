@@ -19,6 +19,7 @@ import {
   Crown,
   ShieldCheck,
   Mail,
+  Copy,
 } from 'lucide-react';
 
 /* ─── Types ──────────────────────────────────────────────── */
@@ -84,6 +85,7 @@ export default function AlgolympiaRegistrationForm() {
   const [hasFacultyMentor, setHasFacultyMentor] = useState(false);
   const [facultyMentorName, setFacultyMentorName] = useState('');
   const [facultyMentorEid, setFacultyMentorEid] = useState('');
+  const [leaderReferralCode, setLeaderReferralCode] = useState('');
 
   /* ── OTP state ─────────────────────────────────────────── */
   const [otp, setOtp] = useState('');
@@ -314,6 +316,7 @@ export default function AlgolympiaRegistrationForm() {
         throw new Error(json.error || 'Registration failed');
       }
 
+      setLeaderReferralCode(json.referralCode || '');
       setIsCuPaymentInfo(isCU);
       setSubmitted(true);
     } catch (e: any) {
@@ -343,7 +346,7 @@ export default function AlgolympiaRegistrationForm() {
         </p>
 
         {isCuPaymentInfo ? (
-          <div className="mx-auto max-w-md rounded-xl border border-primary/20 bg-primary/5 p-5">
+          <div className="mx-auto mt-6 max-w-md rounded-xl border border-primary/20 bg-primary/5 p-5">
             <p className="mb-2 text-sm font-semibold text-primary">💳 Registration Fee: ₹300 (₹100 per member)</p>
             <p className="text-sm text-foreground/65">
               ₹100 will be reflected on each member's <span className="font-semibold text-foreground">CUIMS</span>.
@@ -351,7 +354,7 @@ export default function AlgolympiaRegistrationForm() {
             </p>
           </div>
         ) : (
-          <div className="mx-auto max-w-md rounded-xl border border-primary/20 bg-primary/5 p-5">
+          <div className="mx-auto mt-6 max-w-md rounded-xl border border-primary/20 bg-primary/5 p-5">
             <p className="mb-2 text-sm font-semibold text-primary">💳 Payment: ₹300</p>
             <p className="text-sm text-foreground/65">
               Payment details will be sent to your registered email. Please check your inbox.
@@ -359,7 +362,33 @@ export default function AlgolympiaRegistrationForm() {
           </div>
         )}
 
-        <p className="mt-6 text-xs text-foreground/40">
+        {leaderReferralCode && (
+          <div className="mx-auto mt-6 max-w-md rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-5">
+            <h4 className="flex items-center justify-center gap-2 text-sm font-bold text-indigo-400 mb-2">
+              <Trophy className="h-4 w-4" /> You're a Campus Ambassador!
+            </h4>
+            <p className="text-sm text-foreground/60 mb-4">
+              Share this code with your peers. Teams can use it during registration!
+            </p>
+            <div className="flex items-center justify-between gap-3 bg-black/40 rounded-lg p-3 border border-indigo-500/20">
+              <code className="text-lg font-mono font-bold text-indigo-300 tracking-wider">
+                {leaderReferralCode}
+              </code>
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(leaderReferralCode);
+                  alert("Copied to clipboard!");
+                }}
+                className="text-xs text-indigo-400 bg-indigo-500/20 hover:bg-indigo-500/30 p-2 rounded transition-colors"
+                title="Copy code"
+              >
+                <Copy className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        <p className="mt-8 text-xs text-foreground/40">
           A confirmation email has been sent to the team leader.
         </p>
       </div>
