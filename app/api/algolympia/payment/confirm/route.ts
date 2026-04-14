@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { updatePaymentDetails } from "@/lib/algolympia-registrations-store";
+import { updatePaymentDetails, getAlgolympiaRegistrationById } from "@/lib/algolympia-registrations-store";
+import { appendPaymentConfirmationToSheet } from "@/lib/google-sheets";
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,6 +17,18 @@ export async function POST(req: NextRequest) {
     const id = parseInt(idString, 10);
     if (isNaN(id)) {
       return NextResponse.json({ success: false, message: "Invalid ID format" }, { status: 400 });
+    }
+
+    // Check if payment was already submitted
+    const existing = await getAlgolympiaRegistrationById(id);
+    if (!existing) {
+      return NextResponse.json({ success: false, message: "Registration not found" }, { status: 404 });
+    }
+    if (existing.paymentStatus === "submitted") {
+      return NextResponse.json(
+        { success: false, message: "Payment proof has already been submitted for this team. Duplicate submissions are not allowed.", alreadySubmitted: true },
+        { status: 409 }
+      );
     }
 
     // Convert File to Buffer
@@ -57,6 +70,9 @@ export async function POST(req: NextRequest) {
 
     // Update the database
     const updatedTeam = await updatePaymentDetails(id, transactionId, s3Url);
+
+    // Append to "Payment Confirmation" Google Sheet
+    appendPaymentConfirmationToSheet(updatedTeam).catch(console.error);
 
     return NextResponse.json({
       success: true,

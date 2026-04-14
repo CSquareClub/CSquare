@@ -14,6 +14,7 @@ import {
   Sparkles,
   GraduationCap,
   Building2,
+  Briefcase,
   Zap,
   Crown,
   ShieldCheck,
@@ -22,7 +23,7 @@ import {
 
 /* ─── Types ──────────────────────────────────────────────── */
 
-type ParticipantType = 'cu' | 'non-cu' | null;
+type ParticipantType = 'cu' | 'non-cu' | 'professional' | null;
 
 interface MemberData {
   name: string;
@@ -93,6 +94,7 @@ export default function AlgolympiaRegistrationForm() {
   const [otpCooldown, setOtpCooldown] = useState(0);
 
   const isCU = participantType === 'cu';
+  const isProfessional = participantType === 'professional';
   const steps = formSteps;
   const totalSteps = steps.length;
   const progress = Math.round(((step + 1) / totalSteps) * 100);
@@ -192,7 +194,7 @@ export default function AlgolympiaRegistrationForm() {
       return `${label}: Valid CU UID is required`;
     }
     if (isLeader && (!member.college?.trim() || member.college.trim().length < 2)) {
-      return `${label}: College/Institute name is required`;
+      return `${label}: College/Organization name is required`;
     }
     if (!member.phone?.trim() || !/^[0-9]{10,15}$/.test(member.phone)) {
       return `${label}: Valid phone number required`;
@@ -239,75 +241,36 @@ export default function AlgolympiaRegistrationForm() {
     setError(null);
     setIsLoading(true);
     try {
+      const buildMemberPayload = (m: MemberData, includeUid: boolean, includeCollege: boolean) => ({
+        name: m.name.trim(),
+        email: m.email.trim(),
+        ...(includeUid ? { uid: m.uid.trim().toUpperCase() } : {}),
+        ...(includeCollege ? { college: m.college.trim() } : {}),
+        phone: m.phone.trim(),
+        leetcode: m.leetcode.trim(),
+        codeforces: m.codeforces.trim(),
+        codechef: m.codechef.trim(),
+        github: m.github.trim(),
+      });
+
       const body = isCU
         ? {
             isCU: true,
+            isProfessional: false,
             teamName: teamName.trim(),
             facultyMentorName: hasFacultyMentor ? facultyMentorName.trim() : undefined,
             facultyMentorEid: hasFacultyMentor ? facultyMentorEid.trim() : undefined,
-            leader: {
-              name: leader.name.trim(),
-              email: leader.email.trim(),
-              uid: leader.uid.trim().toUpperCase(),
-              college: leader.college.trim(),
-              phone: leader.phone.trim(),
-              leetcode: leader.leetcode.trim(),
-              codeforces: leader.codeforces.trim(),
-              codechef: leader.codechef.trim(),
-              github: leader.github.trim(),
-            },
-            member2: {
-              name: member2.name.trim(),
-              email: member2.email.trim(),
-              uid: member2.uid.trim().toUpperCase(),
-              phone: member2.phone.trim(),
-              leetcode: member2.leetcode.trim(),
-              codeforces: member2.codeforces.trim(),
-              codechef: member2.codechef.trim(),
-              github: member2.github.trim(),
-            },
-            member3: {
-              name: member3.name.trim(),
-              email: member3.email.trim(),
-              uid: member3.uid.trim().toUpperCase(),
-              phone: member3.phone.trim(),
-              leetcode: member3.leetcode.trim(),
-              codeforces: member3.codeforces.trim(),
-              codechef: member3.codechef.trim(),
-              github: member3.github.trim(),
-            },
+            leader: buildMemberPayload(leader, true, true),
+            member2: buildMemberPayload(member2, true, false),
+            member3: buildMemberPayload(member3, true, false),
           }
         : {
             isCU: false,
+            isProfessional,
             teamName: teamName.trim(),
-            leader: {
-              name: leader.name.trim(),
-              email: leader.email.trim(),
-              college: leader.college.trim(),
-              phone: leader.phone.trim(),
-              leetcode: leader.leetcode.trim(),
-              codeforces: leader.codeforces.trim(),
-              codechef: leader.codechef.trim(),
-              github: leader.github.trim(),
-            },
-            member2: {
-              name: member2.name.trim(),
-              email: member2.email.trim(),
-              phone: member2.phone.trim(),
-              leetcode: member2.leetcode.trim(),
-              codeforces: member2.codeforces.trim(),
-              codechef: member2.codechef.trim(),
-              github: member2.github.trim(),
-            },
-            member3: {
-              name: member3.name.trim(),
-              email: member3.email.trim(),
-              phone: member3.phone.trim(),
-              leetcode: member3.leetcode.trim(),
-              codeforces: member3.codeforces.trim(),
-              codechef: member3.codechef.trim(),
-              github: member3.github.trim(),
-            },
+            leader: buildMemberPayload(leader, false, true),
+            member2: buildMemberPayload(member2, false, false),
+            member3: buildMemberPayload(member3, false, false),
           };
 
       const res = await fetch('/api/algolympia/register', {
@@ -398,14 +361,14 @@ export default function AlgolympiaRegistrationForm() {
           </p>
         </div>
 
-        <div className="relative grid gap-5 sm:grid-cols-2">
+        <div className="relative grid grid-cols-1 gap-5 sm:grid-cols-3">
           <button
             type="button"
             onClick={() => setParticipantType('cu')}
-            className="group relative rounded-2xl border border-primary/20 bg-primary/[0.03] p-6 text-left transition-all duration-300 hover:scale-[1.02] hover:border-primary/40 hover:bg-primary/[0.06]"
+            className="group relative flex flex-col rounded-2xl border border-primary/20 bg-primary/[0.03] p-6 text-left transition-all duration-300 hover:scale-[1.02] hover:border-primary/40 hover:bg-primary/[0.06]"
           >
             <div className="mb-4 flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-lg">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-lg">
                 <GraduationCap className="h-5 w-5 text-primary" />
               </span>
               <div>
@@ -413,10 +376,10 @@ export default function AlgolympiaRegistrationForm() {
                 <p className="text-xs text-primary/60">Chandigarh University</p>
               </div>
             </div>
-            <ul className="space-y-1.5 text-sm text-foreground/55">
+            <ul className="flex-1 space-y-1.5 text-sm text-foreground/55">
               <li>• Team of 3 members</li>
               <li>• ₹300 fee (₹100/member)</li>
-              <li>• ₹100 on each member's CUIMS</li>
+              <li>• ₹100 on each member&apos;s CUIMS</li>
             </ul>
             <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-primary group-hover:text-accent">
               Register as CU <ChevronRight className="h-3.5 w-3.5" />
@@ -426,24 +389,48 @@ export default function AlgolympiaRegistrationForm() {
           <button
             type="button"
             onClick={() => setParticipantType('non-cu')}
-            className="group relative rounded-2xl border border-accent/20 bg-accent/[0.03] p-6 text-left transition-all duration-300 hover:scale-[1.02] hover:border-accent/40 hover:bg-accent/[0.06]"
+            className="group relative flex flex-col rounded-2xl border border-primary/20 bg-primary/[0.03] p-6 text-left transition-all duration-300 hover:scale-[1.02] hover:border-primary/40 hover:bg-primary/[0.06]"
           >
             <div className="mb-4 flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-lg">
-                <Building2 className="h-5 w-5 text-accent" />
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-lg">
+                <Building2 className="h-5 w-5 text-primary" />
               </span>
               <div>
                 <h3 className="text-lg font-bold text-foreground">Non-CU Participant</h3>
-                <p className="text-xs text-accent/60">Other University</p>
+                <p className="text-xs text-primary/60">Other University</p>
               </div>
             </div>
-            <ul className="space-y-1.5 text-sm text-foreground/55">
+            <ul className="flex-1 space-y-1.5 text-sm text-foreground/55">
               <li>• Team of 3 members</li>
               <li>• ₹300 registration fee</li>
               <li>• Payment details on email</li>
             </ul>
-            <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-accent group-hover:text-primary">
+            <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-primary group-hover:text-accent">
               Register as Non-CU <ChevronRight className="h-3.5 w-3.5" />
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setParticipantType('professional')}
+            className="group relative flex flex-col rounded-2xl border border-primary/20 bg-primary/[0.03] p-6 text-left transition-all duration-300 hover:scale-[1.02] hover:border-primary/40 hover:bg-primary/[0.06]"
+          >
+            <div className="mb-4 flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-lg">
+                <Briefcase className="h-5 w-5 text-primary" />
+              </span>
+              <div>
+                <h3 className="text-lg font-bold text-foreground">Professional / Faculty</h3>
+                <p className="text-xs text-primary/60">Working Professional or Faculty</p>
+              </div>
+            </div>
+            <ul className="flex-1 space-y-1.5 text-sm text-foreground/55">
+              <li>• Team of 3 members</li>
+              <li>• ₹300 registration fee</li>
+              <li>• Payment details on email</li>
+            </ul>
+            <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-primary group-hover:text-accent">
+              Register as Professional <ChevronRight className="h-3.5 w-3.5" />
             </div>
           </button>
         </div>
@@ -504,12 +491,12 @@ export default function AlgolympiaRegistrationForm() {
         )}
         {isLeader && (
           <div>
-            <label className={labelCls}>College / Institute Name *</label>
+            <label className={labelCls}>{isProfessional ? 'Organization / Institution *' : 'College / Institute Name *'}</label>
             <input
               type="text"
               value={data.college}
               onChange={(e) => setData({ ...data, college: e.target.value })}
-              placeholder={isCU ? "e.g. UIE, UIC, etc." : "Enter college/institute name"}
+              placeholder={isCU ? "e.g. UIE, UIC, etc." : isProfessional ? "Enter organization name" : "Enter college/institute name"}
               className={inputCls}
             />
           </div>
@@ -740,14 +727,18 @@ export default function AlgolympiaRegistrationForm() {
             </div>
             {isCU ? (
               <div className="space-y-1 text-xs text-foreground/60">
-                <p>• ₹100 will be reflected on each member's <span className="text-foreground font-medium">CUIMS</span></p>
+                <p>• ₹100 will be reflected on each member&apos;s <span className="text-foreground font-medium">CUIMS</span></p>
                 <p>• Once registered, payment is <span className="text-destructive font-medium">mandatory</span></p>
                 <p>• All 3 team members must be from Chandigarh University</p>
               </div>
             ) : (
               <div className="space-y-1 text-xs text-foreground/60">
                 <p>• Payment details will be sent to your <span className="text-foreground font-medium">registered email</span></p>
-                <p>• Team of 3 members from any college</p>
+                {isProfessional ? (
+                  <p>• Open to working professionals and faculty members</p>
+                ) : (
+                  <p>• Team of 3 members from any college</p>
+                )}
               </div>
             )}
           </div>
@@ -795,7 +786,7 @@ export default function AlgolympiaRegistrationForm() {
           <div className="rounded-xl border border-primary/15 bg-black/20 p-4">
             <div className="grid gap-2 text-sm sm:grid-cols-2">
               <div><span className="text-foreground/45">Team Name:</span> <span className="font-semibold text-primary">{teamName}</span></div>
-              <div><span className="text-foreground/45">Category:</span> <span className="font-semibold text-foreground">{isCU ? 'CU Participant' : 'Non-CU Participant'}</span></div>
+              <div><span className="text-foreground/45">Category:</span> <span className="font-semibold text-foreground">{isCU ? 'CU Participant' : isProfessional ? 'Professional / Faculty' : 'Non-CU Participant'}</span></div>
               <div><span className="text-foreground/45">Fee:</span> <span className="font-semibold text-primary">₹300</span></div>
               <div><span className="text-foreground/45">Payment:</span> <span className="font-semibold text-foreground">{isCU ? 'CUIMS' : 'Via Email'}</span></div>
             </div>

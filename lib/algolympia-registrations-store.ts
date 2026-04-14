@@ -6,6 +6,7 @@ export type AlgolympiaRegistration = {
   id: number;
   createdAt: string;
   isCU: boolean;
+  isProfessional: boolean;
 
   /* Team leader */
   teamName: string;
@@ -52,6 +53,7 @@ type RegistrationRow = {
   id: number;
   created_at: Date | string;
   is_cu: boolean;
+  is_professional: boolean;
   team_name: string;
   leader_name: string;
   leader_email: string;
@@ -150,6 +152,9 @@ async function ensureTable() {
     // Ignore drop column errors on free tier databases or when it's already dropped
   }
 
+  // Add is_professional column
+  await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations ADD COLUMN IF NOT EXISTS is_professional BOOLEAN NOT NULL DEFAULT FALSE;`);
+
   tableReady = true;
 }
 
@@ -159,6 +164,7 @@ function rowToRegistration(row: RegistrationRow): AlgolympiaRegistration {
     id: row.id,
     createdAt: createdAt.toISOString(),
     isCU: row.is_cu,
+    isProfessional: row.is_professional ?? false,
     teamName: row.team_name,
     leaderName: row.leader_name,
     leaderEmail: row.leader_email,
@@ -195,6 +201,7 @@ function rowToRegistration(row: RegistrationRow): AlgolympiaRegistration {
 
 export type CreateAlgolympiaRegistrationInput = {
   isCU: boolean;
+  isProfessional?: boolean;
   teamName: string;
   leaderName: string;
   leaderEmail: string;
@@ -232,7 +239,7 @@ export async function createAlgolympiaRegistration(
 
   const rows = await prisma.$queryRawUnsafe<RegistrationRow[]>(
     `INSERT INTO algolympia_registrations
-      (is_cu, team_name,
+      (is_cu, is_professional, team_name,
        leader_name, leader_email, leader_uid, leader_phone, leader_college,
        leader_leetcode, leader_codeforces, leader_codechef, leader_github,
        member2_name, member2_email, member2_uid, member2_phone,
@@ -241,9 +248,10 @@ export async function createAlgolympiaRegistration(
        member3_leetcode, member3_codeforces, member3_codechef, member3_github,
        faculty_mentor_name, faculty_mentor_eid,
        payment_status)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31)
      RETURNING *;`,
     input.isCU,
+    input.isProfessional ?? false,
     input.teamName,
     input.leaderName,
     input.leaderEmail,
@@ -344,6 +352,18 @@ export async function listAlgolympiaRegistrations(): Promise<AlgolympiaRegistrat
   );
 
   return rows.map(rowToRegistration);
+}
+
+export async function getAlgolympiaRegistrationById(id: number): Promise<AlgolympiaRegistration | null> {
+  await ensureTable();
+
+  const rows = await prisma.$queryRawUnsafe<RegistrationRow[]>(
+    `SELECT * FROM algolympia_registrations WHERE id = $1 LIMIT 1;`,
+    id
+  );
+
+  if (!rows.length) return null;
+  return rowToRegistration(rows[0]);
 }
 
 export async function getRegistrationByPaymentEmail(email: string): Promise<AlgolympiaRegistration | null> {

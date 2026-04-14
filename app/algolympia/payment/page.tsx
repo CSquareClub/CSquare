@@ -175,6 +175,63 @@ export default function PaymentConfirmationPage() {
                   {isVerifying ? "Verifying..." : "Find Team"}
                 </button>
               </form>
+            ) : team.paymentStatus === 'submitted' ? (
+              <div className="space-y-8">
+                <div className="border border-foreground/10 bg-foreground/5 p-6 rounded-none">
+                  <div className="flex items-center gap-4 mb-6 pb-6 border-b border-foreground/10">
+                    <div className="p-3 border border-primary/30 text-primary">
+                      <Users className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="font-mono text-xl uppercase tracking-wider">{team.teamName}</h3>
+                      <p className="text-xs uppercase tracking-[0.15em] text-foreground/60 mt-1 flex items-center gap-2">
+                        <User className="h-3 w-3" /> {team.leaderName} [Leader]
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {team.member2Name && (
+                      <div className="flex items-center gap-3 text-xs uppercase tracking-[0.1em] text-foreground/70 border border-foreground/10 p-3">
+                        <User className="h-4 w-4" /> {team.member2Name}
+                      </div>
+                    )}
+                    {team.member3Name && (
+                      <div className="flex items-center gap-3 text-xs uppercase tracking-[0.1em] text-foreground/70 border border-foreground/10 p-3">
+                        <User className="h-4 w-4" /> {team.member3Name}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="border border-emerald-500/30 bg-emerald-500/10 p-6 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+                    <h3 className="font-mono text-lg font-semibold uppercase tracking-wider text-emerald-400">
+                      Payment Already Submitted
+                    </h3>
+                  </div>
+                  <p className="text-sm text-foreground/60">
+                    Your team&apos;s payment proof has already been submitted and recorded. Duplicate submissions are not allowed.
+                  </p>
+                  {team.transactionId && (
+                    <p className="text-xs font-mono text-foreground/50">
+                      Transaction ID: <span className="text-foreground/80">{team.transactionId}</span>
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTeam(null);
+                    setEmail("");
+                  }}
+                  className="w-full inline-flex items-center justify-center border border-foreground/20 bg-transparent px-7 py-4 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-foreground/80 transition-colors hover:bg-foreground/5"
+                >
+                  Check Another Team
+                </button>
+              </div>
             ) : (
               <form onSubmit={handleConfirm} className="space-y-10">
                 <div className="border border-foreground/10 bg-foreground/5 p-6 rounded-none">
@@ -203,12 +260,6 @@ export default function PaymentConfirmationPage() {
                     )}
                   </div>
                 </div>
-
-                {team.paymentStatus === 'submitted' && (
-                  <div className="border border-primary text-primary p-4 text-xs font-mono uppercase tracking-widest">
-                    [WARNING: Payment already submitted. New upload will overwrite original]
-                  </div>
-                )}
 
                 <div className="space-y-10">
                   <div>

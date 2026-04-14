@@ -20,7 +20,7 @@ export default function AlgolympiaRegisterPage() {
         <section className="overflow-hidden py-10 md:py-14 lg:py-16">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             {/* Header */}
-            <div className="mx-auto mb-10 max-w-4xl text-center">
+            <div className="mx-auto mb-10 max-w-5xl text-center">
               <div className="mb-4 flex flex-wrap items-center justify-center gap-3">
                 <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-4 py-2 backdrop-blur-sm">
                   <span className="text-sm font-mono text-foreground/80">~/algolympia/register</span>
@@ -52,7 +52,7 @@ export default function AlgolympiaRegisterPage() {
             </div>
 
             {/* Form */}
-            <div className="mx-auto max-w-4xl">
+            <div className="mx-auto max-w-5xl">
               <AlgolympiaRegistrationForm />
             </div>
           </div>

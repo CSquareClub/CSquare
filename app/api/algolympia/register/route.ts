@@ -121,6 +121,7 @@ const nonCuMemberSchema = baseMemberSchema;
 
 const cuRegistrationSchema = z.object({
   isCU: z.literal(true),
+  isProfessional: z.literal(false).optional(),
   teamName: z.string().min(2, "Team name is required"),
   facultyMentorName: z.string().optional(),
   facultyMentorEid: z.string().optional(),
@@ -133,9 +134,10 @@ const cuRegistrationSchema = z.object({
 
 const nonCuRegistrationSchema = z.object({
   isCU: z.literal(false),
+  isProfessional: z.boolean().optional().default(false),
   teamName: z.string().min(2, "Team name is required"),
   leader: nonCuMemberSchema.merge(z.object({
-    college: z.string().min(2, "College name is required"),
+    college: z.string().min(2, "College/Organization name is required"),
   })),
   member2: nonCuMemberSchema,
   member3: nonCuMemberSchema,
@@ -507,8 +509,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Create registration
+    const isProfessional = !isCU && (data as any).isProfessional === true;
     const registrationInput = {
       isCU,
+      isProfessional,
       teamName: data.teamName,
       leaderName: data.leader.name,
       leaderEmail: data.leader.email,
