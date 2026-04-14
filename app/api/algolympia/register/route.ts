@@ -146,16 +146,17 @@ const nonCuRegistrationSchema = z.object({
 /* ── Email helpers ───────────────────────────────────────── */
 
 async function sendCuConfirmationEmail(
-  leaderEmail: string,
+  emails: string[],
   teamName: string,
   leaderName: string,
 ) {
   const sourceEmail = process.env.AWS_SES_FROM_EMAIL || "csquareclub@cumail.in";
-  if (!leaderEmail || !leaderEmail.includes("@")) return;
+  const validEmails = emails.filter((e) => e && e.includes("@"));
+  if (validEmails.length === 0) return;
 
   const command = new SendEmailCommand({
     Source: sourceEmail,
-    Destination: { ToAddresses: [leaderEmail] },
+    Destination: { ToAddresses: validEmails },
     Message: {
       Subject: { Data: `AlgOlympia 2026 – Registration Confirmation & CUIMS Payment Instructions` },
       Body: {
@@ -257,16 +258,17 @@ async function sendCuConfirmationEmail(
 }
 
 async function sendNonCuConfirmationEmail(
-  leaderEmail: string,
+  emails: string[],
   teamName: string,
   leaderName: string,
 ) {
   const sourceEmail = process.env.AWS_SES_FROM_EMAIL || "csquareclub@cumail.in";
-  if (!leaderEmail || !leaderEmail.includes("@")) return;
+  const validEmails = emails.filter((e) => e && e.includes("@"));
+  if (validEmails.length === 0) return;
 
   const command = new SendEmailCommand({
     Source: sourceEmail,
-    Destination: { ToAddresses: [leaderEmail] },
+    Destination: { ToAddresses: validEmails },
     Message: {
       Subject: { Data: `AlgOlympia 2026 – Registration Confirmation & Payment Instructions` },
       Body: {
@@ -520,11 +522,17 @@ export async function POST(req: NextRequest) {
     // Append to Google Sheet async
     appendRegistrationToSheet(registrationInput).catch(console.error);
 
-    // Send confirmation to team leader only
+    // Send confirmation to all team members
+    const allEmails = [
+      data.leader.email,
+      data.member2.email,
+      data.member3.email,
+    ];
+
     if (isCU) {
-      await sendCuConfirmationEmail(data.leader.email, data.teamName, data.leader.name);
+      await sendCuConfirmationEmail(allEmails, data.teamName, data.leader.name);
     } else {
-      await sendNonCuConfirmationEmail(data.leader.email, data.teamName, data.leader.name);
+      await sendNonCuConfirmationEmail(allEmails, data.teamName, data.leader.name);
     }
 
     return NextResponse.json({
