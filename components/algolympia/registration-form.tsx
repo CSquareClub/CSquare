@@ -36,6 +36,7 @@ interface MemberData {
   codeforces: string;
   codechef: string;
   github: string;
+  semester?: string;
 }
 
 const emptyMember: MemberData = {
@@ -48,6 +49,7 @@ const emptyMember: MemberData = {
   codeforces: '',
   codechef: '',
   github: '',
+  semester: '',
 };
 
 /* ─── Step definitions ───────────────────────────────────── */
@@ -199,6 +201,9 @@ export default function AlgolympiaRegistrationForm() {
     if (isLeader && (!member.college?.trim() || member.college.trim().length < 2)) {
       return `${label}: ${isProfessional ? 'Organization' : (isCU ? 'Department name' : 'College/Institute')} is required`;
     }
+    if (isLeader && isCU && !member.semester) {
+      return `${label}: Semester is required`;
+    }
     if (!member.phone?.trim() || !/^[0-9]{10,15}$/.test(member.phone)) {
       return `${label}: Valid phone number required`;
     }
@@ -272,6 +277,7 @@ export default function AlgolympiaRegistrationForm() {
         ...(includeUid ? { uid: m.uid.trim().toUpperCase() } : {}),
         ...(includeCollege ? { college: m.college.trim() } : {}),
         phone: m.phone.trim(),
+        semester: m.semester ? m.semester.trim() : "",
         leetcode: m.leetcode.trim(),
         codeforces: m.codeforces.trim(),
         codechef: m.codechef.trim(),
@@ -544,16 +550,51 @@ export default function AlgolympiaRegistrationForm() {
           </div>
         )}
         {isLeader && (
-          <div>
-            <label className={labelCls}>{isProfessional ? 'Organization / Institution *' : isCU ? 'Department Name *' :  'College / Institution Name *'}</label>
-            <input
-              type="text"
-              value={data.college}
-              onChange={(e) => setData({ ...data, college: e.target.value })}
-              placeholder={isCU ? "e.g. UIE, UIC, etc." : isProfessional ? "Enter organization name" : "Enter college/institute name"}
-              className={inputCls}
-            />
-          </div>
+          <>
+            {isCU ? (
+              <>
+                <div>
+                  <label className={labelCls}>Department Name *</label>
+                  <select
+                    value={data.college}
+                    onChange={(e) => setData({ ...data, college: e.target.value })}
+                    className={inputCls}
+                  >
+                    <option value="" disabled className="text-gray-500">Select Department</option>
+                    {[
+                      "Biosciences", "Biotechnology", "Physics", "Chemistry", "Agriculture", "Mathematics", "Nutrition and Dietetics", "Physiotherapy", "Pharmacy", "Optometry", "Forensic Science", "MLT", "Nursing", "Biotech. Eng. & Food Tech.", "ECE", "EE", "Automobile Eng.", "Mechatronics Eng.", "Mechanical Eng.", "Aerospace Eng.", "Chemical Eng.", "Civil Eng.", "CSE-2nd Year", "ME-CSE", "CSE 3rd Year", "CSE 4th Year", "CSE-AIT", "CSE-AIT-AIML", "BCA", "MCA", "AU-1", "AU-4", "AU-2", "AU-3", "AU-5", "Industrial Design", "Interior Design", "Fashion Design", "Fine Arts", "Animation", "English", "Psychology", "Soft Skills", "UITTR", "UIPES", "Media Studies", "Architecture", "BBA-AIT", "MBA-AIT", "GSFA", "Hospitality Mgmt.", "Airlines", "Tourism", "BBA", "Commerce", "MBA and Economics", "B.Com LLB", "BA. LLB", "BBA LLB", "LLB LLM", "Other"
+                    ].map(dept => (
+                      <option key={dept} value={dept} className="bg-black/80">{dept}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className={labelCls}>Semester *</label>
+                  <select
+                    value={data.semester || ""}
+                    onChange={(e) => setData({ ...data, semester: e.target.value })}
+                    className={inputCls}
+                  >
+                    <option value="" disabled className="text-gray-500">Select Semester</option>
+                    {["2", "4", "6", "8", "10"].map(sem => (
+                      <option key={sem} value={sem} className="bg-black/80">{sem}</option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            ) : (
+              <div>
+                <label className={labelCls}>{isProfessional ? 'Organization / Institution *' : 'College / Institution Name *'}</label>
+                <input
+                  type="text"
+                  value={data.college}
+                  onChange={(e) => setData({ ...data, college: e.target.value })}
+                  placeholder={isProfessional ? "Enter organization name" : "Enter college/institute name"}
+                  className={inputCls}
+                />
+              </div>
+            )}
+          </>
         )}
         <div>
           <label className={labelCls}>Phone Number *</label>
@@ -735,6 +776,7 @@ export default function AlgolympiaRegistrationForm() {
         <div><span className="text-foreground/45">Email:</span> <span className="text-foreground">{data.email}</span></div>
         {isCU && <div><span className="text-foreground/45">UID:</span> <span className="text-foreground">{data.uid}</span></div>}
         {isLeader && <div><span className="text-foreground/45">{isCU ? 'Department:' : 'College:'}</span> <span className="text-foreground">{data.college}</span></div>}
+        {isLeader && isCU && data.semester && <div><span className="text-foreground/45">Semester:</span> <span className="text-foreground">{data.semester}</span></div>}
         <div><span className="text-foreground/45">Phone:</span> <span className="text-foreground">{(data as any).phone}</span></div>
         {data.leetcode && <div><span className="text-foreground/45">LeetCode:</span> <span className="text-foreground">{data.leetcode}</span></div>}
         {data.codeforces && <div><span className="text-foreground/45">Codeforces:</span> <span className="text-foreground">{data.codeforces}</span></div>}

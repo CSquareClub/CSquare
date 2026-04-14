@@ -19,6 +19,7 @@ export type AlgolympiaRegistration = {
   leaderCodeforces: string;
   leaderCodechef: string;
   leaderGithub: string;
+  leaderSemester?: string;
 
   /* Member 2 */
   member2Name: string;
@@ -67,6 +68,7 @@ type RegistrationRow = {
   leader_codeforces: string;
   leader_codechef: string;
   leader_github: string;
+  leader_semester?: string;
   member2_name: string;
   member2_email: string;
   member2_uid: string;
@@ -148,6 +150,7 @@ async function ensureTable() {
   await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations ADD COLUMN IF NOT EXISTS faculty_mentor_name TEXT;`);
   await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations ADD COLUMN IF NOT EXISTS faculty_mentor_eid TEXT;`);
   await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations ADD COLUMN IF NOT EXISTS referral_code TEXT DEFAULT '';`);
+  await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_registrations ADD COLUMN IF NOT EXISTS leader_semester TEXT DEFAULT '';`);
 
   
   try {
@@ -180,6 +183,7 @@ function rowToRegistration(row: RegistrationRow): AlgolympiaRegistration {
     leaderCodeforces: row.leader_codeforces,
     leaderCodechef: row.leader_codechef,
     leaderGithub: row.leader_github,
+    leaderSemester: row.leader_semester || '',
     member2Name: row.member2_name,
     member2Email: row.member2_email,
     member2UID: row.member2_uid,
@@ -218,6 +222,7 @@ export type CreateAlgolympiaRegistrationInput = {
   leaderCodeforces: string;
   leaderCodechef: string;
   leaderGithub: string;
+  leaderSemester?: string;
   member2Name: string;
   member2Email: string;
   member2UID: string;
@@ -248,14 +253,14 @@ export async function createAlgolympiaRegistration(
     `INSERT INTO algolympia_registrations
       (is_cu, is_professional, team_name,
        leader_name, leader_email, leader_uid, leader_phone, leader_college,
-       leader_leetcode, leader_codeforces, leader_codechef, leader_github,
+       leader_leetcode, leader_codeforces, leader_codechef, leader_github, leader_semester,
        member2_name, member2_email, member2_uid, member2_phone,
        member2_leetcode, member2_codeforces, member2_codechef, member2_github,
        member3_name, member3_email, member3_uid, member3_phone,
        member3_leetcode, member3_codeforces, member3_codechef, member3_github,
        faculty_mentor_name, faculty_mentor_eid, referral_code,
        payment_status)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33)
      RETURNING *;`,
     input.isCU,
     input.isProfessional ?? false,
@@ -269,6 +274,7 @@ export async function createAlgolympiaRegistration(
     input.leaderCodeforces,
     input.leaderCodechef,
     input.leaderGithub,
+    input.leaderSemester || "",
     input.member2Name,
     input.member2Email,
     input.member2UID,

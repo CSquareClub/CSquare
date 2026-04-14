@@ -130,6 +130,7 @@ const cuRegistrationSchema = z.object({
   referralCode: z.string().optional(),
   leader: cuMemberSchema.merge(z.object({
     college: z.string().min(2, "Department name is required"),
+    semester: z.string().optional(),
   })),
   member2: cuMemberSchema,
   member3: cuMemberSchema,
@@ -515,6 +516,7 @@ export async function POST(req: NextRequest) {
       leaderUID: isCU ? (data.leader as any).uid : "",
       leaderPhone: data.leader.phone,
       leaderCollege: (data.leader as any).college,
+      leaderSemester: (data.leader as any).semester || "",
       leaderLeetcode: data.leader.leetcode || "",
       leaderCodeforces: data.leader.codeforces || "",
       leaderCodechef: data.leader.codechef || "",
