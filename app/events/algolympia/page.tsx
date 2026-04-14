@@ -66,7 +66,7 @@ export default function AlgolympiaEventPage() {
                 <span className="h-px w-10 bg-primary" />
               </div>
 
-              <h1 className="text-[2.8rem] font-semibold uppercase leading-[0.92] tracking-[0.02em] text-foreground sm:text-[4rem] md:text-[5rem] lg:text-[6rem]">
+              <h1 className="text-[2.8rem] font-semibold leading-[0.92] tracking-[0.02em] text-foreground sm:text-[4rem] md:text-[5rem] lg:text-[6rem]">
                 Alg<span className="text-primary">Olympia</span>
               </h1>
 

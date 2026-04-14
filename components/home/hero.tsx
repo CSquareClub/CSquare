@@ -12,7 +12,7 @@ export default function Hero() {
             <span className="h-px w-10 bg-primary" />
           </div>
 
-          <h1 className="text-[3.2rem] font-semibold uppercase leading-[0.92] tracking-[0.02em] text-foreground sm:text-[4.7rem] md:text-[6.2rem] lg:text-[7.4rem]">
+          <h1 className="text-[3.2rem] font-semibold leading-[0.92] tracking-[0.02em] text-foreground sm:text-[4.7rem] md:text-[6.2rem] lg:text-[7.4rem]">
             Alg<span className="text-primary">Olympia</span>
           </h1>
 
