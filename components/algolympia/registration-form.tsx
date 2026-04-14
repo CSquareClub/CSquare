@@ -373,7 +373,7 @@ export default function AlgolympiaRegistrationForm() {
               </span>
               <div>
                 <h3 className="text-lg font-bold text-foreground">CU Participant</h3>
-                <p className="text-xs text-primary/60">Chandigarh University</p>
+                <p className="text-xs text-primary/60">Chandigarh University, Mohali, Punjab</p>
               </div>
             </div>
             <ul className="flex-1 space-y-1.5 text-sm text-foreground/55">
