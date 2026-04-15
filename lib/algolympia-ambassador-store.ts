@@ -193,3 +193,29 @@ export async function listAmbassadors(): Promise<AlgolympiaAmbassador[]> {
 
   return rows.map(rowToAmbassador);
 }
+
+export async function deleteAmbassador(id: number): Promise<boolean> {
+  await ensureTable();
+
+  const rows = await prisma.$queryRawUnsafe<Array<{ id: number }>>(
+    `DELETE FROM algolympia_ambassadors
+     WHERE id = $1
+     RETURNING id;`,
+    id
+  );
+
+  return rows.length > 0;
+}
+
+export async function deleteAmbassadorsByRegistrationId(registrationId: number): Promise<number> {
+  await ensureTable();
+
+  const rows = await prisma.$queryRawUnsafe<Array<{ id: number }>>(
+    `DELETE FROM algolympia_ambassadors
+     WHERE registration_id = $1
+     RETURNING id;`,
+    registrationId
+  );
+
+  return rows.length;
+}

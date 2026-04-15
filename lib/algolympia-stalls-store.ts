@@ -185,3 +185,16 @@ export async function listStallRegistrations(): Promise<StallRegistration[]> {
 
   return rows.map(rowToRegistration);
 }
+
+export async function deleteStallRegistration(id: number): Promise<boolean> {
+  await ensureTable();
+
+  const rows = await prisma.$queryRawUnsafe<Array<{ id: number }>>(
+    `DELETE FROM algolympia_stall_registrations
+     WHERE id = $1
+     RETURNING id;`,
+    id
+  );
+
+  return rows.length > 0;
+}

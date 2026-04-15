@@ -419,3 +419,16 @@ export async function updatePaymentDetails(
 
   return rowToRegistration(rows[0]);
 }
+
+export async function deleteAlgolympiaRegistration(id: number): Promise<boolean> {
+  await ensureTable();
+
+  const rows = await prisma.$queryRawUnsafe<Array<{ id: number }>>(
+    `DELETE FROM algolympia_registrations
+     WHERE id = $1
+     RETURNING id;`,
+    id
+  );
+
+  return rows.length > 0;
+}

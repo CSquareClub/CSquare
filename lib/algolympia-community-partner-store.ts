@@ -160,3 +160,16 @@ export async function listCommunityPartners(): Promise<AlgolympiaCommunityPartne
 
   return rows.map(rowToPartner);
 }
+
+export async function deleteCommunityPartnerEntry(id: number): Promise<boolean> {
+  await ensureTable();
+
+  const rows = await prisma.$queryRawUnsafe<Array<{ id: number }>>(
+    `DELETE FROM algolympia_community_partners
+     WHERE id = $1
+     RETURNING id;`,
+    id
+  );
+
+  return rows.length > 0;
+}
