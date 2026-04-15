@@ -351,9 +351,9 @@ function SectionCard({
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-white/10 dark:border-white/[0.06]">
-          <div className="overflow-x-auto">
+          <div className="max-h-[320px] overflow-auto">
             <table className="min-w-full divide-y divide-white/10 text-sm dark:divide-white/[0.06]">
-              <thead className="bg-black/[0.03] dark:bg-white/[0.02]">
+              <thead className="sticky top-0 z-10 bg-black/[0.08] backdrop-blur-md dark:bg-[#0b0b0b]/95">
                 <tr>
                   {previewHeaders.map((header) => (
                     <th
@@ -676,7 +676,7 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 2xl:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6">
               <SectionCard
                 title="Registrations"
                 description="Team registrations with leader, payment, and referral details."
@@ -685,7 +685,7 @@ export default function AdminDashboardPage() {
                 icon={Users}
                 loading={loadingStats}
                 previewHeaders={["Team", "Leader", "Type", "Payment", "Submitted"]}
-                previewRows={algolympia.registrations.slice(0, 5).map((row) => ({
+                previewRows={algolympia.registrations.map((row) => ({
                   id: row.id,
                   cells: [
                     row.teamName,
@@ -719,7 +719,7 @@ export default function AdminDashboardPage() {
                 icon={Store}
                 loading={loadingStats}
                 previewHeaders={["Stall", "Organizer", "Category", "Pricing Type", "Submitted"]}
-                previewRows={algolympia.stalls.slice(0, 5).map((row) => ({
+                previewRows={algolympia.stalls.map((row) => ({
                   id: row.id,
                   cells: [
                     row.stallName,
@@ -749,7 +749,7 @@ export default function AdminDashboardPage() {
                 icon={Megaphone}
                 loading={loadingStats}
                 previewHeaders={["Name", "College", "Referral Code", "Referrals", "Submitted"]}
-                previewRows={algolympia.ambassadors.slice(0, 5).map((row) => ({
+                previewRows={algolympia.ambassadors.map((row) => ({
                   id: row.id,
                   cells: [
                     row.name,
@@ -783,7 +783,7 @@ export default function AdminDashboardPage() {
                 icon={Handshake}
                 loading={loadingStats}
                 previewHeaders={["Community", "SPOC", "Expectations", "Deliverables", "Submitted"]}
-                previewRows={algolympia.communityPartners.slice(0, 5).map((row) => ({
+                previewRows={algolympia.communityPartners.map((row) => ({
                   id: row.id,
                   cells: [
                     row.communityName,
