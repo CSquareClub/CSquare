@@ -60,7 +60,7 @@ export async function appendRegistrationToSheet(data: any) {
 
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: "Sheet1!A1",
+      range: "Registration!A1",
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [row],
@@ -129,7 +129,7 @@ export async function appendMultipleRegistrationsToSheet(rows: any[]) {
 
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: "Sheet1!A1",
+      range: "Registration!A1",
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: sheetRows,
