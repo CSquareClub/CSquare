@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   Crown,
 } from 'lucide-react';
+import { getStallBasePrice, getStallTotalPrice, type StallCategory } from '@/lib/algolympia-stall-pricing';
 
 /* ─── Types ──────────────────────────────────────────────── */
 
@@ -51,8 +52,11 @@ export default function StallRegistrationForm() {
   const [submitted, setSubmitted] = useState(false);
 
   /* ── Category State ───────────────────────────────────── */
-  const [category, setCategory] = useState<'products_games' | 'food_beverage' | null>(null);
+  const [category, setCategory] = useState<StallCategory | null>(null);
   const [isPremium, setIsPremium] = useState(false);
+  const [isCuStudent, setIsCuStudent] = useState<boolean | null>(null);
+  const [uid, setUid] = useState('');
+  const [idCardFile, setIdCardFile] = useState<File | null>(null);
   const [numberOfDays, setNumberOfDays] = useState<number>(2);
   const [selectedDate, setSelectedDate] = useState<string>('');
 
@@ -129,11 +133,15 @@ export default function StallRegistrationForm() {
   /* ── Validation ───────────────────────────────────────── */
 
   const validate = (): string | null => {
+    if (!category) return 'Please select a stall category';
+    if (isCuStudent === null) return 'Please tell us whether you are a CU student';
     if (!fullName.trim() || fullName.trim().length < 2) return 'Full name is required (min 2 chars)';
     if (!email.trim() || !email.includes('@')) return 'Valid email is required';
     if (!otpVerified) return 'Please verify your email using OTP before proceeding.';
     if (numberOfDays === 1 && !selectedDate) return 'Please select a date for your 1-day stall';
     if (!phone.trim() || !/^[0-9]{10,15}$/.test(phone.trim())) return 'Valid phone number is required';
+    if (isCuStudent && (!uid.trim() || !/^[A-Za-z0-9-]{6,20}$/.test(uid.trim()))) return 'Valid CU UID is required';
+    if (isCuStudent && !idCardFile) return 'Please upload your CU ID card photo';
     if (!stallName.trim() || stallName.trim().length < 2) return 'Stall name is required (min 2 chars)';
     if (!stallDescription.trim() || stallDescription.trim().length < 10) return 'Stall description is required (min 10 chars)';
 
@@ -145,6 +153,25 @@ export default function StallRegistrationForm() {
     }
 
     return null;
+  };
+
+  const uploadIdCard = async (): Promise<string> => {
+    if (!idCardFile) throw new Error('Please upload your CU ID card photo');
+
+    const formData = new FormData();
+    formData.append('idCard', idCardFile);
+
+    const res = await fetch('/api/upload/stall-id-card', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to upload ID card');
+    }
+
+    return data.url;
   };
 
   /* ── Submit ───────────────────────────────────────────── */
@@ -160,13 +187,23 @@ export default function StallRegistrationForm() {
     setIsLoading(true);
 
     try {
+      const selectedCategory = category;
+      if (!selectedCategory || isCuStudent === null) {
+        throw new Error('Please complete the stall category details');
+      }
+
+      const cuStudentSelected = isCuStudent === true;
+      const idCardUrl = cuStudentSelected ? await uploadIdCard() : '';
       const body = {
         fullName: fullName.trim(),
         email: email.trim().toLowerCase(),
         phone: phone.trim(),
         college: college.trim(),
-        stallCategory: category,
+        stallCategory: selectedCategory,
         isPremium,
+        isCuStudent: cuStudentSelected,
+        uid: cuStudentSelected ? uid.trim().toUpperCase() : '',
+        idCardUrl,
         numberOfDays,
         selectedDate: numberOfDays === 1 ? selectedDate : "",
         stallName: stallName.trim(),
@@ -203,6 +240,16 @@ export default function StallRegistrationForm() {
       setIsLoading(false);
     }
   };
+
+  const selectedBasePrice = category ? getStallBasePrice(category, isCuStudent === true) : 0;
+  const selectedTotalPrice = category
+    ? getStallTotalPrice({
+        category,
+        isCuStudent: isCuStudent === true,
+        isPremium,
+        numberOfDays,
+      })
+    : 0;
 
   /* ═══════════════════════════════════════════════════════ */
   /*  RENDER                                                */
@@ -247,18 +294,56 @@ export default function StallRegistrationForm() {
           </p>
         </div>
 
+        <div className="mb-8 rounded-2xl border border-primary/15 bg-primary/[0.03] p-5">
+          <div className="mb-4">
+            <p className="text-sm font-semibold text-primary">Are you a Chandigarh University student?</p>
+            <p className="mt-1 text-xs text-foreground/55">
+              CU students will be asked for a UID and an ID card photo before submitting the stall registration.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setIsCuStudent(true)}
+              className={`rounded-xl border px-4 py-3 text-left transition-colors ${
+                isCuStudent === true
+                  ? 'border-primary bg-primary/15 text-foreground'
+                  : 'border-primary/20 bg-black/20 text-foreground/70 hover:border-primary/40'
+              }`}
+            >
+              <div className="font-semibold">Yes, I&apos;m a CU student</div>
+              <div className="mt-1 text-xs text-foreground/55">UID and ID card photo will be required.</div>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsCuStudent(false)}
+              className={`rounded-xl border px-4 py-3 text-left transition-colors ${
+                isCuStudent === false
+                  ? 'border-primary bg-primary/15 text-foreground'
+                  : 'border-primary/20 bg-black/20 text-foreground/70 hover:border-primary/40'
+              }`}
+            >
+              <div className="font-semibold">No, I&apos;m not a CU student</div>
+              <div className="mt-1 text-xs text-foreground/55">Regular stall pricing will apply.</div>
+            </button>
+          </div>
+        </div>
+
         <div className="grid gap-6 sm:grid-cols-2 mb-8">
           {/* Products & Games */}
           <button
             type="button"
             onClick={() => setCategory('products_games')}
-            className="group relative flex flex-col rounded-2xl border border-primary/20 bg-primary/[0.03] p-6 text-left transition-all duration-300 hover:scale-[1.02] hover:border-primary/40 hover:bg-primary/[0.06]"
+            disabled={isCuStudent === null}
+            className="group relative flex flex-col rounded-2xl border border-primary/20 bg-primary/[0.03] p-6 text-left transition-all duration-300 hover:scale-[1.02] hover:border-primary/40 hover:bg-primary/[0.06] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
           >
             <div className="mb-4 flex items-center justify-between">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15">
                 <ShoppingBag className="h-5 w-5 text-primary" />
               </span>
-              <span className="text-xl font-bold font-mono text-primary">₹2,500/day</span>
+              <span className="text-xl font-bold font-mono text-primary">
+                ₹{getStallBasePrice('products_games', isCuStudent === true).toLocaleString('en-IN')}/day
+              </span>
             </div>
             <div>
               <h3 className="text-lg font-bold text-foreground">Products or Games</h3>
@@ -283,13 +368,16 @@ export default function StallRegistrationForm() {
           <button
             type="button"
             onClick={() => setCategory('food_beverage')}
-            className="group relative flex flex-col rounded-2xl border border-primary/20 bg-primary/[0.03] p-6 text-left transition-all duration-300 hover:scale-[1.02] hover:border-primary/40 hover:bg-primary/[0.06]"
+            disabled={isCuStudent === null}
+            className="group relative flex flex-col rounded-2xl border border-primary/20 bg-primary/[0.03] p-6 text-left transition-all duration-300 hover:scale-[1.02] hover:border-primary/40 hover:bg-primary/[0.06] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
           >
             <div className="mb-4 flex items-center justify-between">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15">
                 <Coffee className="h-5 w-5 text-primary" />
               </span>
-              <span className="text-xl font-bold font-mono text-primary">₹4000/day</span>
+              <span className="text-xl font-bold font-mono text-primary">
+                ₹{getStallBasePrice('food_beverage', isCuStudent === true).toLocaleString('en-IN')}/day
+              </span>
             </div>
             <div>
               <h3 className="text-lg font-bold text-foreground">Food & Beverage (FNF)</h3>
@@ -325,7 +413,7 @@ export default function StallRegistrationForm() {
             <div>
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-accent" />
-                <span className="font-bold text-accent">Premium Upgrade Available (+₹2,000)</span>
+                <span className="font-bold text-accent">Premium Upgrade Available (+₹2,000/day)</span>
               </div>
               <p className="mt-1 text-sm text-foreground/60">
                 Upgrade any stall type to Premium for a larger space in a high-footfall area! Highly recommended for maximum visibility.
@@ -361,13 +449,16 @@ export default function StallRegistrationForm() {
             <span className="text-foreground/80 font-semibold">
               {category === 'products_games' ? 'Products & Games' : 'Food & Beverage'}
             </span>
+            <span className="rounded-full bg-white/5 px-2 py-0.5 text-xs text-foreground/65">
+              {isCuStudent ? 'CU Student' : 'Non-CU'}
+            </span>
             {isPremium && (
               <span className="flex items-center gap-1 text-xs font-bold text-accent bg-accent/10 px-2 py-0.5 rounded-full ml-1">
                 <Crown className="h-3 w-3" /> PREMIUM
               </span>
             )}
             <span className="font-mono text-primary/70">
-              ₹{((category === 'products_games' ? 2500 : 4000) + (isPremium ? 2000 : 0)) * numberOfDays} for {numberOfDays} day{numberOfDays > 1 ? 's' : ''}
+              ₹{selectedTotalPrice.toLocaleString('en-IN')} for {numberOfDays} day{numberOfDays > 1 ? 's' : ''}
             </span>
           </div>
         </div>
@@ -426,6 +517,11 @@ export default function StallRegistrationForm() {
             <p className="text-xs text-foreground/45">
               Your contact information as the stall organizer.
             </p>
+          </div>
+
+          <div className="mb-4 rounded-xl border border-primary/15 bg-primary/[0.03] px-4 py-3 text-sm text-foreground/70">
+            <span className="font-medium text-primary">{isCuStudent ? 'CU student pricing' : 'Non-CU pricing'}:</span>{' '}
+            Base stall fee is <span className="font-mono text-foreground">₹{selectedBasePrice.toLocaleString('en-IN')}/day</span> for this category.
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -511,6 +607,38 @@ export default function StallRegistrationForm() {
               />
             </div>
           </div>
+
+          {isCuStudent && (
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div>
+                <label className={labelCls}>CU UID *</label>
+                <input
+                  type="text"
+                  value={uid}
+                  onChange={(e) => setUid(e.target.value.toUpperCase())}
+                  placeholder="Enter your CU UID"
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>CU ID Card Photo *</label>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(e) => setIdCardFile(e.target.files?.[0] || null)}
+                  className={`${inputCls} file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary-foreground`}
+                />
+                <p className="mt-2 text-xs text-foreground/45">
+                  Upload a clear JPG, PNG, or WEBP image up to 5 MB.
+                </p>
+                {idCardFile && (
+                  <p className="mt-2 text-xs text-foreground/55">
+                    Selected file: <span className="text-foreground/75">{idCardFile.name}</span>
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Stall Details */}
@@ -563,7 +691,7 @@ export default function StallRegistrationForm() {
             <div>
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-accent" />
-                <span className="font-bold text-accent">Premium Upgrade Available (+₹2,000)</span>
+                <span className="font-bold text-accent">Premium Upgrade Available (+₹2,000/day)</span>
               </div>
               <p className="mt-1 text-sm text-foreground/60">
                 Upgrade any stall type to Premium for a larger space in a high-footfall area! Highly recommended for maximum visibility.

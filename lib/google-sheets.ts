@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { getStallBasePrice } from "@/lib/algolympia-stall-pricing";
 
 export async function appendRegistrationToSheet(data: any) {
   try {
@@ -307,17 +308,22 @@ export async function appendStallRegistrationToSheet(data: any) {
     const spreadsheetId = "1O3e33Q1SKPDB39uQK3UkmjrLXwzR36yeIbwqiHsKraM";
 
     const members = data.members || [];
+    const isCuStudent = Boolean(data.isCuStudent);
+    const basePrice = getStallBasePrice(data.stallCategory, isCuStudent);
     const row = [
       new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
       data.fullName || "",
       data.email || "",
       data.phone || "",
       data.college || "",
+      isCuStudent ? "CU Student" : "Non-CU",
+      data.uid || "",
+      data.idCardUrl || "",
       data.stallCategory === 'food_beverage' ? "Food & Beverage" : "Products or Games",
       data.isPremium ? "Yes" : "No",
       data.numberOfDays || 2,
       data.selectedDate || "N/A",
-      "₹" + (((data.stallCategory === 'products_games' ? 2500 : 4000) + (data.isPremium ? 2000 : 0)) * (data.numberOfDays || 2)).toLocaleString('en-IN'),
+      "₹" + ((basePrice + (data.isPremium ? 2000 : 0)) * (data.numberOfDays || 2)).toLocaleString('en-IN'),
       data.stallName || "",
       data.stallDescription || "",
       // Members 1-5

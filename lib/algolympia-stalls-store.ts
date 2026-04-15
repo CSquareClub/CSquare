@@ -11,6 +11,9 @@ export type StallRegistration = {
   college: string;
   stallCategory: string;
   isPremium: boolean;
+  isCuStudent: boolean;
+  uid: string;
+  idCardUrl: string;
   numberOfDays: number;
   selectedDate: string;
   stallName: string;
@@ -33,6 +36,9 @@ type StallRow = {
   college: string;
   stall_category: string;
   is_premium: boolean;
+  is_cu_student: boolean;
+  uid: string;
+  id_card_url: string;
   number_of_days: number;
   selected_date: string;
   stall_name: string;
@@ -55,6 +61,11 @@ async function ensureTable() {
       college TEXT NOT NULL DEFAULT '',
       stall_category TEXT NOT NULL DEFAULT 'unknown',
       is_premium BOOLEAN NOT NULL DEFAULT FALSE,
+      is_cu_student BOOLEAN NOT NULL DEFAULT FALSE,
+      uid TEXT NOT NULL DEFAULT '',
+      id_card_url TEXT NOT NULL DEFAULT '',
+      number_of_days INT NOT NULL DEFAULT 2,
+      selected_date TEXT NOT NULL DEFAULT '',
       stall_name TEXT NOT NULL,
       stall_description TEXT NOT NULL DEFAULT '',
       members_json TEXT NOT NULL DEFAULT '[]'
@@ -64,6 +75,9 @@ async function ensureTable() {
   try {
     await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_stall_registrations ADD COLUMN IF NOT EXISTS stall_category TEXT NOT NULL DEFAULT 'unknown';`);
     await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_stall_registrations ADD COLUMN IF NOT EXISTS is_premium BOOLEAN NOT NULL DEFAULT FALSE;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_stall_registrations ADD COLUMN IF NOT EXISTS is_cu_student BOOLEAN NOT NULL DEFAULT FALSE;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_stall_registrations ADD COLUMN IF NOT EXISTS uid TEXT NOT NULL DEFAULT '';`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_stall_registrations ADD COLUMN IF NOT EXISTS id_card_url TEXT NOT NULL DEFAULT '';`);
     await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_stall_registrations ADD COLUMN IF NOT EXISTS number_of_days INT NOT NULL DEFAULT 2;`);
     await prisma.$executeRawUnsafe(`ALTER TABLE algolympia_stall_registrations ADD COLUMN IF NOT EXISTS selected_date TEXT DEFAULT '';`);
   } catch (e) {
@@ -91,6 +105,9 @@ function rowToRegistration(row: StallRow): StallRegistration {
     college: row.college,
     stallCategory: row.stall_category,
     isPremium: row.is_premium,
+    isCuStudent: row.is_cu_student,
+    uid: row.uid,
+    idCardUrl: row.id_card_url,
     numberOfDays: row.number_of_days,
     selectedDate: row.selected_date,
     stallName: row.stall_name,
@@ -106,6 +123,9 @@ export type CreateStallRegistrationInput = {
   college: string;
   stallCategory: string;
   isPremium: boolean;
+  isCuStudent: boolean;
+  uid: string;
+  idCardUrl: string;
   numberOfDays: number;
   selectedDate: string;
   stallName: string;
@@ -120,8 +140,8 @@ export async function createStallRegistration(
 
   const rows = await prisma.$queryRawUnsafe<StallRow[]>(
     `INSERT INTO algolympia_stall_registrations
-      (full_name, email, phone, college, stall_category, is_premium, stall_name, stall_description, members_json, number_of_days, selected_date)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      (full_name, email, phone, college, stall_category, is_premium, is_cu_student, uid, id_card_url, stall_name, stall_description, members_json, number_of_days, selected_date)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
      RETURNING *;`,
     input.fullName,
     input.email,
@@ -129,6 +149,9 @@ export async function createStallRegistration(
     input.college,
     input.stallCategory,
     input.isPremium,
+    input.isCuStudent,
+    input.uid,
+    input.idCardUrl,
     input.stallName,
     input.stallDescription,
     JSON.stringify(input.members),
