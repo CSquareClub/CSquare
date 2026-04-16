@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Calendar, MapPin, Users, Trophy, Code, Globe, Zap, Target, Rocket } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Trophy, Code, Globe, Zap, Target, Rocket, Instagram, Linkedin } from 'lucide-react';
 import Navigation from '@/components/navigation';
 import Footer from '@/components/footer';
 import GridBackground from '@/components/grid-background';
@@ -39,6 +39,86 @@ const stats = [
   { value: '3', label: 'Per Team' },
   { value: '2', label: 'Days' },
   { value: 'Global', label: 'Scale' },
+];
+
+const communityPartners = [
+  // {
+  //   name: 'Dream Coders',
+  //   logoUrl:
+  //     'https://d3staw4n9fwwx4.cloudfront.net/algolympia/community-partners/dream-coders--1776188887772-light.png',
+  //   instagramUrl: 'https://www.instagram.com/dreamcoderscommunity?igsh=OHdpM2N3b2JkeGR5',
+  //   linkedinUrl: 'https://www.linkedin.com/company/dream-coderscommunity/',
+  // },
+  // {
+  //   name: 'Astitwam',
+  //   logoUrl:
+  //     'https://d3staw4n9fwwx4.cloudfront.net/algolympia/community-partners/astitwam-1776191170972-light.png',
+  //   instagramUrl: 'https://www.instagram.com/astitwam.events',
+  //   linkedinUrl: 'https://www.linkedin.com/company/astitwam-in/',
+  // },
+  // {
+  //   name: 'Shadow Script Community',
+  //   logoUrl:
+  //     'https://d3staw4n9fwwx4.cloudfront.net/algolympia/community-partners/shadow-script-community-1776192371023-light.png',
+  //   instagramUrl: 'https://www.instagram.com/shadowscriptofficial',
+  //   linkedinUrl: 'https://www.linkedin.com/company/shadow-script-community/',
+  // },
+  {
+    name: 'CU Updates',
+    logoUrl:
+      'https://d3staw4n9fwwx4.cloudfront.net/algolympia/community-partners/cu-updates--1776193122321-light.png',
+    instagramUrl: 'https://www.instagram.com/cuupdates1?igsh=MWkydXB6ZGdwcDNqdg==',
+    linkedinUrl: 'https://www.linkedin.com/company/cu-updates/',
+  },
+  // {
+  //   name: 'C Square',
+  //   logoUrl:
+  //     'https://d3staw4n9fwwx4.cloudfront.net/algolympia/community-partners/c-square-1776200272807-light.png',
+  //   instagramUrl: null,
+  //   linkedinUrl: null,
+  // },
+  {
+    name: 'NexaSoul',
+    logoUrl:
+      'https://d3staw4n9fwwx4.cloudfront.net/algolympia/community-partners/nexasoul-1776200780777-light.png',
+    instagramUrl: 'https://www.instagram.com/nexasoul_25/',
+    linkedinUrl: 'https://www.linkedin.com/in/nexa-soul-982b23380/',
+  },
+  // {
+  //   name: 'Bug2Build',
+  //   logoUrl:
+  //     'https://d3staw4n9fwwx4.cloudfront.net/algolympia/community-partners/bug2build--1776218841703-light.jpg',
+  //   instagramUrl: 'https://www.instagram.com/_bug2build_?igsh=emZ3aGQwcjhiZ3Ri',
+  //   linkedinUrl: 'https://www.linkedin.com/company/bug2builds/',
+  // },
+  // {
+  //   name: 'Bizlytics',
+  //   logoUrl:
+  //     'https://d3staw4n9fwwx4.cloudfront.net/algolympia/community-partners/bizlytics--1776222133216-light.jpg',
+  //   instagramUrl: 'https://www.instagram.com/bizlytics.cu?igsh=MXF6cTZ1eGFvMWhtag==',
+  //   linkedinUrl: null,
+  // },
+  // {
+  //   name: 'Nova Sphere',
+  //   logoUrl:
+  //     'https://d3staw4n9fwwx4.cloudfront.net/algolympia/community-partners/nova-sphere-1776277711613-light.jpg',
+  //   instagramUrl: 'https://www.instagram.com/cu__life?igsh=MTl2dWNmZTJ4cG9nMw==',
+  //   linkedinUrl: 'https://www.linkedin.com/company/novasphere09/',
+  // },
+  // {
+  //   name: 'Campus to Corporate Club',
+  //   logoUrl:
+  //     'https://d3staw4n9fwwx4.cloudfront.net/algolympia/community-partners/campus-to-corporate-club-1776317645240-light.png',
+  //   instagramUrl: null,
+  //   linkedinUrl: 'https://www.linkedin.com/in/campus-to-corporate-06662a39b/',
+  // },
+  // {
+  //   name: 'Engineering Community',
+  //   logoUrl:
+  //     'https://d3staw4n9fwwx4.cloudfront.net/algolympia/community-partners/engineering-community--1776329279508-light.png',
+  //   instagramUrl: 'https://www.instagram.com/cu_engineering_community?igsh=N3o5ZHhsNTN1N25q',
+  //   linkedinUrl: null,
+  // },
 ];
 
 export default function AlgolympiaEventPage() {
@@ -153,6 +233,61 @@ export default function AlgolympiaEventPage() {
                     <Icon className="mb-5 h-10 w-10 text-primary transition-transform duration-500 group-hover:scale-105" />
                     <h3 className="mb-2 text-lg font-semibold text-foreground/90">{item.title}</h3>
                     <p className="text-sm leading-relaxed text-foreground/50">{item.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="pb-20 md:pb-24">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-12">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Community Partners</p>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight md:text-3xl">Backed by thriving student communities</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-foreground/60">
+                AlgOlympia is reaching more campuses and coders with support from these partner communities.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {communityPartners.map((partner) => {
+                const primarySocialUrl = partner.linkedinUrl || partner.instagramUrl;
+                const isLinkedIn = Boolean(partner.linkedinUrl);
+                const SocialIcon = isLinkedIn ? Linkedin : Instagram;
+                const socialLabel = isLinkedIn ? 'LinkedIn' : partner.instagramUrl ? 'Instagram' : null;
+
+                return (
+                  <div
+                    key={partner.name}
+                    className="group flex h-full flex-col rounded-2xl border border-border bg-card/65 p-6 transition-all duration-300 hover:border-primary/40 hover:bg-card hover:shadow-[0_0_18px_color-mix(in_oklab,var(--primary)_18%,transparent)]"
+                  >
+                    <div className="flex h-32 items-center justify-center md:h-36">
+                      <img
+                        src={partner.logoUrl}
+                        alt={partner.name}
+                        className="max-h-28 w-auto object-contain md:max-h-32"
+                        loading="lazy"
+                      />
+                    </div>
+
+                    <div className="mt-5 flex min-h-[5.5rem] flex-col items-center justify-between gap-3 text-center">
+                      <div className="flex min-h-[3rem] items-center justify-center">
+                        <p className="text-base font-semibold leading-snug text-foreground/90">{partner.name}</p>
+                      </div>
+
+                      {primarySocialUrl && socialLabel ? (
+                        <a
+                          href={primarySocialUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={`${partner.name} ${socialLabel}`}
+                          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground/70 transition hover:border-primary hover:text-primary"
+                        >
+                          <SocialIcon size={16} />
+                        </a>
+                      ) : null}
+                    </div>
                   </div>
                 );
               })}
