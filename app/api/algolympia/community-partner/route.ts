@@ -3,6 +3,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { createCommunityPartner, getPartnerByEmail, listCommunityPartners } from "@/lib/algolympia-community-partner-store";
 import { appendCommunityPartnerToSheet } from "@/lib/google-sheets";
+import { ALGOLYMPIA_IS_POSTPONED, ALGOLYMPIA_POSTPONED_MESSAGE } from "@/lib/algolympia-config";
 
 const ses = new SESClient({
   region: process.env.AWS_REGION || "us-east-1",
@@ -126,6 +127,13 @@ async function sendCommunityPartnerWelcomeEmail(spocName: string, email: string)
 
 export async function POST(req: NextRequest) {
   try {
+    if (ALGOLYMPIA_IS_POSTPONED) {
+      return NextResponse.json(
+        { error: ALGOLYMPIA_POSTPONED_MESSAGE },
+        { status: 403 }
+      );
+    }
+
     const formData = await req.formData();
     
     // Text fields

@@ -3,11 +3,11 @@ import Footer from '@/components/footer';
 import GridBackground from '@/components/grid-background';
 import type { Metadata } from 'next';
 import { Network, Megaphone, Image as ImageIcon } from 'lucide-react';
+import { ALGOLYMPIA_POSTPONED_DESCRIPTION, ALGOLYMPIA_POSTPONED_MESSAGE } from '@/lib/algolympia-config';
 
 export const metadata: Metadata = {
   title: 'Community Partner | AlgOlympia',
-  description:
-    'Join forces with AlgOlympia 2026. Partner with us to scale your community and grow together.',
+  description: ALGOLYMPIA_POSTPONED_DESCRIPTION,
 };
 
 export default function CommunityPartnerPage() {
@@ -81,16 +81,16 @@ export default function CommunityPartnerPage() {
                 <div className="rounded-3xl border border-border bg-card/80 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.12)] backdrop-blur-sm md:p-10">
                   <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2">
                     <span className="text-xs font-bold uppercase tracking-widest text-primary">
-                      Registration Closed
+                      Event Status
                     </span>
                   </div>
 
                   <h2 className="mt-6 text-3xl font-bold tracking-tight text-foreground">
-                    Community partner applications are now closed.
+                    {ALGOLYMPIA_POSTPONED_MESSAGE}
                   </h2>
 
                   <p className="mt-4 text-base leading-relaxed text-foreground/70">
-                    Thank you for the incredible response. We are no longer accepting new community partner registrations for AlgOlympia 2026.
+                    Community partner applications are unavailable while AlgOlympia is postponed. We&apos;ll share new collaboration details once the revised schedule is announced.
                   </p>
 
                   <p className="mt-4 text-sm leading-relaxed text-foreground/60">

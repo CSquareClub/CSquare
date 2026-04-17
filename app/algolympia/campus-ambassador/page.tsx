@@ -4,11 +4,17 @@ import GridBackground from '@/components/grid-background';
 import AmbassadorForm from '@/components/algolympia/ambassador-form';
 import type { Metadata } from 'next';
 import { Target, Users, Zap } from 'lucide-react';
+import {
+  ALGOLYMPIA_IS_POSTPONED,
+  ALGOLYMPIA_POSTPONED_DESCRIPTION,
+  ALGOLYMPIA_POSTPONED_MESSAGE,
+} from '@/lib/algolympia-config';
 
 export const metadata: Metadata = {
   title: 'Campus Ambassador Program | AlgOlympia',
-  description:
-    'Become a Campus Ambassador for AlgOlympia and lead the coding revolution at your college.',
+  description: ALGOLYMPIA_IS_POSTPONED
+    ? ALGOLYMPIA_POSTPONED_DESCRIPTION
+    : 'Become a Campus Ambassador for AlgOlympia and lead the coding revolution at your college.',
 };
 
 export default function CampusAmbassadorPage() {
@@ -77,9 +83,27 @@ export default function CampusAmbassadorPage() {
                 </div>
               </div>
 
-              {/* Right Column - Form */}
+              {/* Right Column - Form / Status */}
               <div className="relative">
-                <AmbassadorForm />
+                {ALGOLYMPIA_IS_POSTPONED ? (
+                  <div className="rounded-3xl border border-border bg-card/80 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.12)] backdrop-blur-sm md:p-10">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2">
+                      <span className="text-xs font-bold uppercase tracking-widest text-primary">
+                        Event Status
+                      </span>
+                    </div>
+
+                    <h2 className="mt-6 text-3xl font-bold tracking-tight text-foreground">
+                      {ALGOLYMPIA_POSTPONED_MESSAGE}
+                    </h2>
+
+                    <p className="mt-4 text-base leading-relaxed text-foreground/70">
+                      Campus ambassador applications are paused while AlgOlympia is postponed. We&apos;ll reopen this once the revised event schedule is announced.
+                    </p>
+                  </div>
+                ) : (
+                  <AmbassadorForm />
+                )}
               </div>
 
             </div>

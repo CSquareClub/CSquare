@@ -15,6 +15,7 @@ import {
   upsertAlgolympiaOtp,
   verifyAlgolympiaOtp,
 } from "@/lib/algolympia-otp-store";
+import { ALGOLYMPIA_IS_POSTPONED, ALGOLYMPIA_POSTPONED_MESSAGE } from "@/lib/algolympia-config";
 
 const ses = new SESClient({
   region: process.env.AWS_REGION || "us-east-1",
@@ -403,6 +404,13 @@ const nonCuRegistrationSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    if (ALGOLYMPIA_IS_POSTPONED) {
+      return NextResponse.json(
+        { error: ALGOLYMPIA_POSTPONED_MESSAGE },
+        { status: 403 },
+      );
+    }
+
     const body = await req.json();
     const action = String(body?.action || "").trim().toLowerCase();
 

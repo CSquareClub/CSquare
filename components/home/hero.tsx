@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Rocket, ArrowRight } from 'lucide-react';
+import { ALGOLYMPIA_IS_POSTPONED, ALGOLYMPIA_POSTPONED_MESSAGE } from '@/lib/algolympia-config';
 
 export default function Hero() {
   return (
@@ -23,14 +24,27 @@ export default function Hero() {
             A global-level collegiate programming contest by C Square Club at Chandigarh University. Teams of 3 compete in algorithmic and data-structure challenges for a prize pool of ₹2.5 Lakhs.
           </p>
 
+          {ALGOLYMPIA_IS_POSTPONED ? (
+            <div className="mt-6 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              {ALGOLYMPIA_POSTPONED_MESSAGE}
+            </div>
+          ) : null}
+
           <div className="mt-11 flex flex-col gap-4 sm:flex-row sm:items-center">
-            <Link
-              href="/algolympia/register"
-              className="inline-flex items-center justify-center gap-2 border border-primary bg-primary px-7 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-[0_0_24px_color-mix(in_oklab,var(--primary)_30%,transparent)]"
-            >
-              <Rocket size={16} />
-              Register Now
-            </Link>
+            {ALGOLYMPIA_IS_POSTPONED ? (
+              <div className="inline-flex items-center justify-center gap-2 border border-primary/25 bg-primary/10 px-7 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-primary/80">
+                <Rocket size={16} />
+                Registrations Paused
+              </div>
+            ) : (
+              <Link
+                href="/algolympia/register"
+                className="inline-flex items-center justify-center gap-2 border border-primary bg-primary px-7 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-[0_0_24px_color-mix(in_oklab,var(--primary)_30%,transparent)]"
+              >
+                <Rocket size={16} />
+                Register Now
+              </Link>
+            )}
             <Link
               href="/events/algolympia"
               className="inline-flex items-center justify-center gap-2 border border-border bg-card/70 px-7 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-foreground/80 transition-all hover:border-primary/40 hover:text-primary"

@@ -3,11 +3,17 @@ import Footer from '@/components/footer';
 import GridBackground from '@/components/grid-background';
 import AlgolympiaRegistrationForm from '@/components/algolympia/registration-form';
 import type { Metadata } from 'next';
+import {
+  ALGOLYMPIA_POSTPONED_DESCRIPTION,
+  ALGOLYMPIA_POSTPONED_MESSAGE,
+  ALGOLYMPIA_IS_POSTPONED,
+} from '@/lib/algolympia-config';
 
 export const metadata: Metadata = {
   title: 'AlgOlympia Registration | C Square Club',
-  description:
-    'Register your team for AlgOlympia — the ultimate hybrid ICPC x Hackathon competitive programming arena by C Square Club.',
+  description: ALGOLYMPIA_IS_POSTPONED
+    ? ALGOLYMPIA_POSTPONED_DESCRIPTION
+    : 'Register your team for AlgOlympia — the ultimate hybrid ICPC x Hackathon competitive programming arena by C Square Club.',
 };
 
 export default function AlgolympiaRegisterPage() {
@@ -51,9 +57,26 @@ export default function AlgolympiaRegisterPage() {
               </div>
             </div>
 
-            {/* Form */}
             <div className="mx-auto max-w-5xl">
-              <AlgolympiaRegistrationForm />
+              {ALGOLYMPIA_IS_POSTPONED ? (
+                <div className="rounded-3xl border border-border bg-card/80 p-8 text-center shadow-[0_20px_60px_rgba(0,0,0,0.12)] backdrop-blur-sm md:p-10">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2">
+                    <span className="text-xs font-bold uppercase tracking-widest text-primary">
+                      Event Status
+                    </span>
+                  </div>
+
+                  <h2 className="mt-6 text-3xl font-bold tracking-tight text-foreground">
+                    {ALGOLYMPIA_POSTPONED_MESSAGE}
+                  </h2>
+
+                  <p className="mt-4 text-base leading-relaxed text-foreground/70">
+                    AlgOlympia registrations are closed for now. We&apos;ll share updated dates and the next steps once the event is rescheduled.
+                  </p>
+                </div>
+              ) : (
+                <AlgolympiaRegistrationForm />
+              )}
             </div>
           </div>
         </section>
