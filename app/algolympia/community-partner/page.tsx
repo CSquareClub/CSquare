@@ -1,7 +1,6 @@
 import Navigation from '@/components/navigation';
 import Footer from '@/components/footer';
 import GridBackground from '@/components/grid-background';
-import CommunityPartnerForm from '@/components/algolympia/community-partner-form';
 import type { Metadata } from 'next';
 import { Network, Megaphone, Image as ImageIcon } from 'lucide-react';
 
@@ -77,9 +76,27 @@ export default function CommunityPartnerPage() {
                 </div>
               </div>
 
-              {/* Right Column - Form */}
+              {/* Right Column - Closed Notice */}
               <div className="relative">
-                <CommunityPartnerForm />
+                <div className="rounded-3xl border border-border bg-card/80 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.12)] backdrop-blur-sm md:p-10">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2">
+                    <span className="text-xs font-bold uppercase tracking-widest text-primary">
+                      Registration Closed
+                    </span>
+                  </div>
+
+                  <h2 className="mt-6 text-3xl font-bold tracking-tight text-foreground">
+                    Community partner applications are now closed.
+                  </h2>
+
+                  <p className="mt-4 text-base leading-relaxed text-foreground/70">
+                    Thank you for the incredible response. We are no longer accepting new community partner registrations for AlgOlympia 2026.
+                  </p>
+
+                  <p className="mt-4 text-sm leading-relaxed text-foreground/60">
+                    If you have already submitted your details, our team will reach out to you with the next steps.
+                  </p>
+                </div>
               </div>
 
             </div>
