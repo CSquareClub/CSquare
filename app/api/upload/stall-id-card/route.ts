@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import path from "path";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { NextResponse } from "next/server";
+import { ALGOLYMPIA_STALLS_ARE_CLOSED, ALGOLYMPIA_STALLS_CLOSED_MESSAGE } from "@/lib/algolympia-stalls-config";
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -13,6 +14,13 @@ function getFileExtension(fileName: string): string {
 
 export async function POST(req: Request) {
   try {
+    if (ALGOLYMPIA_STALLS_ARE_CLOSED) {
+      return NextResponse.json(
+        { error: ALGOLYMPIA_STALLS_CLOSED_MESSAGE },
+        { status: 403 }
+      );
+    }
+
     const formData = await req.formData();
     const file = formData.get("idCard");
 

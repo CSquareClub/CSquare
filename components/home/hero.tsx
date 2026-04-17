@@ -20,7 +20,7 @@ export default function Hero() {
             Collegiate Programming Contest 2026
           </p>
           <p className="mt-5 max-w-3xl text-base leading-relaxed text-foreground/52 sm:text-xl">
-            A global-level collegiate programming contest by C Square Club at Chandigarh University. Teams of 3 compete in algorithmic and data-structure challenges for a prize pool of ₹2.5 Lakhs. 20th–21st April 2026.
+            A global-level collegiate programming contest by C Square Club at Chandigarh University. Teams of 3 compete in algorithmic and data-structure challenges for a prize pool of ₹2.5 Lakhs.
           </p>
 
           <div className="mt-11 flex flex-col gap-4 sm:flex-row sm:items-center">

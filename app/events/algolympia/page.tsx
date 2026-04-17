@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'AlgOlympia: Collegiate Programming Contest 2026 | C Square Club',
   description:
-    'AlgOlympia is a global-level collegiate programming contest organized by C Square Club at Chandigarh University. Teams of 3 compete for ₹2.5 Lakhs prize pool on 20th–21st April 2026.',
+    'AlgOlympia is a global-level collegiate programming contest organized by C Square Club at Chandigarh University. Teams of 3 compete for ₹2.5 Lakhs prize pool.',
 };
 
 const highlights = [
@@ -157,7 +157,7 @@ export default function AlgolympiaEventPage() {
               <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-foreground/60">
                 <span className="inline-flex items-center gap-1.5">
                   <Calendar size={14} className="text-primary" />
-                  20th – 21st April 2026
+                  To Be Decided
                 </span>
                 <span className="hidden h-4 w-px bg-border sm:block" />
                 <span className="inline-flex items-center gap-1.5">
@@ -207,7 +207,7 @@ export default function AlgolympiaEventPage() {
                 AlgOlympia is a global-level collegiate programming contest organized by the C Square Club at Chandigarh University. Designed to bring together some of the brightest coding minds, the event aims to foster innovation, problem-solving, and competitive programming excellence on an international stage.
               </p>
               <p className="mt-5 text-lg leading-relaxed text-foreground/75">
-                Scheduled for 20th–21st April 2026, AlgOlympia invites students from across the world to compete in teams of three, tackling a series of challenging algorithmic and data-structure-based problems. With a prize pool of ₹2.5 Lakhs, the competition promises high stakes, intense competition, and an unforgettable experience.
+                 AlgOlympia invites students from across the world to compete in teams of three, tackling a series of challenging algorithmic and data-structure-based problems. With a prize pool of ₹2.5 Lakhs, the competition promises high stakes, intense competition, and an unforgettable experience.
               </p>
             </div>
           </div>

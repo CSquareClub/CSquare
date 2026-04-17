@@ -499,8 +499,7 @@ export default function StallRegistrationForm() {
                   className={inputCls}
                 >
                   <option value="" disabled className="text-gray-500 bg-black/80">Choose Date</option>
-                  <option value="20 April 2026" className="bg-black/80">20 April 2026</option>
-                  <option value="21 April 2026" className="bg-black/80">21 April 2026</option>
+                  <option value="To Be Decided" className="bg-black/80">To. Be Decided</option>
                 </select>
               </div>
             )}

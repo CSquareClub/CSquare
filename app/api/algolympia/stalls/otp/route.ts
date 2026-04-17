@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { createHash, randomInt } from "crypto";
+import { ALGOLYMPIA_STALLS_ARE_CLOSED, ALGOLYMPIA_STALLS_CLOSED_MESSAGE } from "@/lib/algolympia-stalls-config";
 import {
-  getAlgolympiaStallsOtpSentAt,
-  isAlgolympiaStallsOtpVerified,
   upsertAlgolympiaStallsOtp,
   verifyAlgolympiaStallsOtp,
 } from "@/lib/algolympia-stalls-otp-store";
@@ -92,6 +91,13 @@ async function sendOtpEmail(email: string, otp: string, fullName?: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    if (ALGOLYMPIA_STALLS_ARE_CLOSED) {
+      return NextResponse.json(
+        { error: ALGOLYMPIA_STALLS_CLOSED_MESSAGE },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
     const action = String(body?.action || "").trim().toLowerCase();
 

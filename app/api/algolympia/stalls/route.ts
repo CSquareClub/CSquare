@@ -4,6 +4,7 @@ import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { createStallRegistration } from "@/lib/algolympia-stalls-store";
 import { appendStallRegistrationToSheet } from "@/lib/google-sheets";
 import { isAlgolympiaStallsOtpVerified, markAlgolympiaStallsOtpUsed } from "@/lib/algolympia-stalls-otp-store";
+import { ALGOLYMPIA_STALLS_ARE_CLOSED, ALGOLYMPIA_STALLS_CLOSED_MESSAGE } from "@/lib/algolympia-stalls-config";
 import {
   getStallBasePrice,
   getStallCategoryLabel,
@@ -205,6 +206,13 @@ const stallRegistrationSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    if (ALGOLYMPIA_STALLS_ARE_CLOSED) {
+      return NextResponse.json(
+        { error: ALGOLYMPIA_STALLS_CLOSED_MESSAGE },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
     const data = stallRegistrationSchema.parse(body);
 

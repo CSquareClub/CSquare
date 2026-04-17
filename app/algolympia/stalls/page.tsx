@@ -1,13 +1,14 @@
 import Navigation from '@/components/navigation';
 import Footer from '@/components/footer';
 import GridBackground from '@/components/grid-background';
-import StallRegistrationForm from '@/components/algolympia/stall-registration-form';
 import type { Metadata } from 'next';
+import {
+  ALGOLYMPIA_STALLS_CLOSED_DESCRIPTION,
+} from '@/lib/algolympia-stalls-config';
 
 export const metadata: Metadata = {
   title: 'AlgOlympia Stall Registration | C Square Club',
-  description:
-    'Register your stall for AlgOlympia 2026 — the global-level collegiate programming contest by C Square Club at Chandigarh University.',
+  description: ALGOLYMPIA_STALLS_CLOSED_DESCRIPTION,
 };
 
 export default function StallRegistrationPage() {
@@ -37,9 +38,26 @@ export default function StallRegistrationPage() {
               </p>
             </div>
 
-            {/* Form */}
             <div className="mx-auto max-w-4xl">
-              <StallRegistrationForm />
+              <div className="rounded-3xl border border-border bg-card/80 p-8 text-center shadow-[0_20px_60px_rgba(0,0,0,0.12)] backdrop-blur-sm md:p-10">
+                <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2">
+                  <span className="text-xs font-bold uppercase tracking-widest text-primary">
+                    Registration Closed
+                  </span>
+                </div>
+
+                <h2 className="mt-6 text-3xl font-bold tracking-tight text-foreground">
+                  Stall registrations are now closed.
+                </h2>
+
+                <p className="mt-4 text-base leading-relaxed text-foreground/70">
+                  Thank you for the incredible response. We are no longer accepting new stall registrations for AlgOlympia 2026.
+                </p>
+
+                {/* <p className="mt-4 text-sm leading-relaxed text-foreground/60">
+                  If you have already submitted your details, our team will contact you with the next steps.
+                </p> */}
+              </div>
             </div>
           </div>
         </section>
