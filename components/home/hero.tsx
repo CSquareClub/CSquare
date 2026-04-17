@@ -31,7 +31,7 @@ export default function Hero() {
           ) : null}
 
           <div className="mt-11 flex flex-col gap-4 sm:flex-row sm:items-center">
-            {ALGOLYMPIA_IS_POSTPONED ? (
+            {/* {ALGOLYMPIA_IS_POSTPONED ? (
               <div className="inline-flex items-center justify-center gap-2 border border-primary/25 bg-primary/10 px-7 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-primary/80">
                 <Rocket size={16} />
                 Registrations Paused
@@ -44,7 +44,7 @@ export default function Hero() {
                 <Rocket size={16} />
                 Register Now
               </Link>
-            )}
+            )} */}
             <Link
               href="/events/algolympia"
               className="inline-flex items-center justify-center gap-2 border border-border bg-card/70 px-7 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-foreground/80 transition-all hover:border-primary/40 hover:text-primary"
