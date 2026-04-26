@@ -1,4 +1,4 @@
-import prisma from "@/lib/db";
+import prisma, { isDatabaseConfigured } from "@/lib/db";
 
 export type GalleryItem = {
   id: number;
@@ -81,6 +81,10 @@ function rowToGalleryItem(row: GalleryRow): GalleryItem {
 }
 
 export async function listPublicGalleryItems(): Promise<GalleryItem[]> {
+  if (!isDatabaseConfigured()) {
+    return [];
+  }
+
   try {
     await ensureGalleryTable();
 
@@ -173,6 +177,10 @@ export async function deleteGalleryItem(id: number): Promise<boolean> {
 }
 
 export async function listGalleryItemsByEventId(eventId: number): Promise<GalleryItem[]> {
+  if (!isDatabaseConfigured()) {
+    return [];
+  }
+
   try {
     await ensureGalleryTable();
 

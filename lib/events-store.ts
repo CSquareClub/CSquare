@@ -1,4 +1,4 @@
-import prisma from "@/lib/db";
+import prisma, { isDatabaseConfigured } from "@/lib/db";
 import { formatTimeRangeFromDates } from "@/lib/event-time-utils";
 
 export type Sponsor = {
@@ -320,6 +320,10 @@ async function getEventCommunityPartners(eventId: number): Promise<CommunityPart
 }
 
 export async function listPublicEvents(): Promise<ClubEvent[]> {
+  if (!isDatabaseConfigured()) {
+    return [];
+  }
+
   await ensureEventsTable();
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
     `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, show_accommodation_on_page, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url
@@ -336,6 +340,10 @@ export async function listPublicEvents(): Promise<ClubEvent[]> {
 }
 
 export async function getPublicEventById(id: number): Promise<ClubEvent | null> {
+  if (!isDatabaseConfigured()) {
+    return null;
+  }
+
   await ensureEventsTable();
   const rows = await prisma.$queryRawUnsafe<EventRow[]>(
     `SELECT id, title, description, start_at, end_at, event_date, time_text, location, attendees, event_fee, accommodation_fee, accommodation_access, show_accommodation_on_page, category, image_url, sponsor_title, sponsor_logo_url, sponsor_logo_light_url, sponsor_logo_dark_url, devfolio_apply_logo_light_url, devfolio_apply_logo_dark_url, is_published, registration_url

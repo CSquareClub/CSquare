@@ -14,7 +14,7 @@ export default function Navigation() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [nowLabel, setNowLabel] = useState('');
   const { resolvedTheme, setTheme } = useTheme();
-  const isDark = resolvedTheme !== 'light';
+  const isDark = (resolvedTheme ?? 'dark') === 'dark';
 
   useEffect(() => {
     setMounted(true);
@@ -118,8 +118,13 @@ export default function Navigation() {
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
               className="inline-flex items-center justify-center border border-border bg-card px-2.5 py-2 text-foreground/70 transition-colors hover:text-primary"
               aria-label="Toggle theme"
+              title="Toggle theme"
             >
-              {mounted && isDark ? <Sun size={16} /> : <Moon size={16} />}
+              {mounted ? (
+                isDark ? <Sun size={16} /> : <Moon size={16} />
+              ) : (
+                <span className="h-4 w-4" aria-hidden="true" />
+              )}
             </button>
           </div>
 
@@ -156,9 +161,14 @@ export default function Navigation() {
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
               className="mt-2 inline-flex w-full items-center justify-center gap-2 border border-border bg-background px-4 py-3 text-sm text-foreground/80 transition-colors hover:bg-card hover:text-foreground"
               aria-label="Toggle theme"
+              title="Toggle theme"
             >
-              {mounted && isDark ? <Sun size={16} /> : <Moon size={16} />}
-              {isDark ? 'Light Mode' : 'Dark Mode'}
+              {mounted ? (
+                isDark ? <Sun size={16} /> : <Moon size={16} />
+              ) : (
+                <span className="h-4 w-4" aria-hidden="true" />
+              )}
+              {mounted ? (isDark ? 'Light Mode' : 'Dark Mode') : 'Theme'}
             </button>
             </div>
           </div>

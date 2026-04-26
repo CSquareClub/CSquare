@@ -9,6 +9,10 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClientSingleton | undefined;
 };
 
+export function isDatabaseConfigured(): boolean {
+  return Boolean(process.env.DATABASE_URL);
+}
+
 function getPrismaClient() {
   if (prismaInstance) return prismaInstance;
 

@@ -1,4 +1,4 @@
-import prisma from "@/lib/db";
+import prisma, { isDatabaseConfigured } from "@/lib/db";
 
 export type TeamMember = {
   id: number;
@@ -67,6 +67,10 @@ function rowToMember(row: TeamRow): TeamMember {
 }
 
 export async function listPublicTeam(): Promise<TeamMember[]> {
+  if (!isDatabaseConfigured()) {
+    return [];
+  }
+
   await ensureTeamTable();
 
   const rows = await prisma.$queryRawUnsafe<TeamRow[]>(

@@ -7,13 +7,17 @@ import ClubDescription from '@/components/home/club-description';
 import GalleryGrid from '@/components/events/gallery-grid';
 import EventCard from '@/components/events/event-card';
 import { listPublicEvents } from '@/lib/events-store';
+import { isDatabaseConfigured } from '@/lib/db';
 import { toEpoch, formatEventDate, formatEventTime } from '@/lib/event-time-utils';
 import Link from 'next/link';
 import type { ClubEvent } from '@/lib/events-store';
+import DatabaseUnavailableBanner from '@/components/database-unavailable-banner';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
+  const dbConfigured = isDatabaseConfigured();
+
   try {
     let allEvents: ClubEvent[] = [];
 
@@ -39,6 +43,7 @@ export default async function Home() {
       <div className="relative isolate min-h-screen bg-background">
         <GridBackground />
         <Navigation />
+        {!dbConfigured ? <DatabaseUnavailableBanner className="pt-4" /> : null}
         
         <main className="relative z-10">
           <Hero />

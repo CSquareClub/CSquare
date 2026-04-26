@@ -4,39 +4,39 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #050505;
-  --foreground: #f4f4f4;
-  --card: #0c0c0c;
-  --card-foreground: #f4f4f4;
-  --popover: #0c0c0c;
-  --popover-foreground: #f4f4f4;
-  --primary: #ffd232;
+  --background: #f7f7f3;
+  --foreground: #111111;
+  --card: #ffffff;
+  --card-foreground: #111111;
+  --popover: #ffffff;
+  --popover-foreground: #111111;
+  --primary: #d4a500;
   --primary-foreground: #0b0b0b;
-  --secondary: #171717;
-  --secondary-foreground: #e9e9e9;
-  --muted: #121212;
-  --muted-foreground: #8a8a8a;
-  --accent: #ffe27a;
-  --accent-foreground: #101010;
-  --destructive: #f44747;
+  --secondary: #ecece6;
+  --secondary-foreground: #1d1d1d;
+  --muted: #efefe9;
+  --muted-foreground: #5f5f5f;
+  --accent: #f1c84a;
+  --accent-foreground: #1a1a1a;
+  --destructive: #d32f2f;
   --destructive-foreground: #ffffff;
-  --border: #252525;
-  --input: #101010;
-  --ring: #ffd232;
-  --chart-1: #ffd232;
-  --chart-2: #ffe27a;
+  --border: #d8d8cf;
+  --input: #f3f3ee;
+  --ring: #d4a500;
+  --chart-1: #d4a500;
+  --chart-2: #f1c84a;
   --chart-3: #7a7a7a;
   --chart-4: #4d4d4d;
-  --chart-5: #d9d9d9;
+  --chart-5: #2e2e2e;
   --radius: 0.25rem;
-  --sidebar: #0c0c0c;
-  --sidebar-foreground: #f4f4f4;
-  --sidebar-primary: #ffd232;
+  --sidebar: #fefefe;
+  --sidebar-foreground: #111111;
+  --sidebar-primary: #d4a500;
   --sidebar-primary-foreground: #0b0b0b;
-  --sidebar-accent: #ffe27a;
+  --sidebar-accent: #f1c84a;
   --sidebar-accent-foreground: #101010;
-  --sidebar-border: #252525;
-  --sidebar-ring: #ffd232;
+  --sidebar-border: #d8d8cf;
+  --sidebar-ring: #d4a500;
 }
 
 .dark {
@@ -135,7 +135,12 @@
   body {
     @apply bg-background text-foreground;
     background-image:
-      linear-gradient(180deg, rgba(14, 14, 14, 0.4) 0%, rgba(6, 6, 6, 0.86) 45%, rgba(4, 4, 4, 0.98) 100%);
+      linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--background) 78%, var(--card) 22%) 0%,
+        color-mix(in oklab, var(--background) 88%, black 12%) 45%,
+        color-mix(in oklab, var(--background) 94%, black 6%) 100%
+      );
     min-height: 100vh;
     overflow-x: clip;
     background-attachment: fixed;

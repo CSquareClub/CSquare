@@ -62,6 +62,15 @@ function getRequiredEnv(name: string): string {
   return value;
 }
 
+export function isGoogleServiceAccountConfigured(): boolean {
+  return Boolean(
+    process.env.GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 ||
+      process.env.GOOGLE_SERVICE_ACCOUNT_JSON ||
+      (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL &&
+        (process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64 || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY))
+  );
+}
+
 function parseServiceAccountJson(raw: string): GoogleServiceAccountFields {
   let parsed: unknown;
 

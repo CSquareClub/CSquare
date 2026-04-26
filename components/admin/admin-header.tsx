@@ -5,6 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { ArrowRight, CalendarDays, LogOut, Menu, Moon, RefreshCw, Sun, Users } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 interface AdminHeaderProps {
   onMenuToggle?: () => void;
@@ -12,9 +13,16 @@ interface AdminHeaderProps {
 
 export default function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
   const { data: session } = useSession();
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = (resolvedTheme ?? "dark") === "dark";
 
   const activeSection = pathname.startsWith("/admin/events")
     ? "Events"
@@ -84,11 +92,16 @@ export default function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
 
         {/* Theme Toggle */}
         <button
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          onClick={() => setTheme(isDark ? "light" : "dark")}
           className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/35 text-black/50 backdrop-blur-md hover:bg-white/50 hover:text-black/80 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-white/40 dark:hover:bg-white/[0.06] dark:hover:text-white/70 transition-colors"
+          aria-label="Toggle theme"
+          title="Toggle theme"
         >
-          <Sun className="h-4 w-4 hidden dark:block" />
-          <Moon className="h-4 w-4 block dark:hidden" />
+          {mounted ? (
+            isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />
+          ) : (
+            <span className="h-4 w-4" aria-hidden="true" />
+          )}
         </button>
 
         {session?.user && (
