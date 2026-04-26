@@ -92,10 +92,14 @@ export default function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
 
         {/* Theme Toggle */}
         <button
-          onClick={() => setTheme(isDark ? "light" : "dark")}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/35 text-black/50 backdrop-blur-md hover:bg-white/50 hover:text-black/80 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-white/40 dark:hover:bg-white/[0.06] dark:hover:text-white/70 transition-colors"
+          onClick={() => {
+            if (!mounted) return;
+            setTheme(isDark ? "light" : "dark");
+          }}
+          className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/35 text-black/50 backdrop-blur-md hover:bg-white/50 hover:text-black/80 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-white/40 dark:hover:bg-white/[0.06] dark:hover:text-white/70 transition-colors disabled:cursor-not-allowed disabled:opacity-55"
           aria-label="Toggle theme"
           title="Toggle theme"
+          disabled={!mounted}
         >
           {mounted ? (
             isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />

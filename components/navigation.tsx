@@ -115,10 +115,14 @@ export default function Navigation() {
 
             <button
               type="button"
-              onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className="inline-flex items-center justify-center border border-border bg-card px-2.5 py-2 text-foreground/70 transition-colors hover:text-primary"
+              onClick={() => {
+                if (!mounted) return;
+                setTheme(isDark ? 'light' : 'dark');
+              }}
+              className="inline-flex items-center justify-center border border-border bg-card px-2.5 py-2 text-foreground/70 transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-55"
               aria-label="Toggle theme"
               title="Toggle theme"
+              disabled={!mounted}
             >
               {mounted ? (
                 isDark ? <Sun size={16} /> : <Moon size={16} />
@@ -158,10 +162,14 @@ export default function Navigation() {
             </div>
             <button
               type="button"
-              onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className="mt-2 inline-flex w-full items-center justify-center gap-2 border border-border bg-background px-4 py-3 text-sm text-foreground/80 transition-colors hover:bg-card hover:text-foreground"
+              onClick={() => {
+                if (!mounted) return;
+                setTheme(isDark ? 'light' : 'dark');
+              }}
+              className="mt-2 inline-flex w-full items-center justify-center gap-2 border border-border bg-background px-4 py-3 text-sm text-foreground/80 transition-colors hover:bg-card hover:text-foreground disabled:cursor-not-allowed disabled:opacity-55"
               aria-label="Toggle theme"
               title="Toggle theme"
+              disabled={!mounted}
             >
               {mounted ? (
                 isDark ? <Sun size={16} /> : <Moon size={16} />
