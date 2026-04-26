@@ -43,6 +43,8 @@ Optional:
 
 When `SYNC_BACKEND_API_KEY` is set, write routes expect either an `x-sync-api-key` header or an `apiKey` field in the JSON body.
 
+For Google Apps Script, set the same value in `SYNC_API_KEY` so the trigger sends a matching header and body field.
+
 You can also provide service account JSON using existing env support:
 
 - `GOOGLE_SERVICE_ACCOUNT_JSON`
@@ -85,5 +87,3 @@ For sync from sheet:
 ```
 
 Unknown keys are ignored automatically if they do not exist in the Prisma User table.
-
-If `SYNC_BACKEND_API_KEY` is configured on the backend, set the same value in [google-apps-script.gs](google-apps-script.gs) so sheet edits can authenticate with the `x-sync-api-key` header.
