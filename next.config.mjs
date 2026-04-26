@@ -9,6 +9,11 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: '/algolympia/register',
+        destination: '/',
+        permanent: false,
+      },
+      {
         source: '/codewar/:path*',
         destination: '/algolympia/:path*',
         permanent: true,

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import Navigation from '@/components/navigation';
 import Footer from '@/components/footer';
@@ -12,7 +13,7 @@ import { Instagram, Linkedin } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 const EVENT_TIMEZONE = 'Asia/Kolkata';
 
-function renderInlineBold(text: string): Array<string | JSX.Element> {
+function renderInlineBold(text: string): ReactNode[] {
   return text.split(/(\*\*[^*]+\*\*)/g).map((part, index) => {
     if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
       return <strong key={`b-${index}`}>{part.slice(2, -2)}</strong>;
@@ -21,7 +22,7 @@ function renderInlineBold(text: string): Array<string | JSX.Element> {
   });
 }
 
-function renderFormattedDescription(text: string): JSX.Element[] {
+function renderFormattedDescription(text: string): ReactNode[] {
   return text.split('\n').map((line, index) => {
     const trimmed = line.trim();
     if (!trimmed) {

@@ -49,7 +49,7 @@ export default async function Home() {
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               <div className="mb-8 flex items-end justify-between gap-3">
                 <div>
-                  <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Published Events</h2>
+                  <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Club Events</h2>
                   <p className="mt-2 text-sm text-foreground/65">
                     {currentEvents.length > 0 ? "Happening now and coming up next." : "Latest published events from the club."}
                   </p>
@@ -82,7 +82,7 @@ export default async function Home() {
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               <div className="mb-8 flex items-end justify-between gap-3">
                 <div>
-                  <h2 className="text-2xl font-bold tracking-tight md:text-3xl">C Square Moments</h2>
+                  <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Community Moments</h2>
                   <p className="mt-2 text-sm text-foreground/65">Highlights from our workshops, coding sessions, and club events.</p>
                 </div>
               </div>

@@ -65,9 +65,11 @@ export default function Navigation() {
   }, [isOpen]);
 
   const navItems = [
-    { href: '/events', label: 'Contests' },
-    { href: '/team', label: 'Problems' },
-    { href: '/cusoc', label: 'Leaderboard' },
+    { href: '/', label: 'Home' },
+    { href: '/events', label: 'Events' },
+    { href: '/team', label: 'Team' },
+    { href: '/cusoc', label: 'CUSOC' },
+    { href: '/core-team', label: 'Core Team' },
   ];
 
   return (
@@ -84,7 +86,7 @@ export default function Navigation() {
             <div className="grid h-8 w-8 place-items-center bg-primary font-mono text-xs font-semibold text-primary-foreground">c2</div>
             <span className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">
               CSQUARE
-              <span className="ml-2 text-foreground/65">/ ALGOLYMPIA</span>
+              <span className="ml-2 text-foreground/65">/ CLUB</span>
             </span>
           </Link>
 
@@ -108,7 +110,7 @@ export default function Navigation() {
             </span>
 
             <JoinNowModal className="inline-flex items-center justify-center border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary-foreground transition-colors hover:bg-primary/90">
-              Dashboard
+              Join Now
             </JoinNowModal>
 
             <button
@@ -146,7 +148,7 @@ export default function Navigation() {
               <JoinNowModal
                 className="mt-2 inline-flex w-full items-center justify-center border border-primary bg-primary px-4 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-colors hover:bg-primary/90"
               >
-                Dashboard
+                Join Now
               </JoinNowModal>
             </div>
             <button
