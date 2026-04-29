@@ -12,10 +12,10 @@ export default function GridBackground() {
 
   const isDarkTheme = mounted ? resolvedTheme !== 'light' : true;
 
-  const baseBg = isDarkTheme ? '#050505' : '#080808';
-  const gridLine = isDarkTheme ? 'rgba(255, 210, 50, 0.09)' : 'rgba(255, 210, 50, 0.08)';
-  const overlayMid = isDarkTheme ? 'rgba(8, 8, 8, 0.35)' : 'rgba(8, 8, 8, 0.34)';
-  const overlayEnd = isDarkTheme ? 'rgba(5, 5, 5, 0.96)' : 'rgba(6, 6, 6, 0.95)';
+  const baseBg = isDarkTheme ? '#050505' : '#ffffff';
+  const gridLine = isDarkTheme ? 'rgba(255, 210, 50, 0.09)' : 'rgba(255, 180, 0, 0.15)';
+  const overlayMid = isDarkTheme ? 'rgba(8, 8, 8, 0.35)' : 'rgba(255, 255, 255, 0.35)';
+  const overlayEnd = isDarkTheme ? 'rgba(5, 5, 5, 0.96)' : 'rgba(255, 255, 255, 0.95)';
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" style={{ backgroundColor: baseBg }}>
