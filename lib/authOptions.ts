@@ -4,8 +4,6 @@ import prisma from "@/lib/db";
 import type { NextAuthOptions } from "next-auth";
 import { checkRateLimit, resetRateLimit } from "./rateLimiter";
 
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "club.csquare@gmail.com").trim().toLowerCase();
-
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -22,15 +20,15 @@ export const authOptions: NextAuthOptions = {
       },
 
       async authorize(credentials, req) {
+        console.log(credentials);
+        
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Missing credentials");
         }
 
         const normalizedEmail = credentials.email.trim().toLowerCase();
 
-        if (normalizedEmail !== ADMIN_EMAIL) {
-          throw new Error("Invalid email or password");
-        }
+      
 
         const ip =
           (req?.headers?.["x-forwarded-for"] as string)?.split(",")[0] ||
@@ -40,11 +38,15 @@ export const authOptions: NextAuthOptions = {
         // Rate limiting
         checkRateLimit(ip);
 
+        const users = await prisma.user.findMany();
+        console.log(users);
+        
+
         // try {
         //   await prisma.user.create({
         //   data : {
         //     name : "C Square",
-        //     email : "club.csquare@gmail.com",
+        //     email : "csquareclub@cumail.in",
         //     password : await hash("CSqaure@2026", 10)
         //   }
         // })
