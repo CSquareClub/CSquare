@@ -68,13 +68,13 @@ export default function Hero() {
             ) : null} */}
 
             <div className="mt-11 flex flex-col gap-4 sm:flex-row sm:items-center">
-              <Link
+              {/* <Link
                 href="/events"
                 className="inline-flex items-center justify-center gap-2 border border-primary bg-primary px-7 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-[0_0_24px_color-mix(in_oklab,var(--primary)_30%,transparent)]"
               >
                 <Rocket size={16} />
                 Explore Events
-              </Link>
+              </Link> */}
               {/* <Link
                 href="/events/algolympia"
                 className="inline-flex items-center justify-center gap-2 border border-border bg-card/70 px-7 py-3 font-mono text-sm font-semibold uppercase tracking-[0.14em] text-foreground/80 transition-all hover:border-primary/40 hover:text-primary"
@@ -189,7 +189,6 @@ export default function Hero() {
             {([
               ['10+', 'Events'],
               ['1000+', 'Members'],
-              ['4', 'Tracks'],
               ['Live', 'Community'],
             ] as const).map(([value, label]) => (
               <div key={label}>
@@ -204,12 +203,12 @@ export default function Hero() {
       </div>
 
       {/* Float animation keyframes */}
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes float-badge {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-8px); }
         }
-      `}</style>
+      `}} />
     </section>
   );
 }

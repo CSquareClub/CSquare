@@ -666,9 +666,9 @@ export default function CusocForm() {
           </p>
         </div>
 
-        <div className="relative grid gap-5 sm:grid-cols-2">
+        <div className="relative grid gap-5 sm:grid-cols-1">
           {/* 2026 Card */}
-          <button
+          {/* <button
             type="button"
             disabled
             className={`group relative rounded-2xl border p-6 text-left transition-all duration-300 opacity-60 cursor-not-allowed ${dk ? 'border-emerald-400/20 bg-emerald-400/[0.03]' : 'border-emerald-300 bg-emerald-50'}`}
@@ -687,7 +687,7 @@ export default function CusocForm() {
             <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-rose-500">
               Registrations Closed
             </div>
-          </button>
+          </button> */}
 
           {/* 2027 Card */}
           <button

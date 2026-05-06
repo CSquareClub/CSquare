@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -82,13 +83,22 @@ export default function Navigation() {
       </div>
       <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-10">
         <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-90">
-            <div className="grid h-8 w-8 place-items-center bg-primary font-mono text-xs font-semibold text-primary-foreground">c2</div>
-            <span className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">
-              CSQUARE
-              <span className="ml-2 text-foreground/65">/ CLUB</span>
-            </span>
+          <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-90 font-bold text-lg">
+            {mounted ? (
+              <Image
+                src={isDark ? "/c-square-white.png" : "/c-square.png"}
+                alt="CSquare Logo"
+                width={150}
+                height={50}
+                className="h-10 w-auto object-contain"
+                priority
+              />
+            ) : (
+              <div className="h-10 w-32 animate-pulse rounded bg-foreground/10" />
+            )}
+          C Square
           </Link>
+
 
           <div className="hidden items-center gap-7 md:flex">
             {navItems.map((item) => (
