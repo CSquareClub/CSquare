@@ -249,7 +249,7 @@ export default function ContributorApplicationForm() {
           <Sparkles className="h-4 w-4" />
           Pilot Program Form
         </p>
-        <p className="text-sm text-foreground/60 mt-2">Expected time: 10–15 minutes maximum</p>
+        {/* <p className="text-sm text-foreground/60 mt-2">Expected time: 10–15 minutes maximum</p> */}
       </div>
 
       {error && (
