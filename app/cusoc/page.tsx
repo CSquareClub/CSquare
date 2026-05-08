@@ -87,9 +87,9 @@ export default function CusocPage() {
               </div>
             </div>
 
-            <div className="mx-auto max-w-4xl">
+            {/* <div className="mx-auto max-w-4xl">
               <CusocForm />
-            </div>
+            </div> */}
           </div>
         </section>
       </main>
