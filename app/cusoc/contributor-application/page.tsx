@@ -1,7 +1,7 @@
 import Navigation from '@/components/navigation';
 import Footer from '@/components/footer';
 import GridBackground from '@/components/grid-background';
-import ContributorApplicationForm from '@/components/cusoc/contributor-application-form';
+// import ContributorApplicationForm from '@/components/cusoc/contributor-application-form';
 
 export default function ContributorApplicationPage() {
   return (
@@ -28,7 +28,7 @@ export default function ContributorApplicationPage() {
             </div>
 
             <div className="mx-auto max-w-4xl">
-              <ContributorApplicationForm />
+              {/* <ContributorApplicationForm /> */}
             </div>
           </div>
         </section>
