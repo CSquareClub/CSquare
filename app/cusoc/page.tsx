@@ -25,10 +25,10 @@ export default function CusocPage() {
               </div>
 
               <h1 className="mb-3 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                CUSoC <span className="text-[#ef4444]">Registration</span>
+                Cohort <span className="text-[#ef4444]">Registration</span>
               </h1>
               <p className="mx-auto max-w-2xl text-lg leading-relaxed text-foreground/70">
-                Chandigarh University Summer of Code — Choose your track and start your open-source journey.
+                Chandigarh University Summer of Code Cohort — Start your open-source journey with our pilot and long-term programs.
               </p>
             </div>
 
@@ -87,9 +87,9 @@ export default function CusocPage() {
               </div>
             </div>
 
-            {/* <div className="mx-auto max-w-4xl">
+            <div className="mx-auto max-w-4xl">
               <CusocForm />
-            </div> */}
+            </div>
           </div>
         </section>
       </main>
