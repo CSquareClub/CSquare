@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
 
     // Validation
-    if (!data.fullName || !data.cuEmail || !data.rollNumber) {
+    if (!data.fullName || !data.email || !data.contactNumber || !data.resumeUrl) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -30,3 +30,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
