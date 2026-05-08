@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { CheckCircle2, AlertCircle, Loader2, Sparkles } from 'lucide-react';
 
-const inputCls = 'w-full rounded-xl border border-primary/20 bg-black/30 px-4 py-3 text-foreground placeholder:text-foreground/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors';
+const inputCls = 'w-full rounded-xl border border-primary/20 bg-input dark:bg-black/30 px-4 py-3 text-foreground placeholder:text-foreground/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors';
 const labelCls = 'mb-1.5 block text-sm font-medium text-foreground';
 
 export default function FacultyMentorApplicationForm() {
@@ -123,7 +123,7 @@ export default function FacultyMentorApplicationForm() {
 
   if (submitted) {
     return (
-      <div className="rounded-2xl border border-primary/20 bg-black/30 p-10 text-center backdrop-blur-xl">
+      <div className="rounded-2xl border border-primary/20 bg-primary/5 dark:bg-black/30 p-10 text-center backdrop-blur-xl">
         <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/10">
           <CheckCircle2 className="h-8 w-8 text-emerald-400" />
         </div>
@@ -134,7 +134,7 @@ export default function FacultyMentorApplicationForm() {
   }
 
   return (
-    <div className="rounded-2xl border border-primary/15 bg-black/40 p-8 backdrop-blur-xl">
+    <div className="rounded-2xl border border-primary/15 bg-black/5 dark:bg-black/40 p-8 backdrop-blur-xl">
       <div className="mb-8">
         <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-primary">
           <Sparkles className="h-3.5 w-3.5" />
@@ -411,7 +411,7 @@ export default function FacultyMentorApplicationForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-xl bg-primary px-6 py-3 font-semibold text-black transition-all hover:bg-primary/90 disabled:opacity-50"
+          className="w-full rounded-xl bg-primary px-6 py-3 font-semibold text-white dark:text-black transition-all hover:bg-primary/90 disabled:opacity-50"
         >
           {isLoading ? (
             <>

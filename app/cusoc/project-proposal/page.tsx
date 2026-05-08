@@ -30,7 +30,7 @@ export default function ProjectProposalPage() {
             <div className="grid gap-8 md:grid-cols-2 lg:gap-12">
               {/* Institutional Projects */}
               <Link href="/cusoc/project-proposal/institutional-project">
-                <div className="group cursor-pointer rounded-2xl border border-primary/15 bg-black/40 p-8 transition-all hover:border-primary/40 hover:shadow-[0_0_80px_rgba(255,210,50,0.1)] backdrop-blur-xl">
+                <div className="group cursor-pointer rounded-2xl border border-primary/15 bg-black/5 dark:bg-black/40 p-8 transition-all hover:border-primary/40 hover:shadow-[0_0_80px_rgba(255,210,50,0.1)] backdrop-blur-xl">
                   <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-400/20 bg-blue-500/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-blue-400">
                     For Faculty
                   </div>
@@ -54,7 +54,7 @@ export default function ProjectProposalPage() {
                       <span>Mentor students through real-world project experience</span>
                     </li>
                   </ul>
-                  <button className="w-full rounded-xl bg-primary px-6 py-3 font-semibold text-black transition-all hover:bg-primary/90">
+                  <button className="w-full rounded-xl bg-primary px-6 py-3 font-semibold text-white dark:text-black transition-all hover:bg-primary/90">
                     Submit Institutional Project
                   </button>
                 </div>
@@ -62,7 +62,7 @@ export default function ProjectProposalPage() {
 
               {/* Industry Projects */}
               <Link href="/cusoc/project-proposal/industry-project">
-                <div className="group cursor-pointer rounded-2xl border border-primary/15 bg-black/40 p-8 transition-all hover:border-primary/40 hover:shadow-[0_0_80px_rgba(255,210,50,0.1)] backdrop-blur-xl">
+                <div className="group cursor-pointer rounded-2xl border border-primary/15 bg-black/5 dark:bg-black/40 p-8 transition-all hover:border-primary/40 hover:shadow-[0_0_80px_rgba(255,210,50,0.1)] backdrop-blur-xl">
                   <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-amber-400">
                     For Industry
                   </div>
@@ -86,7 +86,7 @@ export default function ProjectProposalPage() {
                       <span>Showcase your company as an innovation partner</span>
                     </li>
                   </ul>
-                  <button className="w-full rounded-xl bg-primary px-6 py-3 font-semibold text-black transition-all hover:bg-primary/90">
+                  <button className="w-full rounded-xl bg-primary px-6 py-3 font-semibold text-white dark:text-black transition-all hover:bg-primary/90">
                     Submit Industry Project
                   </button>
                 </div>

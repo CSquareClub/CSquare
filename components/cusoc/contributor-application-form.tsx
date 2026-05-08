@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { CheckCircle2, AlertCircle, Loader2, Sparkles, UploadCloud, X } from 'lucide-react';
 
 const inputCls =
-  'w-full rounded-xl border border-primary/20 bg-black/30 px-4 py-3 text-foreground placeholder:text-foreground/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors';
+  'w-full rounded-xl border border-primary/20 bg-primary/5 dark:bg-black/30 px-4 py-3 text-foreground placeholder:text-foreground/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors';
 const labelCls = 'mb-1.5 block text-sm font-medium text-foreground/90';
 
 export default function ContributorApplicationForm() {
@@ -230,7 +230,7 @@ export default function ContributorApplicationForm() {
 
   if (submitted) {
     return (
-      <div className="rounded-2xl border border-primary/20 bg-black/30 p-10 text-center backdrop-blur-xl shadow-2xl">
+      <div className="rounded-2xl border border-primary/20 bg-primary/5 dark:bg-black/30 p-10 text-center backdrop-blur-xl shadow-2xl">
         <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/10">
           <CheckCircle2 className="h-10 w-10 text-emerald-400" />
         </div>
@@ -243,7 +243,7 @@ export default function ContributorApplicationForm() {
   }
 
   return (
-    <div className="rounded-2xl border border-primary/15 bg-black/40 p-6 sm:p-10 backdrop-blur-xl shadow-2xl">
+    <div className="rounded-2xl border border-primary/15 bg-black/5 dark:bg-black/40 p-6 sm:p-10 backdrop-blur-xl shadow-2xl">
       <div className="mb-8">
         <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-1.5 text-sm font-semibold uppercase tracking-widest text-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)]">
           <Sparkles className="h-4 w-4" />
@@ -375,7 +375,7 @@ export default function ContributorApplicationForm() {
                 />
                 <label
                   htmlFor="resume-upload"
-                  className="flex cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-dashed border-primary/30 bg-black/30 px-6 py-8 text-sm text-foreground/70 transition-all hover:border-primary/50 hover:bg-black/50 peer-focus:border-primary"
+                  className="flex cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 dark:bg-black/30 px-6 py-8 text-sm text-foreground/70 transition-all hover:border-primary/50 hover:bg-primary/10 dark:hover:bg-black/50 peer-focus:border-primary"
                 >
                   {formData.resumeFile ? (
                     <div className="flex flex-col items-center gap-2">
@@ -427,8 +427,8 @@ export default function ContributorApplicationForm() {
                         onChange={() => handleCheckboxGroup('areasOfInterest', area)}
                         className="peer sr-only"
                       />
-                      <div className="h-5 w-5 rounded border border-primary/40 bg-black/30 transition-all peer-checked:bg-primary peer-checked:border-primary"></div>
-                      <CheckCircle2 className="absolute h-3.5 w-3.5 text-black opacity-0 peer-checked:opacity-100 transition-opacity" />
+                      <div className="h-5 w-5 rounded border border-primary/40 bg-primary/5 dark:bg-black/30 transition-all peer-checked:bg-primary peer-checked:border-primary"></div>
+                      <CheckCircle2 className="absolute h-3.5 w-3.5 text-white dark:text-black opacity-0 peer-checked:opacity-100 transition-opacity" />
                     </div>
                     <span className="text-sm text-foreground/80 group-hover:text-foreground transition-colors">{area}</span>
                   </label>
@@ -460,8 +460,8 @@ export default function ContributorApplicationForm() {
                         onChange={() => handleCheckboxGroup('comfortableWith', item)}
                         className="peer sr-only"
                       />
-                      <div className="h-5 w-5 rounded border border-primary/40 bg-black/30 transition-all peer-checked:bg-primary peer-checked:border-primary"></div>
-                      <CheckCircle2 className="absolute h-3.5 w-3.5 text-black opacity-0 peer-checked:opacity-100 transition-opacity" />
+                      <div className="h-5 w-5 rounded border border-primary/40 bg-primary/5 dark:bg-black/30 transition-all peer-checked:bg-primary peer-checked:border-primary"></div>
+                      <CheckCircle2 className="absolute h-3.5 w-3.5 text-white dark:text-black opacity-0 peer-checked:opacity-100 transition-opacity" />
                     </div>
                     <span className="text-sm text-foreground/80 group-hover:text-foreground transition-colors">{item}</span>
                   </label>
@@ -481,7 +481,7 @@ export default function ContributorApplicationForm() {
                       onChange={() => setFormData({ ...formData, technicalConfidence: rating })}
                       className="peer sr-only"
                     />
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary/30 bg-black/30 text-foreground/60 transition-all peer-checked:border-primary peer-checked:bg-primary peer-checked:text-black font-semibold peer-hover:border-primary/60">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary/30 bg-primary/5 dark:bg-black/30 text-foreground/60 transition-all peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white peer-checked:dark:text-black font-semibold peer-hover:border-primary/60">
                       {rating}
                     </div>
                   </label>
@@ -544,7 +544,7 @@ export default function ContributorApplicationForm() {
                       className="peer sr-only"
                       required
                     />
-                    <div className="h-5 w-5 rounded-full border border-primary/40 bg-black/30 transition-all peer-checked:border-[6px] peer-checked:border-primary"></div>
+                    <div className="h-5 w-5 rounded-full border border-primary/40 bg-primary/5 dark:bg-black/30 transition-all peer-checked:border-[6px] peer-checked:border-primary"></div>
                     <span className="text-sm text-foreground/80 group-hover:text-foreground transition-colors">{option}</span>
                   </label>
                 ))}
@@ -623,8 +623,8 @@ export default function ContributorApplicationForm() {
                         onChange={() => handleCheckboxGroup('participationExperience', item)}
                         className="peer sr-only"
                       />
-                      <div className="h-5 w-5 rounded border border-primary/40 bg-black/30 transition-all peer-checked:bg-primary peer-checked:border-primary"></div>
-                      <CheckCircle2 className="absolute h-3.5 w-3.5 text-black opacity-0 peer-checked:opacity-100 transition-opacity" />
+                      <div className="h-5 w-5 rounded border border-primary/40 bg-primary/5 dark:bg-black/30 transition-all peer-checked:bg-primary peer-checked:border-primary"></div>
+                      <CheckCircle2 className="absolute h-3.5 w-3.5 text-white dark:text-black opacity-0 peer-checked:opacity-100 transition-opacity" />
                     </div>
                     <span className="text-sm text-foreground/80 group-hover:text-foreground transition-colors">{item}</span>
                   </label>
@@ -645,7 +645,7 @@ export default function ContributorApplicationForm() {
                       className="peer sr-only"
                       required
                     />
-                    <div className="h-5 w-5 rounded-full border border-primary/40 bg-black/30 transition-all peer-checked:border-[6px] peer-checked:border-primary"></div>
+                    <div className="h-5 w-5 rounded-full border border-primary/40 bg-primary/5 dark:bg-black/30 transition-all peer-checked:border-[6px] peer-checked:border-primary"></div>
                     <span className="text-sm text-foreground/80 group-hover:text-foreground transition-colors">{option}</span>
                   </label>
                 ))}
@@ -672,8 +672,8 @@ export default function ContributorApplicationForm() {
                         onChange={() => handleCheckboxGroup('preferredDomains', item)}
                         className="peer sr-only"
                       />
-                      <div className="h-5 w-5 rounded border border-primary/40 bg-black/30 transition-all peer-checked:bg-primary peer-checked:border-primary"></div>
-                      <CheckCircle2 className="absolute h-3.5 w-3.5 text-black opacity-0 peer-checked:opacity-100 transition-opacity" />
+                      <div className="h-5 w-5 rounded border border-primary/40 bg-primary/5 dark:bg-black/30 transition-all peer-checked:bg-primary peer-checked:border-primary"></div>
+                      <CheckCircle2 className="absolute h-3.5 w-3.5 text-white dark:text-black opacity-0 peer-checked:opacity-100 transition-opacity" />
                     </div>
                     <span className="text-sm text-foreground/80 group-hover:text-foreground transition-colors">{item}</span>
                   </label>
@@ -693,8 +693,8 @@ export default function ContributorApplicationForm() {
                         onChange={() => handleCheckboxGroup('preferredRoles', item)}
                         className="peer sr-only"
                       />
-                      <div className="h-5 w-5 rounded border border-primary/40 bg-black/30 transition-all peer-checked:bg-primary peer-checked:border-primary"></div>
-                      <CheckCircle2 className="absolute h-3.5 w-3.5 text-black opacity-0 peer-checked:opacity-100 transition-opacity" />
+                      <div className="h-5 w-5 rounded border border-primary/40 bg-primary/5 dark:bg-black/30 transition-all peer-checked:bg-primary peer-checked:border-primary"></div>
+                      <CheckCircle2 className="absolute h-3.5 w-3.5 text-white dark:text-black opacity-0 peer-checked:opacity-100 transition-opacity" />
                     </div>
                     <span className="text-sm text-foreground/80 group-hover:text-foreground transition-colors">{item}</span>
                   </label>
@@ -715,7 +715,7 @@ export default function ContributorApplicationForm() {
                       className="peer sr-only"
                       required
                     />
-                    <div className="h-5 w-5 rounded-full border border-primary/40 bg-black/30 transition-all peer-checked:border-[6px] peer-checked:border-primary"></div>
+                    <div className="h-5 w-5 rounded-full border border-primary/40 bg-primary/5 dark:bg-black/30 transition-all peer-checked:border-[6px] peer-checked:border-primary"></div>
                     <span className="text-sm text-foreground/80 group-hover:text-foreground transition-colors">{option}</span>
                   </label>
                 ))}
@@ -736,8 +736,8 @@ export default function ContributorApplicationForm() {
                   className="peer sr-only"
                   required
                 />
-                <div className="h-6 w-6 rounded border-2 border-primary/40 bg-black/30 transition-all peer-checked:bg-primary peer-checked:border-primary"></div>
-                <CheckCircle2 className="absolute h-4 w-4 text-black opacity-0 peer-checked:opacity-100 transition-opacity" />
+                <div className="h-6 w-6 rounded border-2 border-primary/40 bg-primary/5 dark:bg-black/30 transition-all peer-checked:bg-primary peer-checked:border-primary"></div>
+                <CheckCircle2 className="absolute h-4 w-4 text-white dark:text-black opacity-0 peer-checked:opacity-100 transition-opacity" />
               </div>
               <span className="text-sm font-medium leading-relaxed text-foreground/90">
                 29. I confirm that the information provided is accurate and that I am committed to actively participating in the 8-week CUSoC pilot program, attending reviews, and collaborating ethically with mentors and contributors.
@@ -749,7 +749,7 @@ export default function ContributorApplicationForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-xl bg-primary px-8 py-4 text-lg font-bold text-black shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] transition-all hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] hover:scale-[1.01] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100 flex items-center justify-center gap-3"
+          className="w-full rounded-xl bg-primary px-8 py-4 text-lg font-bold text-white dark:text-black shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] transition-all hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] hover:scale-[1.01] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100 flex items-center justify-center gap-3"
         >
           {isLoading ? (
             <>

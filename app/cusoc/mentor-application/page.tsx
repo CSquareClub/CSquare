@@ -30,7 +30,7 @@ export default function MentorApplicationPage() {
             <div className="grid gap-8 md:grid-cols-3 lg:gap-12">
               {/* Industry Mentors */}
               <Link href="/cusoc/mentor-application/industry-mentor">
-                <div className="group cursor-pointer rounded-2xl border border-primary/15 bg-black/40 p-8 transition-all hover:border-primary/40 hover:shadow-[0_0_80px_rgba(255,210,50,0.1)] backdrop-blur-xl">
+                <div className="group cursor-pointer rounded-2xl border border-primary/15 bg-black/5 dark:bg-black/40 p-8 transition-all hover:border-primary/40 hover:shadow-[0_0_80px_rgba(255,210,50,0.1)] backdrop-blur-xl">
                   <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-purple-400/20 bg-purple-500/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-purple-400">
                     Industry
                   </div>
@@ -54,7 +54,7 @@ export default function MentorApplicationPage() {
                       <span>Shape the future talent</span>
                     </li>
                   </ul>
-                  <button className="w-full rounded-xl bg-primary px-6 py-3 font-semibold text-black transition-all hover:bg-primary/90">
+                  <button className="w-full rounded-xl bg-primary px-6 py-3 font-semibold text-white dark:text-black transition-all hover:bg-primary/90">
                     Apply as Industry Mentor
                   </button>
                 </div>
@@ -62,7 +62,7 @@ export default function MentorApplicationPage() {
 
               {/* Faculty Mentors */}
               <Link href="/cusoc/mentor-application/faculty-mentor">
-                <div className="group cursor-pointer rounded-2xl border border-primary/15 bg-black/40 p-8 transition-all hover:border-primary/40 hover:shadow-[0_0_80px_rgba(255,210,50,0.1)] backdrop-blur-xl">
+                <div className="group cursor-pointer rounded-2xl border border-primary/15 bg-black/5 dark:bg-black/40 p-8 transition-all hover:border-primary/40 hover:shadow-[0_0_80px_rgba(255,210,50,0.1)] backdrop-blur-xl">
                   <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-400/20 bg-blue-500/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-blue-400">
                     Faculty
                   </div>
@@ -86,7 +86,7 @@ export default function MentorApplicationPage() {
                       <span>Develop future researchers</span>
                     </li>
                   </ul>
-                  <button className="w-full rounded-xl bg-primary px-6 py-3 font-semibold text-black transition-all hover:bg-primary/90">
+                  <button className="w-full rounded-xl bg-primary px-6 py-3 font-semibold text-white dark:text-black transition-all hover:bg-primary/90">
                     Apply as Faculty Mentor
                   </button>
                 </div>
@@ -94,7 +94,7 @@ export default function MentorApplicationPage() {
 
               {/* Student Mentors */}
               <Link href="/cusoc/mentor-application/student-mentor">
-                <div className="group cursor-pointer rounded-2xl border border-primary/15 bg-black/40 p-8 transition-all hover:border-primary/40 hover:shadow-[0_0_80px_rgba(255,210,50,0.1)] backdrop-blur-xl">
+                <div className="group cursor-pointer rounded-2xl border border-primary/15 bg-black/5 dark:bg-black/40 p-8 transition-all hover:border-primary/40 hover:shadow-[0_0_80px_rgba(255,210,50,0.1)] backdrop-blur-xl">
                   <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-green-400/20 bg-green-500/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-green-400">
                     Student
                   </div>
@@ -118,7 +118,7 @@ export default function MentorApplicationPage() {
                       <span>Build leadership skills</span>
                     </li>
                   </ul>
-                  <button className="w-full rounded-xl bg-primary px-6 py-3 font-semibold text-black transition-all hover:bg-primary/90">
+                  <button className="w-full rounded-xl bg-primary px-6 py-3 font-semibold text-white dark:text-black transition-all hover:bg-primary/90">
                     Apply as Student Mentor
                   </button>
                 </div>

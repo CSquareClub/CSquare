@@ -33,7 +33,7 @@ export default function CusocPage() {
             </div>
 
             <div className="mx-auto max-w-4xl mb-12">
-              <div className="rounded-2xl border border-primary/20 bg-black/20 p-6 backdrop-blur-sm sm:p-8">
+              <div className="rounded-2xl border border-primary/20 bg-muted dark:bg-black/20 p-6 backdrop-blur-sm sm:p-8">
                 <h2 className="mb-6 text-2xl font-bold text-foreground flex items-center gap-2">
                   <span className="text-primary">📅</span> Program Timeline
                 </h2>
@@ -47,18 +47,18 @@ export default function CusocPage() {
                         <th className="px-4 py-3 font-semibold rounded-tr-lg">Objective</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/10 text-foreground/80">
-                      <tr className="hover:bg-white/5 transition-colors">
+                    <tbody className="divide-y divide-border dark:divide-white/10 text-foreground/80">
+                      <tr className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                         <td className="px-4 py-4 font-medium">Pilot Summer Program</td>
                         <td className="px-4 py-4 whitespace-nowrap">15 May 2026 – 15 July 2026</td>
                         <td className="px-4 py-4">Identification and training of high-potential contributors</td>
                       </tr>
-                      <tr className="hover:bg-white/5 transition-colors">
+                      <tr className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                         <td className="px-4 py-4 font-medium">Final Showcase & Evaluation Day</td>
                         <td className="px-4 py-4 whitespace-nowrap">21 July 2026</td>
                         <td className="px-4 py-4">Final assessment, project showcase, and evaluation</td>
                       </tr>
-                      <tr className="hover:bg-white/5 transition-colors">
+                      <tr className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                         <td className="px-4 py-4 font-medium">CUSoC Cohort Program</td>
                         <td className="px-4 py-4 whitespace-nowrap">25 July 2026 – April 2027</td>
                         <td className="px-4 py-4">Long-term mentorship and production-scale engineering training</td>
@@ -67,18 +67,18 @@ export default function CusocPage() {
                   </table>
                 </div>
 
-                <div className="mt-8 pt-8 border-t border-white/10">
+                <div className="mt-8 pt-8 border-t border-black/10 dark:border-white/10">
                   <h3 className="mb-4 text-lg font-semibold text-foreground">Pilot Program Applications</h3>
                   <div className="grid gap-4 sm:grid-cols-3">
-                    <a href="/cusoc/contributor-application" className="group flex flex-col items-center justify-center rounded-xl border border-primary/20 bg-primary/5 p-4 text-center transition-all hover:bg-primary hover:text-black">
+                    <a href="/cusoc/contributor-application" className="group flex flex-col items-center justify-center rounded-xl border border-primary/20 bg-primary/5 p-4 text-center transition-all hover:bg-primary hover:text-primary-foreground">
                       <span className="text-xl mb-2 group-hover:scale-110 transition-transform">💻</span>
                       <span className="font-medium">Contributor Application</span>
                     </a>
-                    <a href="/cusoc/mentor-application" className="group flex flex-col items-center justify-center rounded-xl border border-primary/20 bg-primary/5 p-4 text-center transition-all hover:bg-primary hover:text-black">
+                    <a href="/cusoc/mentor-application" className="group flex flex-col items-center justify-center rounded-xl border border-primary/20 bg-primary/5 p-4 text-center transition-all hover:bg-primary hover:text-primary-foreground">
                       <span className="text-xl mb-2 group-hover:scale-110 transition-transform">🎓</span>
                       <span className="font-medium">Mentor Application</span>
                     </a>
-                    <a href="/cusoc/project-proposal" className="group flex flex-col items-center justify-center rounded-xl border border-primary/20 bg-primary/5 p-4 text-center transition-all hover:bg-primary hover:text-black">
+                    <a href="/cusoc/project-proposal" className="group flex flex-col items-center justify-center rounded-xl border border-primary/20 bg-primary/5 p-4 text-center transition-all hover:bg-primary hover:text-primary-foreground">
                       <span className="text-xl mb-2 group-hover:scale-110 transition-transform">🚀</span>
                       <span className="font-medium">Project Proposal</span>
                     </a>
