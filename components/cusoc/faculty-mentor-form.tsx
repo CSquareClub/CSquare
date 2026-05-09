@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CheckCircle2, AlertCircle, Loader2, Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 
 const inputCls = 'w-full rounded-xl border border-primary/20 bg-input dark:bg-black/30 px-4 py-3 text-foreground placeholder:text-foreground/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors';
 const labelCls = 'mb-1.5 block text-sm font-medium text-foreground';
@@ -149,7 +150,15 @@ export default function FacultyMentorApplicationForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} onInvalid={(e) => {
+        e.preventDefault();
+        toast.error('Please fill in all required fields correctly.');
+        const form = e.currentTarget;
+        const firstInvalid = form.querySelector(':invalid') as HTMLElement;
+        if (firstInvalid) {
+          firstInvalid.focus();
+        }
+      }} className="space-y-8">
         {/* Basic Information */}
         <div>
           <h3 className="mb-4 text-lg font-bold text-primary">Basic Information</h3>

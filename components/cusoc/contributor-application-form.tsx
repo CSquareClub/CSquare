@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CheckCircle2, AlertCircle, Loader2, Sparkles, UploadCloud, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 const inputCls =
   'w-full rounded-xl border border-primary/20 bg-primary/5 dark:bg-black/30 px-4 py-3 text-foreground placeholder:text-foreground/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors';
@@ -259,7 +260,15 @@ export default function ContributorApplicationForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-12">
+      <form onSubmit={handleSubmit} onInvalid={(e) => {
+        e.preventDefault();
+        toast.error('Please fill in all required fields correctly.');
+        const form = e.currentTarget;
+        const firstInvalid = form.querySelector(':invalid') as HTMLElement;
+        if (firstInvalid) {
+          firstInvalid.focus();
+        }
+      }} className="space-y-12">
         {/* SECTION 1 — Basic Information */}
         <section className="space-y-6">
           <div className="border-b border-border pb-2">

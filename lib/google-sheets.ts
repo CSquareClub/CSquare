@@ -447,3 +447,71 @@ export async function appendCommunityPartnerToSheet(data: any) {
     console.error("Error appending community partner to Google Sheets:", error);
   }
 }
+
+export async function appendCusocDataToSheet(sheetName: string, headers: string[], row: any[]) {
+  try {
+    const clientEmail = process.env.GOOGLE_CLIENT_EMAIL || process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+    let privateKey = process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
+    if (privateKey) {
+      privateKey = privateKey.replace(/\\n/g, '\n');
+    }
+    
+    if (!clientEmail || !privateKey) {
+      console.warn("Google Sheets credentials are not configured.");
+      return;
+    }
+
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: clientEmail,
+        private_key: privateKey,
+      },
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    });
+
+    const sheets = google.sheets({ version: "v4", auth });
+    const spreadsheetId = "1yL4MZIZ5-1k2X7uSv6K-GNkjSt6EcT7s9GxtW0Gurns";
+
+    // Ensure sheet exists
+    const meta = await sheets.spreadsheets.get({
+      spreadsheetId,
+      fields: "sheets.properties.title",
+    });
+
+    const hasSheet = meta.data.sheets?.some(
+      (sheet) => sheet.properties?.title === sheetName
+    );
+
+    if (!hasSheet) {
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: {
+          requests: [{ addSheet: { properties: { title: sheetName } } }],
+        },
+      });
+      
+      // Add headers to new sheet
+      await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range: `'${sheetName}'!A1`,
+        valueInputOption: "USER_ENTERED",
+        requestBody: {
+          values: [headers],
+        },
+      });
+    }
+
+    // Append data
+    await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: `'${sheetName}'!A1`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [row],
+      },
+    });
+
+  } catch (error) {
+    console.error(`Error appending CUSoC data to Google Sheets (${sheetName}):`, error);
+  }
+}

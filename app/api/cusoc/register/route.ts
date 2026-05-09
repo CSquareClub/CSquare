@@ -10,6 +10,7 @@ import {
   verifyCusocOtp,
 } from "@/lib/cusoc-otp-store";
 import { createHash, randomInt } from "crypto";
+import { appendCusocDataToSheet } from "@/lib/google-sheets";
 
 const ses = new SESClient({
   region: process.env.AWS_REGION || "us-east-1",
@@ -484,6 +485,38 @@ export async function POST(req: NextRequest) {
         normalizedFields.rollNumber
       );
       await markCusocOtpUsed(normalizedFields.rollNumber);
+
+      // Append to Google Sheets
+      const sheetHeaders = [
+        "Date", "Full Name", "Roll Number", "CU Email", "Personal Email", "Phone", 
+        "Department", "Year", "Skill Level", "Languages", "Interest Area", 
+        "Learn Coding", "Build Projects", "Target GSoC", "Why Join", 
+        "Knows Open Source", "Knows GSoC", "Hours/Week", "Motivation"
+      ];
+      
+      const sheetRow = [
+        new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+        normalizedFields.fullName,
+        normalizedFields.rollNumber,
+        normalizedFields.cuEmail,
+        normalizedFields.personalEmail,
+        normalizedFields.phone,
+        normalizedFields.department,
+        normalizedFields.year,
+        normalizedFields.skillLevel,
+        normalizedFields.languages,
+        normalizedFields.interestArea,
+        normalizedFields.goalLearnCoding ? "Yes" : "No",
+        normalizedFields.goalBuildProjects ? "Yes" : "No",
+        normalizedFields.goalTargetGsoc ? "Yes" : "No",
+        normalizedFields.whyJoin,
+        normalizedFields.knowsOpenSource ? "Yes" : "No",
+        normalizedFields.knowsGsoc ? "Yes" : "No",
+        normalizedFields.hoursPerWeek,
+        normalizedFields.motivation
+      ];
+
+      appendCusocDataToSheet("CUSoC 2027 Registrations", sheetHeaders, sheetRow).catch(e => console.error("Failed to append to Google Sheets:", e));
 
       return NextResponse.json({ success: true });
     }
