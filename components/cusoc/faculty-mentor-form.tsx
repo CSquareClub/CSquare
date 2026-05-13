@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { CheckCircle2, AlertCircle, Loader2, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CheckCircle2, AlertCircle, Loader2, Sparkles, Mail, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 const inputCls = 'w-full rounded-xl border border-primary/20 bg-input dark:bg-black/30 px-4 py-3 text-foreground placeholder:text-foreground/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors';
@@ -34,6 +34,15 @@ export default function FacultyMentorApplicationForm() {
     declarationAccepted: false,
   });
 
+  // OTP state
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpMessage, setOtpMessage] = useState<string | null>(null);
+  const [otpError, setOtpError] = useState<string | null>(null);
+  const [otpCooldown, setOtpCooldown] = useState(0);
+
   const researchAreas = [
     'Artificial Intelligence',
     'Machine Learning',
@@ -62,6 +71,23 @@ export default function FacultyMentorApplicationForm() {
     'Other',
   ];
 
+  // Reset OTP when official email changes
+  useEffect(() => {
+    setOtp('');
+    setOtpSent(false);
+    setOtpVerified(false);
+    setOtpMessage(null);
+    setOtpError(null);
+    setOtpCooldown(0);
+  }, [formData.officialEmail]);
+
+  // OTP cooldown timer
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const timer = window.setTimeout(() => setOtpCooldown((p) => p - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [otpCooldown]);
+
   const handleCheckboxGroup = (name: string, value: string) => {
     setFormData((prev) => {
       const current = prev[name as keyof typeof formData] as string[];
@@ -73,10 +99,85 @@ export default function FacultyMentorApplicationForm() {
     });
   };
 
+  // OTP actions
+  const sendOtp = async () => {
+    const email = formData.officialEmail.trim().toLowerCase();
+    if (!email || !email.includes('@cumail.in')) {
+      setOtpError('Official email must be a @cumail.in address');
+      return;
+    }
+
+    setOtpLoading(true);
+    setOtpError(null);
+    setOtpMessage(null);
+
+    try {
+      const res = await fetch('/api/cusoc/mentor-application', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'send-otp', email, fullName: formData.fullName.trim() }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(payload?.error || 'Failed to send OTP');
+
+      setOtpSent(true);
+      setOtpVerified(false);
+      setOtp('');
+      setOtpMessage(payload?.message || `OTP sent to ${email}`);
+      setOtpCooldown(Number(payload?.cooldownSeconds || 60));
+    } catch (err) {
+      setOtpError(err instanceof Error ? err.message : 'Failed to send OTP');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const verifyOtp = async () => {
+    const email = formData.officialEmail.trim().toLowerCase();
+    const otpValue = otp.trim();
+    if (!email || !otpValue) {
+      setOtpError('Enter email and OTP');
+      return;
+    }
+    if (!/^\d{6}$/.test(otpValue)) {
+      setOtpError('OTP must be 6 digits');
+      return;
+    }
+
+    setOtpLoading(true);
+    setOtpError(null);
+    setOtpMessage(null);
+
+    try {
+      const res = await fetch('/api/cusoc/mentor-application', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verify-otp', email, otp: otpValue }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(payload?.error || 'OTP verification failed');
+
+      setOtpVerified(true);
+      setOtpMessage('OTP verified successfully ✓');
+    } catch (err) {
+      setOtpVerified(false);
+      setOtpError(err instanceof Error ? err.message : 'OTP verification failed');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
+
+    // Check OTP verification for faculty mentors
+    if (!otpVerified) {
+      setError('Please verify your official email with OTP before submitting');
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const submitData = {
@@ -245,6 +346,70 @@ export default function FacultyMentorApplicationForm() {
                 placeholder="name@cumail.in"
                 required
               />
+            </div>
+
+            {/* OTP Verification - Always visible for faculty mentors */}
+            <div className="space-y-3 p-4 rounded-xl border border-primary/20 bg-primary/5 dark:bg-black/30">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-foreground">Email Verification Required</span>
+                {otpVerified && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+              </div>
+              <p className="text-xs text-foreground/70">
+                Please verify your official @cumail.in email address to proceed with the application.
+              </p>
+
+              {!otpSent ? (
+                <button
+                  type="button"
+                  onClick={sendOtp}
+                  disabled={otpLoading || otpCooldown > 0 || !formData.officialEmail?.includes('@cumail.in')}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {otpLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+                  {otpCooldown > 0 ? `Resend in ${otpCooldown}s` : 'Send OTP to Email'}
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-foreground">Enter 6-digit OTP sent to {formData.officialEmail}</label>
+                    <input
+                      type="text"
+                      className={inputCls}
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      placeholder="000000"
+                      maxLength={6}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={verifyOtp}
+                      disabled={otpLoading || otpVerified}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {otpLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+                      Verify OTP
+                    </button>
+                    <button
+                      type="button"
+                      onClick={sendOtp}
+                      disabled={otpLoading || otpCooldown > 0}
+                      className="px-4 py-2 rounded-lg border border-primary/20 hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {otpCooldown > 0 ? `Resend in ${otpCooldown}s` : 'Resend OTP'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {otpMessage && (
+                <p className="text-sm text-emerald-600 dark:text-emerald-400">{otpMessage}</p>
+              )}
+              {otpError && (
+                <p className="text-sm text-red-600 dark:text-red-400">{otpError}</p>
+              )}
             </div>
 
             <div>
